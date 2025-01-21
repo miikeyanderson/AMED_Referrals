@@ -55,8 +55,6 @@ const STATUS_OPTIONS: StatusOption[] = [
   { label: "Rejected", value: "rejected" },
 ] as const;
 
-import React, { useCallback, useMemo, useState, memo } from "react";
-
 const LoadingSkeleton = memo(({ role }: { role: string }) => (
   <TableRow>
     <TableCell colSpan={role === "clinician" ? 4 : 5}>
