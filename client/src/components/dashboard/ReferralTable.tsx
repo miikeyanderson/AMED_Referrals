@@ -26,6 +26,8 @@ export function ReferralTable({ role }: ReferralTableProps) {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
+  const [sortField, setSortField] = useState("createdAt");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const { data: referrals } = useQuery({
     queryKey: ["/api/referrals", { search, status }],
@@ -79,15 +81,45 @@ export function ReferralTable({ role }: ReferralTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Candidate</TableHead>
-              <TableHead>Position</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Department</TableHead>
-              {role !== "clinician" && <TableHead>Next Steps</TableHead>}
+              <TableHead onClick={() => {
+                setSortField("candidateName");
+                setSortDirection(current => current === "asc" ? "desc" : "asc");
+              }} className="cursor-pointer hover:bg-secondary">
+                Candidate {sortField === "candidateName" && (sortDirection === "asc" ? "↑" : "↓")}
+              </TableHead>
+              <TableHead onClick={() => {
+                setSortField("position");
+                setSortDirection(current => current === "asc" ? "desc" : "asc");
+              }} className="cursor-pointer hover:bg-secondary">
+                Position {sortField === "position" && (sortDirection === "asc" ? "↑" : "↓")}
+              </TableHead>
+              <TableHead onClick={() => {
+                setSortField("status");
+                setSortDirection(current => current === "asc" ? "desc" : "asc");
+              }} className="cursor-pointer hover:bg-secondary">
+                Status {sortField === "status" && (sortDirection === "asc" ? "↑" : "↓")}
+              </TableHead>
+              <TableHead onClick={() => {
+                setSortField("department");
+                setSortDirection(current => current === "asc" ? "desc" : "asc");
+              }} className="cursor-pointer hover:bg-secondary">
+                Department {sortField === "department" && (sortDirection === "asc" ? "↑" : "↓")}
+              </TableHead>
+              {role !== "clinician" && (
+                <TableHead onClick={() => {
+                  setSortField("nextSteps");
+                  setSortDirection(current => current === "asc" ? "desc" : "asc");
+                }} className="cursor-pointer hover:bg-secondary">
+                  Next Steps {sortField === "nextSteps" && (sortDirection === "asc" ? "↑" : "↓")}
+                </TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {referrals?.map((referral: any) => (
+            {referrals?.sort((a: any, b: any) => {
+              const modifier = sortDirection === "asc" ? 1 : -1;
+              return a[sortField] > b[sortField] ? modifier : -modifier;
+            }).map((referral: any) => (
               <TableRow key={referral.id}>
                 <TableCell>
                   <div>
