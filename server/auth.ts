@@ -140,6 +140,10 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
+    // Initialize session
+    if (!req.session) {
+      req.session = {};
+    }
     passport.authenticate("local", (err: Error, user: Express.User, info: IVerifyOptions) => {
       if (err) {
         return next(err);
