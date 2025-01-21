@@ -27,16 +27,32 @@ export function ReferralForm() {
         return !value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) ? 'Invalid email format' : '';
       case 'position':
         return value.length < 2 ? 'Position is required' : '';
+      case 'department':
+        return !value ? 'Department is required' : '';
+      case 'experience':
+        return value.length > 1000 ? 'Experience cannot exceed 1000 characters' : '';
+      case 'notes':
+        return value.length > 2000 ? 'Notes cannot exceed 2000 characters' : '';
       default:
         return '';
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     const error = validateField(name, value);
     setErrors(prev => ({ ...prev, [name]: error }));
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    Object.entries(formData).forEach(([key, value]) => {
+      const error = validateField(key, value);
+      if (error) newErrors[key] = error;
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const { mutate } = useMutation({
@@ -121,7 +137,10 @@ export function ReferralForm() {
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
           />
-          <Button onClick={() => mutate(formData)} className="w-full">
+          <Button 
+            onClick={() => validateForm() && mutate(formData)} 
+            className="w-full"
+          >
             Submit Referral
           </Button>
         </div>
