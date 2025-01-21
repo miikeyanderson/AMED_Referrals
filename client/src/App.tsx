@@ -4,12 +4,21 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
-import Dashboard from "@/pages/dashboard";
+import DashboardLayout from "@/components/layout/dashboard-layout";
+import ClinicianDashboard from "@/pages/dashboard/clinician";
+import RecruiterDashboard from "@/pages/dashboard/recruiter";
+import LeadershipDashboard from "@/pages/dashboard/leadership";
 import { useUser } from "@/hooks/use-user";
 import { Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 
-function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+function ProtectedRoute({ 
+  component: Component, 
+  allowedRoles = [] 
+}: { 
+  component: React.ComponentType;
+  allowedRoles?: string[];
+}) {
   const { user, isLoading } = useUser();
   const [, setLocation] = useLocation();
 
@@ -26,7 +35,16 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
     return null;
   }
 
-  return <Component />;
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    setLocation("/dashboard");
+    return null;
+  }
+
+  return (
+    <DashboardLayout>
+      <Component />
+    </DashboardLayout>
+  );
 }
 
 function Router() {
@@ -49,10 +67,23 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={() => {
-        setLocation("/dashboard");
+        // Redirect to role-specific dashboard
+        const dashboardPath = `/dashboard/${user.role}`;
+        setLocation(dashboardPath);
         return null;
       }} />
-      <Route path="/dashboard" component={() => <ProtectedRoute component={Dashboard} />} />
+
+      {/* Role-specific routes */}
+      <Route path="/dashboard/clinician" component={() => 
+        <ProtectedRoute component={ClinicianDashboard} allowedRoles={['clinician']} />
+      } />
+      <Route path="/dashboard/recruiter" component={() => 
+        <ProtectedRoute component={RecruiterDashboard} allowedRoles={['recruiter']} />
+      } />
+      <Route path="/dashboard/leadership" component={() => 
+        <ProtectedRoute component={LeadershipDashboard} allowedRoles={['leadership']} />
+      } />
+
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
