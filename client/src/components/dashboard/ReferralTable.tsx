@@ -59,11 +59,9 @@ const LoadingSkeleton = memo(({ role }: { role: string }) => (
   <>
     {Array.from({ length: 5 }).map((_, i) => (
       <TableRow key={i}>
-        <TableCell>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-[250px]" />
-            <Skeleton className="h-3 w-[180px]" />
-          </div>
+        <TableCell className="space-y-2">
+          <Skeleton className="h-4 w-[250px]" />
+          <Skeleton className="h-3 w-[180px]" />
         </TableCell>
         <TableCell>
           <Skeleton className="h-4 w-[200px]" />
