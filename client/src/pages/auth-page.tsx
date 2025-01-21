@@ -119,7 +119,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-primary/10 to-background">
-      <div className={cn("flex flex-col gap-6 w-full max-w-lg mx-4")}>
+      <div className={cn("flex flex-col gap-6 w-full max-w-2xl mx-4")}>
         <Card className="overflow-hidden">
           <CardContent className="grid p-0 md:grid-cols-2">
             <div className="p-6 md:p-8">
