@@ -9,8 +9,12 @@ export const apiLimiter = rateLimit({
     message: 'Too many requests from this IP, please try again after 15 minutes',
     limitReached: true
   },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  standardHeaders: true,
+  legacyHeaders: false,
+  trustProxy: (ip) => {
+    // Only trust Replit's proxy
+    return ip === '127.0.0.1' || ip.startsWith('172.'); 
+  },
   // Add request timestamp for monitoring
   handler: (req, res) => {
     res.status(429).json({
