@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
+
+import React, { useCallback, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 import {
   Table,
@@ -76,24 +77,22 @@ export function ReferralTable({ role }: ReferralTableProps) {
   const { data: referrals = [], isLoading, error } = useQuery({
     queryKey: ["/api/referrals", { search: debouncedSearch, status }],
     queryFn: fetchReferrals,
-    staleTime: 1000 * 60, // Consider data fresh for 1 minute
+    staleTime: 1000 * 60,
     retry: 3,
   });
 
   const LoadingSkeleton = React.memo(({ role }: { role: string }) => (
-    <>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <TableRow key={i}>
-          <TableCell><Skeleton className="h-8 w-[250px]" /></TableCell>
-          <TableCell><Skeleton className="h-8 w-[200px]" /></TableCell>
-          <TableCell><Skeleton className="h-8 w-[100px]" /></TableCell>
-          <TableCell><Skeleton className="h-8 w-[100px]" /></TableCell>
-          {role !== "clinician" && (
-            <TableCell><Skeleton className="h-8 w-[150px]" /></TableCell>
-          )}
-        </TableRow>
-      ))}
-    </>
+    <TableRow>
+      <TableCell colSpan={role === "clinician" ? 4 : 5}>
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center space-x-4">
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ))}
+        </div>
+      </TableCell>
+    </TableRow>
   ));
 
   const tableContent = useMemo(() => {
