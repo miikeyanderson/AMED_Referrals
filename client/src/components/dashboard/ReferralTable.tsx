@@ -171,7 +171,10 @@ export function ReferralTable({ role }: ReferralTableProps) {
             onChange={(e) => setSearch(e.target.value)}
             className="max-w-sm"
           />
-          <Select value={status} onValueChange={(value) => setStatus(value as ReferralStatus | "all")}>
+          <Select 
+            value={status} 
+            onValueChange={(value: ReferralStatus | "all") => setStatus(value)}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
