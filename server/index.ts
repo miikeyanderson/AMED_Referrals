@@ -6,14 +6,12 @@ import { apiLimiter, requestMonitor } from "./middleware/rate-limit";
 import logger from "./utils/logger";
 
 const app = express();
+// Move trust proxy setting to the very beginning
 app.set('trust proxy', true);
+// Then add other middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-// Add correlation ID middleware early in the chain
 app.use(correlationMiddleware);
-
-// Apply rate limiting to all /api routes
 app.use('/api', apiLimiter);
 // Apply request monitoring middleware for dashboard
 app.use('/api', requestMonitor.middleware);
