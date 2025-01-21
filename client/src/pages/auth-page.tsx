@@ -184,7 +184,7 @@ export default function AuthPage() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="flex justify-center gap-4">
                           <Button variant="outline" size="icon" className="hover:bg-primary/5">
                             <SiGoogle className="h-5 w-5 text-primary/80 hover:text-primary" />
                           </Button>
