@@ -116,6 +116,7 @@ export function ReferralTable({ role }: ReferralTableProps) {
                 }} className="cursor-pointer hover:bg-secondary">
                   Next Steps {sortField === "nextSteps" && (sortDirection === "asc" ? "↑" : "↓")}
                 </TableHead>
+                <TableHead>Notes</TableHead>
               )}
             </TableRow>
           </TableHeader>
@@ -168,7 +169,36 @@ export function ReferralTable({ role }: ReferralTableProps) {
                 </TableCell>
                 <TableCell>{referral.department}</TableCell>
                 {role !== "clinician" && (
-                  <TableCell>{referral.nextSteps || "No next steps"}</TableCell>
+                  <>
+                    <TableCell>{referral.nextSteps || "No next steps"}</TableCell>
+                    <TableCell>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80">
+                          <div className="space-y-2">
+                            <h4 className="font-medium">Notes</h4>
+                            <Textarea
+                              placeholder="Add notes about the candidate..."
+                              defaultValue={referral.recruiterNotes || ""}
+                              onChange={(e) => {
+                                fetch(`/api/referrals/${referral.id}`, {
+                                  method: "PATCH",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ recruiterNotes: e.target.value }),
+                                }).then(() => {
+                                  queryClient.invalidateQueries({ queryKey: ["/api/referrals"] });
+                                });
+                              }}
+                            />
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </TableCell>
+                  </>
                 )}
               </TableRow>
             ))}
