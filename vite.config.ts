@@ -10,12 +10,12 @@ const __dirname = dirname(__filename);
 export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   server: {
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     hmr: {
       clientPort: 443,
-      protocol: 'wss',
-        host: 'your-repl-name.your-username.repl.co'
-    }
+      protocol: "wss",
+      host: "manderson23-referrals.replit.dev",
+    },
   },
   resolve: {
     alias: {
