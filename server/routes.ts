@@ -82,21 +82,23 @@ export function registerRoutes(app: Express): Server {
       const { status, search, page = 1, limit = 10 } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
 
-      let query = db.select().from(referrals);
+      let baseQuery = db.select().from(referrals);
+
+      let conditions = [];
 
       // Apply filters based on role
       if (req.user.role === 'clinician') {
-        query = query.where(eq(referrals.referrerId, req.user.id));
+        conditions.push(eq(referrals.referrerId, req.user.id));
       }
 
       // Apply status filter if provided
-      if (status) {
-        query = query.where(eq(referrals.status, status as string));
+      if (status && status !== 'all') {
+        conditions.push(eq(referrals.status, status as string));
       }
 
       // Apply search filter if provided
       if (search) {
-        query = query.where(
+        conditions.push(
           or(
             like(referrals.candidateName, `%${search}%`),
             like(referrals.candidateEmail, `%${search}%`),
@@ -105,6 +107,11 @@ export function registerRoutes(app: Express): Server {
         );
       }
 
+      // Apply conditions if any exist
+      let query = conditions.length > 0
+        ? baseQuery.where(and(...conditions))
+        : baseQuery;
+
       const referralsList = await query
         .orderBy(desc(referrals.createdAt))
         .limit(Number(limit))
@@ -112,6 +119,7 @@ export function registerRoutes(app: Express): Server {
 
       res.json(referralsList);
     } catch (error) {
+      console.error('Error fetching referrals:', error);
       res.status(500).send("Failed to fetch referrals");
     }
   });
