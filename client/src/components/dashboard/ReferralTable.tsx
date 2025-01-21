@@ -1,5 +1,5 @@
 
-import React, { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, memo } from "react";
 import { useDebounce } from "use-debounce";
 import {
   Table,
@@ -54,7 +54,7 @@ const STATUS_OPTIONS: StatusOption[] = [
   { label: "Rejected", value: "rejected" },
 ] as const;
 
-const LoadingSkeleton = React.memo(({ role }: { role: string }) => (
+const LoadingSkeleton = memo(({ role }: { role: string }) => (
   <>
     {Array.from({ length: 5 }).map((_, i) => (
       <TableRow key={i}>
