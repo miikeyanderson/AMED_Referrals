@@ -80,25 +80,23 @@ export function ReferralTable({ role }: ReferralTableProps) {
     retry: 3,
   });
 
-  const LoadingSkeleton = () => (
-    <>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <TableRow key={i}>
-          <TableCell><Skeleton className="h-8 w-[250px]" /></TableCell>
-          <TableCell><Skeleton className="h-8 w-[200px]" /></TableCell>
-          <TableCell><Skeleton className="h-8 w-[100px]" /></TableCell>
-          <TableCell><Skeleton className="h-8 w-[100px]" /></TableCell>
-          {role !== "clinician" && (
-            <TableCell><Skeleton className="h-8 w-[150px]" /></TableCell>
-          )}
-        </TableRow>
-      ))}
-    </>
+  const LoadingSkeleton = ({ role }: { role: string }) => (
+    Array.from({ length: 5 }).map((_, i) => (
+      <TableRow key={i}>
+        <TableCell><Skeleton className="h-8 w-[250px]" /></TableCell>
+        <TableCell><Skeleton className="h-8 w-[200px]" /></TableCell>
+        <TableCell><Skeleton className="h-8 w-[100px]" /></TableCell>
+        <TableCell><Skeleton className="h-8 w-[100px]" /></TableCell>
+        {role !== "clinician" && (
+          <TableCell><Skeleton className="h-8 w-[150px]" /></TableCell>
+        )}
+      </TableRow>
+    ))
   );
 
   const tableContent = useMemo(() => {
     if (isLoading) {
-      return <LoadingSkeleton />;
+      return <LoadingSkeleton role={role} />;
     }
 
     if (error) {
