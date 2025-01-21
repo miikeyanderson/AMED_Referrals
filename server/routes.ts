@@ -2,8 +2,14 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { referrals, rewards, users } from "@db/schema";
+import { referrals, rewards, users, type User, type Referral } from "@db/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
+
+declare global {
+  namespace Express {
+    interface User extends User {}
+  }
+}
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
@@ -68,6 +74,7 @@ export function registerRoutes(app: Express): Server {
         rewardsTrend,
       });
     } catch (error) {
+      console.error('Error in analytics:', error);
       res.status(500).send("Failed to fetch analytics");
     }
   });
@@ -75,7 +82,6 @@ export function registerRoutes(app: Express): Server {
   // Referral routes
   app.get("/api/referrals", async (req, res) => {
     if (!req.isAuthenticated() || !req.user) {
-      console.log('User not authenticated');
       return res.status(401).json({ error: "Not authenticated" });
     }
 
@@ -84,7 +90,6 @@ export function registerRoutes(app: Express): Server {
       const offset = (Number(page) - 1) * Number(limit);
 
       let baseQuery = db.select().from(referrals);
-
       let conditions = [];
 
       // Apply filters based on role
@@ -94,7 +99,7 @@ export function registerRoutes(app: Express): Server {
 
       // Apply status filter if provided
       if (status && status !== 'all') {
-        conditions.push(eq(referrals.status, status as string));
+        conditions.push(eq(referrals.status, status as Referral['status']));
       }
 
       // Apply search filter if provided
@@ -125,6 +130,37 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Clinician-specific referral submission endpoint
+  app.post("/api/referrals", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    if (req.user.role !== 'clinician') {
+      return res.status(403).send("Only clinicians can submit referrals");
+    }
+
+    try {
+      const newReferral = {
+        ...req.body,
+        referrerId: req.user.id,
+        status: 'pending' as const,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const [createdReferral] = await db
+        .insert(referrals)
+        .values(newReferral)
+        .returning();
+
+      res.json(createdReferral);
+    } catch (error) {
+      console.error('Error creating referral:', error);
+      res.status(500).send("Failed to create referral");
+    }
+  });
+
   app.get("/api/referrals/:id", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).send("Not authenticated");
@@ -147,28 +183,8 @@ export function registerRoutes(app: Express): Server {
 
       res.json(referral);
     } catch (error) {
+      console.error('Error fetching referral:', error);
       res.status(500).send("Failed to fetch referral");
-    }
-  });
-
-  app.post("/api/referrals", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
-    try {
-      const [newReferral] = await db
-        .insert(referrals)
-        .values({
-          ...req.body,
-          referrerId: req.user.id,
-          status: 'pending',
-        })
-        .returning();
-
-      res.json(newReferral);
-    } catch (error) {
-      res.status(500).send("Failed to create referral");
     }
   });
 
@@ -198,6 +214,7 @@ export function registerRoutes(app: Express): Server {
 
       res.json(updatedReferral);
     } catch (error) {
+      console.error('Error updating referral:', error);
       res.status(500).send("Failed to update referral");
     }
   });
@@ -216,6 +233,7 @@ export function registerRoutes(app: Express): Server {
         .orderBy(desc(rewards.createdAt));
       res.json(userRewards);
     } catch (error) {
+      console.error('Error fetching rewards:', error);
       res.status(500).send("Failed to fetch rewards");
     }
   });
