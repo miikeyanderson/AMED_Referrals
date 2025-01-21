@@ -50,25 +50,29 @@ const STATUS_OPTIONS = [
 ];
 
 const LoadingSkeleton = React.memo(({ role }: { role: string }) => (
-  <TableRow>
-    <TableCell>
-      <Skeleton className="h-8 w-[250px]" />
-    </TableCell>
-    <TableCell>
-      <Skeleton className="h-8 w-[200px]" />
-    </TableCell>
-    <TableCell>
-      <Skeleton className="h-8 w-[100px]" />
-    </TableCell>
-    <TableCell>
-      <Skeleton className="h-8 w-[100px]" />
-    </TableCell>
-    {role !== "clinician" && (
-      <TableCell>
-        <Skeleton className="h-8 w-[150px]" />
-      </TableCell>
-    )}
-  </TableRow>
+  <>
+    {Array.from({ length: 5 }).map((_, i) => (
+      <TableRow key={i}>
+        <TableCell>
+          <Skeleton className="h-8 w-[250px]" />
+        </TableCell>
+        <TableCell>
+          <Skeleton className="h-8 w-[200px]" />
+        </TableCell>
+        <TableCell>
+          <Skeleton className="h-8 w-[100px]" />
+        </TableCell>
+        <TableCell>
+          <Skeleton className="h-8 w-[100px]" />
+        </TableCell>
+        {role !== "clinician" && (
+          <TableCell>
+            <Skeleton className="h-8 w-[150px]" />
+          </TableCell>
+        )}
+      </TableRow>
+    ))}
+  </>
 ));
 LoadingSkeleton.displayName = 'LoadingSkeleton';
 
