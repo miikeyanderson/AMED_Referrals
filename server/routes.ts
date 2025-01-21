@@ -15,17 +15,88 @@ declare global {
   }
 }
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Referral:
+ *       type: object
+ *       required:
+ *         - candidateName
+ *         - candidateEmail
+ *         - position
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: Unique identifier for the referral
+ *         candidateName:
+ *           type: string
+ *           description: Full name of the candidate
+ *         candidateEmail:
+ *           type: string
+ *           format: email
+ *           description: Email address of the candidate
+ *         position:
+ *           type: string
+ *           description: Position the candidate is being referred for
+ *         status:
+ *           type: string
+ *           enum: [pending, contacted, interviewing, hired, rejected]
+ *           description: Current status of the referral
+ *     Analytics:
+ *       type: object
+ *       properties:
+ *         totalReferrals:
+ *           type: integer
+ *           description: Total number of referrals
+ *         activeReferrals:
+ *           type: integer
+ *           description: Number of active referrals
+ *         totalRewards:
+ *           type: string
+ *           description: Total rewards earned (formatted as currency)
+ */
+
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
-  // Rate limit test endpoint
+  /**
+   * @swagger
+   * /api/rate-limit-test:
+   *   get:
+   *     summary: Test endpoint for rate limiting
+   *     description: Returns information about the current rate limit status
+   *     tags: [System]
+   *     responses:
+   *       200:
+   *         description: Rate limit information
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                 message:
+   *                   type: string
+   *                 rateLimitInfo:
+   *                   type: object
+   *                   properties:
+   *                     requestCount:
+   *                       type: integer
+   *                     remainingRequests:
+   *                       type: integer
+   *                     resetTime:
+   *                       type: string
+   *                       format: date-time
+   */
   app.get("/api/rate-limit-test", (req: Request, res: Response) => {
-    const rateLimitInfo = (req as any).rateLimit;
+    const rateLimitInfo = req.rateLimit;
     res.json({
       success: true,
       message: "Rate limit test endpoint",
       rateLimitInfo: {
-        requestCount: rateLimitInfo?.currentCount || 0,
+        requestCount: rateLimitInfo?.current || 0,
         remainingRequests: rateLimitInfo?.remaining || 0,
         resetTime: new Date(rateLimitInfo?.resetTime || Date.now()).toISOString()
       }
@@ -41,7 +112,27 @@ export function registerRoutes(app: Express): Server {
     next();
   };
 
-  // Analytics endpoint
+  /**
+   * @swagger
+   * /api/analytics:
+   *   get:
+   *     summary: Get user analytics
+   *     description: Retrieve analytics data including total referrals, active referrals, and rewards
+   *     tags: [Analytics]
+   *     security:
+   *       - sessionAuth: []
+   *     responses:
+   *       200:
+   *         description: Analytics data retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Analytics'
+   *       401:
+   *         description: Not authenticated
+   *       500:
+   *         description: Server error while fetching analytics
+   */
   app.get("/api/analytics", checkAuth, async (req: Request, res: Response) => {
     try {
       // Get total referrals count
@@ -98,7 +189,81 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Referral routes
+  /**
+   * @swagger
+   * /api/referrals:
+   *   get:
+   *     summary: Get all referrals
+   *     description: Retrieve a list of referrals with optional filtering
+   *     tags: [Referrals]
+   *     security:
+   *       - sessionAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: status
+   *         schema:
+   *           type: string
+   *           enum: [all, pending, contacted, interviewing, hired, rejected]
+   *         description: Filter referrals by status
+   *       - in: query
+   *         name: search
+   *         schema:
+   *           type: string
+   *         description: Search term for filtering referrals
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           default: 1
+   *         description: Page number for pagination
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           maximum: 100
+   *           default: 10
+   *         description: Number of items per page
+   *     responses:
+   *       200:
+   *         description: List of referrals
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Referral'
+   *       401:
+   *         description: Not authenticated
+   *       500:
+   *         description: Server error while fetching referrals
+   *   post:
+   *     summary: Create a new referral
+   *     description: Submit a new referral (clinicians only)
+   *     tags: [Referrals]
+   *     security:
+   *       - sessionAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/Referral'
+   *     responses:
+   *       200:
+   *         description: Referral created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Referral'
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized (non-clinician users)
+   *       500:
+   *         description: Server error while creating referral
+   */
   app.get("/api/referrals", checkAuth, async (req: Request, res: Response) => {
     try {
       const { status, search, page = 1, limit = 10 } = req.query;
@@ -149,7 +314,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Clinician-specific referral submission endpoint
   app.post("/api/referrals", checkAuth, async (req: Request, res: Response) => {
     if (req.user?.role !== 'clinician') {
       const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
@@ -187,6 +351,76 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  /**
+   * @swagger
+   * /api/referrals/{id}:
+   *   get:
+   *     summary: Get a specific referral
+   *     description: Retrieve details of a specific referral
+   *     tags: [Referrals]
+   *     security:
+   *       - sessionAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: ID of the referral
+   *     responses:
+   *       200:
+   *         description: Referral details
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Referral'
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized to view this referral
+   *       404:
+   *         description: Referral not found
+   *       500:
+   *         description: Server error while fetching referral
+   *   patch:
+   *     summary: Update a referral
+   *     description: Update the status or details of a referral (recruiters/leadership only)
+   *     tags: [Referrals]
+   *     security:
+   *       - sessionAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: ID of the referral to update
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               status:
+   *                 type: string
+   *                 enum: [pending, contacted, interviewing, hired, rejected]
+   *     responses:
+   *       200:
+   *         description: Referral updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Referral'
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized (clinician users)
+   *       404:
+   *         description: Referral not found
+   *       500:
+   *         description: Server error while updating referral
+   */
   app.get("/api/referrals/:id", checkAuth, async (req: Request, res: Response) => {
     try {
       const [referral] = await db
@@ -260,7 +494,39 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Rewards routes
+  /**
+   * @swagger
+   * /api/rewards:
+   *   get:
+   *     summary: Get user rewards
+   *     description: Retrieve a list of rewards for the authenticated user
+   *     tags: [Rewards]
+   *     security:
+   *       - sessionAuth: []
+   *     responses:
+   *       200:
+   *         description: List of user rewards
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   id:
+   *                     type: integer
+   *                   userId:
+   *                     type: integer
+   *                   amount:
+   *                     type: number
+   *                   createdAt:
+   *                     type: string
+   *                     format: date-time
+   *       401:
+   *         description: Not authenticated
+   *       500:
+   *         description: Server error while fetching rewards
+   */
   app.get("/api/rewards", checkAuth, async (req: Request, res: Response) => {
     try {
       const userRewards = await db
