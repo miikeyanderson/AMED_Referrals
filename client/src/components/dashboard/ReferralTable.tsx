@@ -1,5 +1,6 @@
 
 import * as React from "react";
+import * as React from "react";
 import {
   Table,
   TableBody,
@@ -27,8 +28,8 @@ interface ReferralTableProps {
 }
 
 export function ReferralTable({ role }: ReferralTableProps) {
-  const [search, setSearch] = React.useState("");
-  const [status, setStatus] = React.useState<string>("all");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<string>("all");
 
   const { data: referrals = [], isLoading } = useQuery({
     queryKey: ['/api/referrals', { search, status }],
