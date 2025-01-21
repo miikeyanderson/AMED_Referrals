@@ -1,6 +1,7 @@
+
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useDebounce } from "react-use";
+import { useDebounce } from "use-debounce";
 import {
   Table,
   TableBody,
@@ -32,6 +33,11 @@ interface ReferralTableProps {
   role: "clinician" | "admin" | "recruiter";
 }
 
+interface StatusOption {
+  label: string;
+  value: ReferralStatus | "all";
+}
+
 const STATUS_COLORS: Record<ReferralStatus, "default" | "primary" | "secondary" | "destructive"> = {
   pending: "secondary",
   contacted: "primary",
@@ -40,7 +46,7 @@ const STATUS_COLORS: Record<ReferralStatus, "default" | "primary" | "secondary" 
   rejected: "destructive",
 };
 
-const STATUS_OPTIONS = [
+const STATUS_OPTIONS: StatusOption[] = [
   { label: "All statuses", value: "all" },
   { label: "Pending", value: "pending" },
   { label: "Contacted", value: "contacted" },
@@ -49,28 +55,28 @@ const STATUS_OPTIONS = [
   { label: "Rejected", value: "rejected" },
 ];
 
-function LoadingSkeleton({ role }: { role: string }) {
-  return (
-    <>
-      {[...Array(5)].map((_, i) => (
-        <TableRow key={i}>
-          <TableCell>
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-3 w-[180px]" />
-            </div>
-          </TableCell>
-          <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-          {role !== "clinician" && (
-            <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-          )}
-        </TableRow>
-      ))}
-    </>
-  );
-}
+const LoadingSkeleton = React.memo(({ role }: { role: string }) => (
+  <>
+    {[...Array(5)].map((_, i) => (
+      <TableRow key={i}>
+        <TableCell>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-3 w-[180px]" />
+          </div>
+        </TableCell>
+        <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
+        <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+        <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+        {role !== "clinician" && (
+          <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
+        )}
+      </TableRow>
+    ))}
+  </>
+));
+
+LoadingSkeleton.displayName = 'LoadingSkeleton';
 
 export function ReferralTable({ role }: ReferralTableProps) {
   const [search, setSearch] = React.useState("");
