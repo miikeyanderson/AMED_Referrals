@@ -14,7 +14,7 @@ export default defineConfig({
     hmr: {
       clientPort: 443,
       protocol: "wss",
-      host: "manderson23-referrals.replit.dev",
+      host: "manderson23-referrals",
     },
   },
   resolve: {
