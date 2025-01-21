@@ -40,14 +40,19 @@ const STATUS_COLORS: Record<ReferralStatus, string> = {
   rejected: "destructive",
 } as const;
 
-const STATUS_OPTIONS = [
+type StatusOption = {
+  label: string;
+  value: ReferralStatus | "all";
+};
+
+const STATUS_OPTIONS: StatusOption[] = [
   { label: "All statuses", value: "all" },
   { label: "Pending", value: "pending" },
   { label: "Contacted", value: "contacted" },
   { label: "Interviewing", value: "interviewing" },
   { label: "Hired", value: "hired" },
   { label: "Rejected", value: "rejected" },
-];
+] as const;
 
 const LoadingSkeleton = React.memo(({ role }: { role: string }) => (
   <>
