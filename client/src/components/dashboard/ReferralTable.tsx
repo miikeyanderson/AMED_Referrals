@@ -16,7 +16,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Define proper types
 type ReferralStatus = "pending" | "contacted" | "interviewing" | "hired" | "rejected";
 
 interface Referral {
@@ -41,7 +40,7 @@ const STATUS_COLORS: Record<ReferralStatus, string> = {
   rejected: "destructive",
 } as const;
 
-const STATUS_OPTIONS: Array<{ label: string; value: ReferralStatus | "all" }> = [
+const STATUS_OPTIONS = [
   { label: "All statuses", value: "all" },
   { label: "Pending", value: "pending" },
   { label: "Contacted", value: "contacted" },
@@ -49,6 +48,28 @@ const STATUS_OPTIONS: Array<{ label: string; value: ReferralStatus | "all" }> = 
   { label: "Hired", value: "hired" },
   { label: "Rejected", value: "rejected" },
 ];
+
+const LoadingSkeleton = React.memo(({ role }: { role: string }) => (
+  <TableRow>
+    <TableCell>
+      <Skeleton className="h-8 w-[250px]" />
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-8 w-[200px]" />
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-8 w-[100px]" />
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-8 w-[100px]" />
+    </TableCell>
+    {role !== "clinician" && (
+      <TableCell>
+        <Skeleton className="h-8 w-[150px]" />
+      </TableCell>
+    )}
+  </TableRow>
+));
 
 export function ReferralTable({ role }: ReferralTableProps) {
   const [search, setSearch] = useState("");
@@ -62,16 +83,11 @@ export function ReferralTable({ role }: ReferralTableProps) {
     if (search) searchParams.append("search", search);
     if (status !== "all") searchParams.append("status", status);
 
-    try {
-      const response = await fetch(`/api/referrals?${searchParams.toString()}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data as Referral[];
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : "Failed to fetch referrals");
+    const response = await fetch(`/api/referrals?${searchParams.toString()}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+    return response.json() as Promise<Referral[]>;
   }, []);
 
   const { data: referrals = [], isLoading, error } = useQuery({
@@ -81,20 +97,6 @@ export function ReferralTable({ role }: ReferralTableProps) {
     retry: 3,
   });
 
-  const LoadingSkeleton = React.memo(({ role }: { role: string }) => (
-    <TableRow>
-      <TableCell colSpan={role === "clinician" ? 4 : 5}>
-        <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex items-center space-x-4">
-              <Skeleton className="h-12 w-full" />
-            </div>
-          ))}
-        </div>
-      </TableCell>
-    </TableRow>
-  ));
-
   const tableContent = useMemo(() => {
     if (isLoading) {
       return <LoadingSkeleton role={role} />;
@@ -103,10 +105,7 @@ export function ReferralTable({ role }: ReferralTableProps) {
     if (error) {
       return (
         <TableRow>
-          <TableCell 
-            colSpan={role === "clinician" ? 4 : 5} 
-            className="text-center py-8 text-red-500"
-          >
+          <TableCell colSpan={role === "clinician" ? 4 : 5} className="text-center py-8 text-red-500">
             Error loading referrals. Please try again later.
           </TableCell>
         </TableRow>
@@ -116,10 +115,7 @@ export function ReferralTable({ role }: ReferralTableProps) {
     if (referrals.length === 0) {
       return (
         <TableRow>
-          <TableCell 
-            colSpan={role === "clinician" ? 4 : 5} 
-            className="text-center py-8"
-          >
+          <TableCell colSpan={role === "clinician" ? 4 : 5} className="text-center py-8">
             No referrals found
           </TableCell>
         </TableRow>
@@ -165,7 +161,7 @@ export function ReferralTable({ role }: ReferralTableProps) {
             onChange={(e) => setSearch(e.target.value)}
             className="max-w-sm"
           />
-          <Select value={status} onValueChange={setStatus}>
+          <Select value={status} onValueChange={(value) => setStatus(value as ReferralStatus | "all")}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
