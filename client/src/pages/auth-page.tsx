@@ -119,16 +119,17 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-primary/10 to-background">
-      <div className={cn("flex flex-col gap-6 w-full max-w-md mx-4")}>
+      <div className={cn("flex flex-col gap-6 w-full max-w-2xl mx-4")}>
         <Card className="overflow-hidden">
-          <CardContent className="p-6 md:p-8">
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col items-center text-center space-y-2">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-balance text-muted-foreground">
-                  Access your ARM Platform account
-                </p>
-              </div>
+          <CardContent className="grid p-0 md:grid-cols-2">
+            <div className="p-6 md:p-8">
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col items-center text-center">
+                  <h1 className="text-2xl font-bold">Welcome back</h1>
+                  <p className="text-balance text-muted-foreground">
+                    Access your ARM Platform account
+                  </p>
+                </div>
 
                 <Tabs defaultValue="login" className="w-full">
                   <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -183,14 +184,14 @@ export default function AuthPage() {
                           </div>
                         </div>
 
-                        <div className="flex justify-center gap-4">
-                          <Button variant="outline" size="icon" className="hover:bg-primary/5 w-10 h-10">
+                        <div className="grid grid-cols-3 gap-3">
+                          <Button variant="outline" size="icon" className="hover:bg-primary/5">
                             <SiGoogle className="h-5 w-5 text-primary/80 hover:text-primary" />
                           </Button>
-                          <Button variant="outline" size="icon" className="hover:bg-primary/5 w-10 h-10">
+                          <Button variant="outline" size="icon" className="hover:bg-primary/5">
                             <SiApple className="h-5 w-5 text-primary/80 hover:text-primary" />
                           </Button>
-                          <Button variant="outline" size="icon" className="hover:bg-primary/5 w-10 h-10">
+                          <Button variant="outline" size="icon" className="hover:bg-primary/5">
                             <SiMeta className="h-5 w-5 text-primary/80 hover:text-primary" />
                           </Button>
                         </div>
