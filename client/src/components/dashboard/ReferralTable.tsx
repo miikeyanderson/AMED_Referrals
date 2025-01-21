@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo, useState, memo } from "react";
+import * as React from "react";
+import { useCallback, useMemo, useState, memo } from "react";
 import { useDebounce } from "use-debounce";
 import {
   Table,
