@@ -1,3 +1,4 @@
+
 import {
   Table,
   TableBody,
@@ -19,7 +20,6 @@ const STATUS_OPTIONS = {
   completed: "Completed"
 } as const;
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 
 interface ReferralTableProps {
   role: string;
