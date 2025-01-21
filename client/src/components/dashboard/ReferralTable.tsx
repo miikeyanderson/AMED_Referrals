@@ -31,7 +31,7 @@ export function ReferralTable({ role }: ReferralTableProps) {
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { data: paginatedData } = useQuery({
+  const { data: { referrals = [], total = 0 } = {} } = useQuery({
     queryKey: ["/api/referrals", { search, status }],
     queryFn: async () => {
       const params = new URLSearchParams();
