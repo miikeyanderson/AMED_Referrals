@@ -101,21 +101,40 @@ export function ReferralForm() {
               <p className="text-sm text-red-500">{errors.candidateName}</p>
             )}
           </div>
-          <Input
-            placeholder="Candidate Email"
-            type="email"
-            value={formData.candidateEmail}
-            onChange={(e) => setFormData({ ...formData, candidateEmail: e.target.value })}
-          />
-          <Input
-            placeholder="Position"
-            value={formData.position}
-            onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-          />
-          <Select
-            value={formData.department}
-            onValueChange={(value) => setFormData({ ...formData, department: value })}
-          >
+          <div className="space-y-2">
+            <Input
+              name="candidateEmail"
+              placeholder="Candidate Email"
+              type="email"
+              value={formData.candidateEmail}
+              onChange={handleChange}
+              className={errors.candidateEmail ? "border-red-500" : ""}
+            />
+            {errors.candidateEmail && (
+              <p className="text-sm text-red-500">{errors.candidateEmail}</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Input
+              name="position"
+              placeholder="Position"
+              value={formData.position}
+              onChange={handleChange}
+              className={errors.position ? "border-red-500" : ""}
+            />
+            {errors.position && (
+              <p className="text-sm text-red-500">{errors.position}</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Select
+              value={formData.department}
+              onValueChange={(value) => {
+                setFormData(prev => ({ ...prev, department: value }));
+                const error = validateField('department', value);
+                setErrors(prev => ({ ...prev, department: error }));
+              }}
+            >
             <SelectTrigger>
               <SelectValue placeholder="Select Department" />
             </SelectTrigger>
@@ -127,16 +146,30 @@ export function ReferralForm() {
               <SelectItem value="Sales">Sales</SelectItem>
             </SelectContent>
           </Select>
-          <Input
-            placeholder="Experience"
-            value={formData.experience}
-            onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-          />
-          <Input
-            placeholder="Notes"
-            value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          />
+          <div className="space-y-2">
+            <Input
+              name="experience"
+              placeholder="Experience"
+              value={formData.experience}
+              onChange={handleChange}
+              className={errors.experience ? "border-red-500" : ""}
+            />
+            {errors.experience && (
+              <p className="text-sm text-red-500">{errors.experience}</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Input
+              name="notes"
+              placeholder="Notes"
+              value={formData.notes}
+              onChange={handleChange}
+              className={errors.notes ? "border-red-500" : ""}
+            />
+            {errors.notes && (
+              <p className="text-sm text-red-500">{errors.notes}</p>
+            )}
+          </div>
           <Button 
             onClick={() => validateForm() && mutate(formData)} 
             className="w-full"
