@@ -102,7 +102,7 @@ export function ReferralTable({ role }: ReferralTableProps) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     return response.json() as Promise<Referral[]>;
-  }, []);
+  }, [user]); // Add user to dependencies
 
   const { data: referrals = [], isLoading, error } = useQuery({
     queryKey: ["/api/referrals", { search: debouncedSearch, status }],
