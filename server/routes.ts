@@ -1,32 +1,41 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { referrals, rewards, users, type User, type Referral } from "@db/schema";
+import { referrals, rewards, type User, type Referral } from "@db/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
+import { logUnauthorizedAccess, logServerError } from "./utils/logger";
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    interface User extends Omit<User, 'password'> {
+      id: number;
+      role: string;
+    }
   }
 }
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
-  // Analytics endpoint
-  app.get("/api/analytics", async (req, res) => {
+  const checkAuth = (req: Request, res: Response, next: NextFunction) => {
     if (!req.isAuthenticated()) {
+      const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
+      logUnauthorizedAccess(-1, ip, req.path);
       return res.status(401).send("Not authenticated");
     }
+    next();
+  };
 
+  // Analytics endpoint
+  app.get("/api/analytics", checkAuth, async (req: Request, res: Response) => {
     try {
       // Get total referrals count
       const [totalReferrals] = await db
         .select({ count: sql<number>`cast(count(*) as integer)` })
         .from(referrals)
         .where(
-          req.user.role === 'clinician'
+          req.user?.role === 'clinician'
             ? eq(referrals.referrerId, req.user.id)
             : undefined
         );
@@ -37,7 +46,7 @@ export function registerRoutes(app: Express): Server {
         .from(referrals)
         .where(
           and(
-            req.user.role === 'clinician'
+            req.user?.role === 'clinician'
               ? eq(referrals.referrerId, req.user.id)
               : undefined,
             or(
@@ -55,36 +64,28 @@ export function registerRoutes(app: Express): Server {
         })
         .from(rewards)
         .where(
-          req.user.role === 'clinician'
+          req.user?.role === 'clinician'
             ? eq(rewards.userId, req.user.id)
             : undefined
         );
-
-      // Calculate trends (simplified for now)
-      const referralTrend = "+12%";
-      const activeTrend = "+8%";
-      const rewardsTrend = "+15%";
 
       res.json({
         totalReferrals: totalReferrals?.count || 0,
         activeReferrals: activeReferrals?.count || 0,
         totalRewards: `$${totalRewards?.sum || 0}`,
-        referralTrend,
-        activeTrend,
-        rewardsTrend,
       });
     } catch (error) {
-      console.error('Error in analytics:', error);
+      logServerError(error as Error, { 
+        context: 'analytics',
+        userId: req.user?.id,
+        role: req.user?.role
+      });
       res.status(500).send("Failed to fetch analytics");
     }
   });
 
   // Referral routes
-  app.get("/api/referrals", async (req, res) => {
-    if (!req.isAuthenticated() || !req.user) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-
+  app.get("/api/referrals", checkAuth, async (req: Request, res: Response) => {
     try {
       const { status, search, page = 1, limit = 10 } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
@@ -93,7 +94,7 @@ export function registerRoutes(app: Express): Server {
       let conditions = [];
 
       // Apply filters based on role
-      if (req.user.role === 'clinician') {
+      if (req.user?.role === 'clinician') {
         conditions.push(eq(referrals.referrerId, req.user.id));
       }
 
@@ -113,7 +114,6 @@ export function registerRoutes(app: Express): Server {
         );
       }
 
-      // Apply conditions if any exist
       let query = conditions.length > 0
         ? baseQuery.where(and(...conditions))
         : baseQuery;
@@ -125,18 +125,26 @@ export function registerRoutes(app: Express): Server {
 
       res.json(referralsList);
     } catch (error) {
-      console.error('Error fetching referrals:', error);
+      logServerError(error as Error, { 
+        context: 'get-referrals',
+        userId: req.user?.id,
+        role: req.user?.role,
+        query: req.query
+      });
       res.status(500).send("Failed to fetch referrals");
     }
   });
 
   // Clinician-specific referral submission endpoint
-  app.post("/api/referrals", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
-    if (req.user.role !== 'clinician') {
+  app.post("/api/referrals", checkAuth, async (req: Request, res: Response) => {
+    if (req.user?.role !== 'clinician') {
+      const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
+      logUnauthorizedAccess(
+        req.user.id,
+        ip,
+        '/api/referrals',
+        'clinician'
+      );
       return res.status(403).send("Only clinicians can submit referrals");
     }
 
@@ -156,16 +164,16 @@ export function registerRoutes(app: Express): Server {
 
       res.json(createdReferral);
     } catch (error) {
-      console.error('Error creating referral:', error);
+      logServerError(error as Error, {
+        context: 'create-referral',
+        userId: req.user?.id,
+        role: req.user?.role
+      });
       res.status(500).send("Failed to create referral");
     }
   });
 
-  app.get("/api/referrals/:id", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
+  app.get("/api/referrals/:id", checkAuth, async (req: Request, res: Response) => {
     try {
       const [referral] = await db
         .select()
@@ -177,24 +185,38 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Check if user has access to this referral
-      if (req.user.role === 'clinician' && referral.referrerId !== req.user.id) {
+      if (req.user?.role === 'clinician' && referral.referrerId !== req.user.id) {
+        const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
+        logUnauthorizedAccess(
+          req.user.id,
+          ip,
+          `/api/referrals/${req.params.id}`,
+          'owner'
+        );
         return res.status(403).send("Access denied");
       }
 
       res.json(referral);
     } catch (error) {
-      console.error('Error fetching referral:', error);
+      logServerError(error as Error, {
+        context: 'get-referral',
+        userId: req.user?.id,
+        role: req.user?.role,
+        referralId: req.params.id
+      });
       res.status(500).send("Failed to fetch referral");
     }
   });
 
-  app.patch("/api/referrals/:id", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
-    // Only recruiters and leadership can update referrals
-    if (req.user.role === 'clinician') {
+  app.patch("/api/referrals/:id", checkAuth, async (req: Request, res: Response) => {
+    if (req.user?.role === 'clinician') {
+      const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
+      logUnauthorizedAccess(
+        req.user.id,
+        ip,
+        `/api/referrals/${req.params.id}`,
+        'recruiter/leadership'
+      );
       return res.status(403).send("Access denied");
     }
 
@@ -214,26 +236,31 @@ export function registerRoutes(app: Express): Server {
 
       res.json(updatedReferral);
     } catch (error) {
-      console.error('Error updating referral:', error);
+      logServerError(error as Error, {
+        context: 'update-referral',
+        userId: req.user?.id,
+        role: req.user?.role,
+        referralId: req.params.id
+      });
       res.status(500).send("Failed to update referral");
     }
   });
 
   // Rewards routes
-  app.get("/api/rewards", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
+  app.get("/api/rewards", checkAuth, async (req: Request, res: Response) => {
     try {
       const userRewards = await db
         .select()
         .from(rewards)
-        .where(eq(rewards.userId, req.user.id))
+        .where(eq(rewards.userId, req.user?.id))
         .orderBy(desc(rewards.createdAt));
       res.json(userRewards);
     } catch (error) {
-      console.error('Error fetching rewards:', error);
+      logServerError(error as Error, {
+        context: 'get-rewards',
+        userId: req.user?.id,
+        role: req.user?.role
+      });
       res.status(500).send("Failed to fetch rewards");
     }
   });
