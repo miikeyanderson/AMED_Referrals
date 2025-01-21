@@ -13,7 +13,8 @@ export default defineConfig({
     host: '0.0.0.0',
     hmr: {
       clientPort: 443,
-      protocol: 'wss'
+      protocol: 'wss',
+        host: 'your-repl-name.your-username.repl.co'
     }
   },
   resolve: {
