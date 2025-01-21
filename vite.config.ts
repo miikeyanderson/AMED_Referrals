@@ -13,10 +13,9 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     hmr: {
-      clientPort: 443,
-      protocol: "wss",
-      host: "manderson23-referrals.replit.dev",
-      path: "/_vite",
+      clientPort: 5173,
+      protocol: "ws",
+      host: "0.0.0.0",
     },
   },
   resolve: {
