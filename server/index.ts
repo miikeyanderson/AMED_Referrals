@@ -6,8 +6,7 @@ import { apiLimiter, requestMonitor } from "./middleware/rate-limit";
 import logger from "./utils/logger";
 
 const app = express();
-// Move trust proxy setting to the very beginning
-app.set('trust proxy', true);
+// Trust proxy disabled for security
 // Then add other middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

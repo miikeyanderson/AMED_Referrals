@@ -11,9 +11,11 @@ export const apiLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  trustProxy: (ip) => {
-    // Only trust Replit's internal proxy IPs
-    return ip === '127.0.0.1' || ip.startsWith('172.') || ip.startsWith('10.'); 
+  trustProxy: false,
+  keyGenerator: (req) => {
+    // Use X-Forwarded-For header from Replit's proxy
+    const forwardedFor = req.headers['x-forwarded-for'];
+    return Array.isArray(forwardedFor) ? forwardedFor[0] : (forwardedFor?.split(',')[0] || req.ip);
   },
   // Add request timestamp for monitoring
   handler: (req, res) => {
