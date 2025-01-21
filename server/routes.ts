@@ -5,6 +5,9 @@ import { db } from "@db";
 import { referrals, rewards, type User, type Referral } from "@db/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
 import { logUnauthorizedAccess, logServerError } from "./utils/logger";
+import { referralSubmissionSchema, referrals } from "@db/schema";
+import { ZodError } from "zod";
+import { sanitizeHtml } from "./utils/sanitize";
 
 declare global {
   namespace Express {
@@ -89,7 +92,7 @@ export function registerRoutes(app: Express): Server {
         totalRewards: `$${totalRewards?.sum || 0}`,
       });
     } catch (error) {
-      logServerError(error as Error, { 
+      logServerError(error as Error, {
         context: 'analytics',
         userId: req.user?.id,
         role: req.user?.role
@@ -139,7 +142,7 @@ export function registerRoutes(app: Express): Server {
 
       res.json(referralsList);
     } catch (error) {
-      logServerError(error as Error, { 
+      logServerError(error as Error, {
         context: 'get-referrals',
         userId: req.user?.id,
         role: req.user?.role,
@@ -154,17 +157,36 @@ export function registerRoutes(app: Express): Server {
     if (req.user?.role !== 'clinician') {
       const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
       logUnauthorizedAccess(
-        req.user.id,
+        req.user?.id || -1,
         ip,
         '/api/referrals',
         'clinician'
       );
-      return res.status(403).send("Only clinicians can submit referrals");
+      return res.status(403).json({
+        error: "Only clinicians can submit referrals",
+        code: "FORBIDDEN"
+      });
     }
 
     try {
-      const newReferral = {
+      // First, sanitize the input data
+      const sanitizedData = {
         ...req.body,
+        candidateName: sanitizeHtml(req.body.candidateName),
+        candidateEmail: sanitizeHtml(req.body.candidateEmail),
+        candidatePhone: req.body.candidatePhone ? sanitizeHtml(req.body.candidatePhone) : undefined,
+        position: sanitizeHtml(req.body.position),
+        department: req.body.department ? sanitizeHtml(req.body.department) : undefined,
+        experience: req.body.experience ? sanitizeHtml(req.body.experience) : undefined,
+        notes: req.body.notes ? sanitizeHtml(req.body.notes) : undefined,
+      };
+
+      // Validate the sanitized data
+      const validatedData = referralSubmissionSchema.parse(sanitizedData);
+
+      // Create the referral with validated and sanitized data
+      const newReferral = {
+        ...validatedData,
         referrerId: req.user.id,
         status: 'pending' as const,
         createdAt: new Date(),
@@ -176,14 +198,37 @@ export function registerRoutes(app: Express): Server {
         .values(newReferral)
         .returning();
 
-      res.json(createdReferral);
+      res.status(201).json({
+        success: true,
+        data: createdReferral,
+        message: "Referral submitted successfully"
+      });
+
     } catch (error) {
+      if (error instanceof ZodError) {
+        const validationErrors = error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message
+        }));
+
+        return res.status(400).json({
+          error: "Validation failed",
+          code: "VALIDATION_ERROR",
+          details: validationErrors
+        });
+      }
+
       logServerError(error as Error, {
         context: 'create-referral',
         userId: req.user?.id,
-        role: req.user?.role
+        role: req.user?.role,
+        payload: req.body
       });
-      res.status(500).send("Failed to create referral");
+
+      res.status(500).json({
+        error: "Failed to create referral",
+        code: "SERVER_ERROR"
+      });
     }
   });
 
