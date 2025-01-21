@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -118,36 +118,36 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-primary/10 to-background">
-      <div className={cn("flex flex-col gap-6 w-full max-w-lg mx-4")}>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-primary/5">
+      <div className={cn("flex flex-col gap-8 w-full max-w-2xl px-4 py-8 md:px-8")}>
         <Card className="overflow-hidden">
-          <CardContent className="grid p-0 md:grid-cols-2">
-            <div className="p-6 md:p-8">
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col items-center text-center">
-                  <h1 className="text-2xl font-bold">Welcome back</h1>
-                  <p className="text-balance text-muted-foreground">
+          <CardContent className="grid gap-6 p-0">
+            <div className="p-6 md:p-10">
+              <div className="flex flex-col gap-8">
+                <div className="flex flex-col items-center text-center space-y-2">
+                  <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
+                  <p className="text-balance text-muted-foreground text-lg">
                     Access your ARM Platform account
                   </p>
                 </div>
 
                 <Tabs defaultValue="login" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-4">
-                    <TabsTrigger value="login">Login</TabsTrigger>
-                    <TabsTrigger value="register">Register</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 mb-6">
+                    <TabsTrigger value="login" className="text-base">Login</TabsTrigger>
+                    <TabsTrigger value="register" className="text-base">Register</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="login">
                     <Form {...loginForm}>
-                      <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+                      <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-6">
                         <FormField
                           control={loginForm.control}
                           name="username"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Username</FormLabel>
+                              <FormLabel className="text-base">Username</FormLabel>
                               <FormControl>
-                                <Input placeholder="Enter username" {...field} />
+                                <Input placeholder="Enter username" className="h-11" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -159,24 +159,24 @@ export default function AuthPage() {
                           render={({ field }) => (
                             <FormItem>
                               <div className="flex items-center justify-between">
-                                <FormLabel>Password</FormLabel>
-                                <a href="#" className="text-sm text-primary hover:underline">
+                                <FormLabel className="text-base">Password</FormLabel>
+                                <a href="#" className="text-sm font-medium text-primary hover:underline">
                                   Forgot password?
                                 </a>
                               </div>
                               <FormControl>
-                                <Input type="password" placeholder="Enter password" {...field} />
+                                <Input type="password" placeholder="Enter password" className="h-11" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
                           Sign In
                         </Button>
 
-                        <div className="relative text-center text-sm">
-                          <span className="relative z-10 bg-background px-2 text-muted-foreground">
+                        <div className="relative text-center">
+                          <span className="relative z-10 bg-background px-4 text-sm text-muted-foreground">
                             Or continue with
                           </span>
                           <div className="absolute inset-0 flex items-center">
@@ -184,15 +184,15 @@ export default function AuthPage() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-3">
-                          <Button variant="outline" size="icon">
-                            <SiGoogle className="h-4 w-4" />
+                        <div className="grid grid-cols-3 gap-4">
+                          <Button variant="outline" size="lg" className="h-11">
+                            <SiGoogle className="h-5 w-5" />
                           </Button>
-                          <Button variant="outline" size="icon">
-                            <SiApple className="h-4 w-4" />
+                          <Button variant="outline" size="lg" className="h-11">
+                            <SiApple className="h-5 w-5" />
                           </Button>
-                          <Button variant="outline" size="icon">
-                            <SiMeta className="h-4 w-4" />
+                          <Button variant="outline" size="lg" className="h-11">
+                            <SiMeta className="h-5 w-5" />
                           </Button>
                         </div>
                       </form>
@@ -201,15 +201,15 @@ export default function AuthPage() {
 
                   <TabsContent value="register">
                     <Form {...registerForm}>
-                      <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+                      <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-6">
                         <FormField
                           control={registerForm.control}
                           name="username"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Username</FormLabel>
+                              <FormLabel className="text-base">Username</FormLabel>
                               <FormControl>
-                                <Input placeholder="Enter username" {...field} />
+                                <Input placeholder="Enter username" className="h-11" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -220,9 +220,9 @@ export default function AuthPage() {
                           name="password"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Password</FormLabel>
+                              <FormLabel className="text-base">Password</FormLabel>
                               <FormControl>
-                                <Input type="password" placeholder="Enter password" {...field} />
+                                <Input type="password" placeholder="Enter password" className="h-11" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -233,9 +233,9 @@ export default function AuthPage() {
                           name="name"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Full Name</FormLabel>
+                              <FormLabel className="text-base">Full Name</FormLabel>
                               <FormControl>
-                                <Input placeholder="Enter your full name" {...field} />
+                                <Input placeholder="Enter your full name" className="h-11" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -246,9 +246,9 @@ export default function AuthPage() {
                           name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Email</FormLabel>
+                              <FormLabel className="text-base">Email</FormLabel>
                               <FormControl>
-                                <Input type="email" placeholder="Enter your email" {...field} />
+                                <Input type="email" placeholder="Enter your email" className="h-11" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -259,10 +259,10 @@ export default function AuthPage() {
                           name="role"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Role</FormLabel>
+                              <FormLabel className="text-base">Role</FormLabel>
                               <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
-                                  <SelectTrigger>
+                                  <SelectTrigger className="h-11">
                                     <SelectValue placeholder="Select your role" />
                                   </SelectTrigger>
                                 </FormControl>
@@ -276,7 +276,7 @@ export default function AuthPage() {
                             </FormItem>
                           )}
                         />
-                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
                           Create Account
                         </Button>
                       </form>
@@ -285,16 +285,18 @@ export default function AuthPage() {
                 </Tabs>
               </div>
             </div>
-            <div className="relative hidden md:block bg-muted">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5" />
-            </div>
           </CardContent>
         </Card>
-        <div className="text-balance text-center text-xs text-muted-foreground">
+        <div className="text-balance text-center text-sm text-muted-foreground">
           By continuing, you agree to our{" "}
-          <a href="#" className="underline underline-offset-4 hover:text-primary">Terms of Service</a>
-          {" "}and{" "}
-          <a href="#" className="underline underline-offset-4 hover:text-primary">Privacy Policy</a>.
+          <a href="#" className="font-medium underline underline-offset-4 hover:text-primary">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="#" className="font-medium underline underline-offset-4 hover:text-primary">
+            Privacy Policy
+          </a>
+          .
         </div>
       </div>
     </div>
