@@ -26,8 +26,8 @@ interface ReferralTableProps {
 }
 
 export function ReferralTable({ role }: ReferralTableProps) {
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<string>("");
+  const [search, setSearch] = React.useState("");
+  const [status, setStatus] = React.useState<string>("all");
 
   const { data: referrals = [], isLoading } = useQuery({
     queryKey: ['/api/referrals', { search, status }],
