@@ -41,7 +41,6 @@ function useCarousel() {
 }
 
 import * as React from "react"
-import { useRef } from "react"
 
 const Carousel = React.forwardRef<
   HTMLDivElement,
@@ -59,7 +58,7 @@ const Carousel = React.forwardRef<
     },
     ref
   ) => {
-    const carouselRef = useRef(null)
+    const carouselRef = React.useRef<HTMLDivElement>(null)
     const [api] = useEmblaCarousel(
       {
         ...opts,
