@@ -59,8 +59,16 @@ app.use((req, res, next) => {
   // Set server hostname to 0.0.0.0 to allow external connections
   const hostname = '0.0.0.0';
   const port = process.env.PORT || 5000;
+  const fallbackPort = 5001;
 
-  app.listen(port, hostname, () => {
+  const server = app.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`);
+  }).on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`Port ${port} is busy, trying ${fallbackPort}...`);
+      app.listen(fallbackPort, hostname, () => {
+        console.log(`Server running at http://${hostname}:${fallbackPort}/`);
+      });
+    }
   });
 })();
