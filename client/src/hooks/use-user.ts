@@ -8,10 +8,15 @@ type RequestResult = {
   message: string;
 };
 
+type LoginCredentials = {
+  username: string;
+  password: string;
+};
+
 async function handleRequest(
   url: string,
   method: string,
-  body?: InsertUser
+  body?: LoginCredentials | InsertUser
 ): Promise<RequestResult> {
   try {
     const response = await fetch(url, {
@@ -66,7 +71,7 @@ export function useUser() {
     retry: false
   });
 
-  const loginMutation = useMutation<RequestResult, Error, InsertUser>({
+  const loginMutation = useMutation<RequestResult, Error, LoginCredentials>({
     mutationFn: (userData) => handleRequest('/api/login', 'POST', userData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
