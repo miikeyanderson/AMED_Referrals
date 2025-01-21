@@ -81,13 +81,19 @@ export function ReferralTable({ role }: ReferralTableProps) {
   });
 
   const LoadingSkeleton = () => (
-    <div className="space-y-3">
+    <>
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center space-x-4">
-          <Skeleton className="h-12 w-full" />
-        </div>
+        <TableRow key={i}>
+          <TableCell><Skeleton className="h-8 w-[250px]" /></TableCell>
+          <TableCell><Skeleton className="h-8 w-[200px]" /></TableCell>
+          <TableCell><Skeleton className="h-8 w-[100px]" /></TableCell>
+          <TableCell><Skeleton className="h-8 w-[100px]" /></TableCell>
+          {role !== "clinician" && (
+            <TableCell><Skeleton className="h-8 w-[150px]" /></TableCell>
+          )}
+        </TableRow>
       ))}
-    </div>
+    </>
   );
 
   const tableContent = useMemo(() => {
