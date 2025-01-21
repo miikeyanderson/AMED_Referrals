@@ -106,6 +106,10 @@ export function ReferralTable({ role }: ReferralTableProps) {
     queryFn: fetchReferrals,
     staleTime: 1000 * 60,
     retry: 3,
+    enabled: !!user, // Only run query when user is authenticated
+    onError: (error) => {
+      console.error('Error fetching referrals:', error);
+    }
   });
 
   const tableContent = useMemo(() => {

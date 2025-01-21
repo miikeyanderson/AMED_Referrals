@@ -74,8 +74,9 @@ export function registerRoutes(app: Express): Server {
 
   // Referral routes
   app.get("/api/referrals", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
+    if (!req.isAuthenticated() || !req.user) {
+      console.log('User not authenticated');
+      return res.status(401).json({ error: "Not authenticated" });
     }
 
     try {
