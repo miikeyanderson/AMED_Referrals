@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -12,13 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-const STATUS_OPTIONS = {
-  all: "All Status",
-  active: "Active",
-  pending: "Pending",
-  completed: "Completed"
-} as const;
 import { useQuery } from "@tanstack/react-query";
 
 interface ReferralTableProps {
