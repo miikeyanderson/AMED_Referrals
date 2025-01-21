@@ -68,7 +68,7 @@ export function ReferralTable({ role }: ReferralTableProps) {
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All statuses</SelectItem>
+              <SelectItem value="all">All statuses</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="contacted">Contacted</SelectItem>
               <SelectItem value="interviewing">Interviewing</SelectItem>
