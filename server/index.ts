@@ -61,7 +61,7 @@ app.use((req, res, next) => {
   const port = process.env.PORT || 5000;
   const fallbackPort = 5001;
 
-  const server = app.listen(port, hostname, () => {
+  app.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`);
   }).on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
