@@ -6,3 +6,5 @@
 {"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.88","resource":"/api/user","timestamp":"2025-01-21T19:06:44.438Z","userId":-1},"timestamp":"2025-01-21T19:06:44.438Z"}
 {"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.88","resource":"/api/user","timestamp":"2025-01-21T19:08:31.011Z","userId":-1},"timestamp":"2025-01-21T19:08:31.012Z"}
 {"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.88","resource":"/api/user","timestamp":"2025-01-21T19:08:31.035Z","userId":-1},"timestamp":"2025-01-21T19:08:31.035Z"}
+{"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.88","resource":"/api/user","timestamp":"2025-01-21T19:09:21.036Z","userId":-1},"timestamp":"2025-01-21T19:09:21.037Z"}
+{"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.88","resource":"/api/user","timestamp":"2025-01-21T19:09:21.098Z","userId":-1},"timestamp":"2025-01-21T19:09:21.098Z"}
