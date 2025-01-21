@@ -33,11 +33,11 @@ interface ReferralTableProps {
   role: "clinician" | "admin" | "recruiter";
 }
 
-const STATUS_COLORS: Record<ReferralStatus, "default" | "primary" | "secondary" | "success" | "destructive"> = {
+const STATUS_COLORS: Record<ReferralStatus, "default" | "primary" | "secondary" | "destructive"> = {
   pending: "secondary",
   contacted: "primary",
   interviewing: "default",
-  hired: "success",
+  hired: "primary",
   rejected: "destructive",
 } as const;
 
