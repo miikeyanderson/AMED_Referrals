@@ -1,11 +1,17 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { correlationMiddleware } from "./middleware/correlation";
+import logger from "./utils/logger";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Add correlation ID middleware early in the chain
+app.use(correlationMiddleware);
+
+// Request logging middleware with correlation ID
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -29,7 +35,15 @@ app.use((req, res, next) => {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      log(logLine);
+      logger.info({
+        message: logLine,
+        correlationId: req.correlationId,
+        method: req.method,
+        path: req.path,
+        statusCode: res.statusCode,
+        duration,
+        response: capturedJsonResponse
+      });
     }
   });
 
@@ -39,17 +53,24 @@ app.use((req, res, next) => {
 (async () => {
   const server = registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  // Error handling middleware with correlation ID logging
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    logger.error({
+      message: `Error handling request: ${message}`,
+      correlationId: req.correlationId,
+      error: err,
+      status,
+    });
+
+    res.status(status).json({ 
+      message,
+      requestId: req.correlationId 
+    });
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
@@ -58,16 +79,27 @@ app.use((req, res, next) => {
 
   // Set server hostname to 0.0.0.0 to allow external connections
   const hostname = '0.0.0.0';
-  const port = process.env.PORT || 5000;
+  const port = parseInt(process.env.PORT || '5000', 10);
   const fallbackPort = 5001;
 
   app.listen(port, hostname, () => {
-    console.log(`Server running at http://${hostname}:${port}/`);
+    logger.info({
+      message: `Server running at http://${hostname}:${port}/`,
+      port,
+      hostname
+    });
   }).on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
-      console.log(`Port ${port} is busy, trying ${fallbackPort}...`);
+      logger.warn({
+        message: `Port ${port} is busy, trying ${fallbackPort}...`,
+        error: err
+      });
       app.listen(fallbackPort, hostname, () => {
-        console.log(`Server running at http://${hostname}:${fallbackPort}/`);
+        logger.info({
+          message: `Server running at http://${hostname}:${fallbackPort}/`,
+          port: fallbackPort,
+          hostname
+        });
       });
     }
   });

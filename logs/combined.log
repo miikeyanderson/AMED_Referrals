@@ -7,3 +7,10 @@
 {"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.88","resource":"/api/user","timestamp":"2025-01-21T19:08:31.011Z","userId":-1},"timestamp":"2025-01-21T19:08:31.012Z"}
 {"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.88","resource":"/api/user","timestamp":"2025-01-21T19:08:31.035Z","userId":-1},"timestamp":"2025-01-21T19:08:31.035Z"}
 {"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.88","resource":"/api/user","timestamp":"2025-01-21T19:12:06.312Z","userId":-1},"timestamp":"2025-01-21T19:12:06.312Z"}
+{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-21T20:04:26.899Z"}
+{"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.88","resource":"/api/user","timestamp":"2025-01-21T20:04:30.151Z","userId":-1},"service":"arm-platform","timestamp":"2025-01-21T20:04:30.151Z"}
+{"correlationId":"34f4e36d-68b8-4114-8868-90f6ef568a1b","duration":11,"level":"info","message":"GET /api/user 401 in 11ms","method":"GET","path":"/api/user","service":"arm-platform","statusCode":401,"timestamp":"2025-01-21T20:04:30.161Z"}
+{"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.88","resource":"/api/user","timestamp":"2025-01-21T20:04:30.485Z","userId":-1},"service":"arm-platform","timestamp":"2025-01-21T20:04:30.485Z"}
+{"correlationId":"7a17bb22-5ea8-4b94-be3e-7109afe14e69","duration":2,"level":"info","message":"GET /api/user 401 in 2ms","method":"GET","path":"/api/user","service":"arm-platform","statusCode":401,"timestamp":"2025-01-21T20:04:30.487Z"}
+{"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.88","resource":"/api/user","timestamp":"2025-01-21T20:04:30.518Z","userId":-1},"service":"arm-platform","timestamp":"2025-01-21T20:04:30.518Z"}
+{"correlationId":"a4fa2845-4856-44f4-8f4b-4646b83970af","duration":2,"level":"info","message":"GET /api/user 401 in 2ms","method":"GET","path":"/api/user","service":"arm-platform","statusCode":401,"timestamp":"2025-01-21T20:04:30.519Z"}

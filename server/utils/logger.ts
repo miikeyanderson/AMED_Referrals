@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/node';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import { mkdirSync } from 'fs';
 import { join } from 'path';
+import { Request } from 'express';
 
 // Initialize Sentry only if DSN is provided
 if (process.env.SENTRY_DSN) {
@@ -60,6 +61,7 @@ const logger = winston.createLogger({
     winston.format.timestamp(),
     winston.format.json()
   ),
+  defaultMeta: { service: 'arm-platform' },
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(
@@ -81,11 +83,24 @@ const logger = winston.createLogger({
   ],
 });
 
+// Helper to get request metadata including correlation ID
+const getRequestMetadata = (req?: Request) => {
+  if (!req) return {};
+
+  return {
+    correlationId: req.correlationId,
+    method: req.method,
+    url: req.url,
+    ip: req.ip || req.socket.remoteAddress || '0.0.0.0',
+  };
+};
+
 // Utility functions for different log types
 export const logAuthFailure = (
   username: string, 
   ip: string, 
-  reason: string
+  reason: string,
+  req?: Request
 ) => {
   const logData = {
     event: 'auth_failure',
@@ -93,13 +108,17 @@ export const logAuthFailure = (
     ip,
     reason,
     timestamp: new Date().toISOString(),
+    ...getRequestMetadata(req),
   };
 
   logger.warn(logData);
   if (process.env.SENTRY_DSN) {
-    Sentry.captureMessage('Authentication Failure', {
-      level: 'warning',
-      extra: logData,
+    Sentry.withScope(scope => {
+      scope.setContext('request', getRequestMetadata(req));
+      Sentry.captureMessage('Authentication Failure', {
+        level: 'warning',
+        extra: logData,
+      });
     });
   }
 };
@@ -108,7 +127,8 @@ export const logUnauthorizedAccess = (
   userId: number,
   ip: string,
   resource: string,
-  requiredRole?: string
+  requiredRole?: string,
+  req?: Request
 ) => {
   const logData = {
     event: 'unauthorized_access',
@@ -117,20 +137,25 @@ export const logUnauthorizedAccess = (
     resource,
     requiredRole,
     timestamp: new Date().toISOString(),
+    ...getRequestMetadata(req),
   };
 
   logger.warn(logData);
   if (process.env.SENTRY_DSN) {
-    Sentry.captureMessage('Unauthorized Access Attempt', {
-      level: 'warning',
-      extra: logData,
+    Sentry.withScope(scope => {
+      scope.setContext('request', getRequestMetadata(req));
+      Sentry.captureMessage('Unauthorized Access Attempt', {
+        level: 'warning',
+        extra: logData,
+      });
     });
   }
 };
 
 export const logServerError = (
   error: Error,
-  context: Record<string, any> = {}
+  context: Record<string, any> = {},
+  req?: Request
 ) => {
   const logData = {
     event: 'server_error',
@@ -141,12 +166,15 @@ export const logServerError = (
     },
     context,
     timestamp: new Date().toISOString(),
+    ...getRequestMetadata(req),
   };
 
   logger.error(logData);
   if (process.env.SENTRY_DSN) {
-    Sentry.captureException(error, {
-      extra: context,
+    Sentry.withScope(scope => {
+      scope.setContext('request', getRequestMetadata(req));
+      Sentry.setContext('error_context', context);
+      Sentry.captureException(error);
     });
   }
 };
