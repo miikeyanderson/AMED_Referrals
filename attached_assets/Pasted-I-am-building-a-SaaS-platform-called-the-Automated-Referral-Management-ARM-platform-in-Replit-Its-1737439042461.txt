@@ -1,0 +1,25 @@
+I am building a SaaS platform called the Automated Referral Management (ARM) platform in Replit. Its purpose is to streamline referral management for healthcare staffing agencies, addressing specific pain points for recruiters, clinicians, and leadership. The platform requires seamless integration with Microsoft Dynamics using middleware, advanced analytics dashboards, and role-based functionalities. I need help creating a step-by-step strategy to build this project efficiently while minimizing technical debt and ensuring scalability.
+
+Here’s the scope of work:
+
+Core Features:
+Recruiter dashboard: Manage referral pipelines, performance insights, and communications.
+Clinician dashboard: Submit referrals, track rewards, and receive notifications.
+Leadership dashboard: View performance analytics, ROI, and customizable insights with drag-and-drop widgets.
+Middleware integration with Microsoft Dynamics for data synchronization.
+Technical Requirements:
+Frontend: React.js or Next.js for interactive dashboards.
+Backend: Node.js with Express for API services.
+Database: MongoDB or PostgreSQL for secure, scalable data storage.
+Security: HIPAA compliance with robust encryption for sensitive data.
+Challenges:
+Managing data integrity and scaling predictive analytics.
+Maintaining API response times below 300ms.
+Help me with:
+
+Project Architecture: How to organize the project files in Replit for a clean and modular structure.
+Development Workflow: What to prioritize and build first (e.g., authentication, middleware, dashboards).
+Code Implementation: Provide starter code snippets or templates for each phase, such as authentication, API endpoints, and UI components.
+Integration Strategy: How to set up and test the middleware for Microsoft Dynamics integration.
+Testing and Debugging: Best practices for writing automated tests and ensuring a stable deployment pipeline.
+Keep your responses focused, actionable, and tailored to the tools available in Replit. Provide specific examples where possible and guide me step by step in building out the platform.
