@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { correlationMiddleware } from "./middleware/correlation";
+import { apiLimiter, requestMonitor } from "./middleware/rate-limit";
 import logger from "./utils/logger";
 
 const app = express();
@@ -10,6 +11,11 @@ app.use(express.urlencoded({ extended: false }));
 
 // Add correlation ID middleware early in the chain
 app.use(correlationMiddleware);
+
+// Apply rate limiting to all /api routes
+app.use('/api', apiLimiter);
+// Apply request monitoring middleware for dashboard
+app.use('/api', requestMonitor.middleware);
 
 // Request logging middleware with correlation ID
 app.use((req, res, next) => {
@@ -42,7 +48,8 @@ app.use((req, res, next) => {
         path: req.path,
         statusCode: res.statusCode,
         duration,
-        response: capturedJsonResponse
+        response: capturedJsonResponse,
+        rateLimit: req.rateLimit // Add rate limit info to logs
       });
     }
   });

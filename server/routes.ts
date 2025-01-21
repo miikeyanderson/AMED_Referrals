@@ -18,6 +18,20 @@ declare global {
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
+  // Rate limit test endpoint
+  app.get("/api/rate-limit-test", (req: Request, res: Response) => {
+    const rateLimitInfo = (req as any).rateLimit;
+    res.json({
+      success: true,
+      message: "Rate limit test endpoint",
+      rateLimitInfo: {
+        requestCount: rateLimitInfo?.currentCount || 0,
+        remainingRequests: rateLimitInfo?.remaining || 0,
+        resetTime: new Date(rateLimitInfo?.resetTime || Date.now()).toISOString()
+      }
+    });
+  });
+
   const checkAuth = (req: Request, res: Response, next: NextFunction) => {
     if (!req.isAuthenticated()) {
       const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
