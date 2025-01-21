@@ -40,6 +40,9 @@ function useCarousel() {
   return context
 }
 
+import * as React from "react"
+import { useRef } from "react"
+
 const Carousel = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & CarouselProps
@@ -56,7 +59,8 @@ const Carousel = React.forwardRef<
     },
     ref
   ) => {
-    const [carouselRef, api] = useEmblaCarousel(
+    const carouselRef = useRef(null)
+    const [api] = useEmblaCarousel(
       {
         ...opts,
         axis: orientation === "horizontal" ? "x" : "y",
