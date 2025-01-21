@@ -1,5 +1,4 @@
-
-import { useCallback, useMemo, useState, memo } from "react";
+import React, { useCallback, useMemo, useState, memo } from "react";
 import { useDebounce } from "use-debounce";
 import {
   Table,
@@ -15,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useUser } from "@/hooks/use-user";
 
 type ReferralStatus = "pending" | "contacted" | "interviewing" | "hired" | "rejected";
 
@@ -32,10 +32,10 @@ interface ReferralTableProps {
   role: "clinician" | "admin" | "recruiter";
 }
 
-const STATUS_COLORS: Record<ReferralStatus, string> = {
+const STATUS_COLORS: Record<ReferralStatus, "default" | "primary" | "secondary" | "success" | "destructive"> = {
   pending: "secondary",
   contacted: "primary",
-  interviewing: "warning",
+  interviewing: "default",
   hired: "success",
   rejected: "destructive",
 } as const;
@@ -58,34 +58,38 @@ const LoadingSkeleton = memo(({ role }: { role: string }) => (
   <>
     {Array.from({ length: 5 }).map((_, i) => (
       <TableRow key={i}>
-        <TableCell className="space-y-2">
-          <Skeleton className="h-4 w-[250px]" />
-          <Skeleton className="h-3 w-[180px]" />
+        <TableCell>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-3 w-[180px]" />
+          </div>
         </TableCell>
         <TableCell>
-          <Skeleton className="h-8 w-[200px]" />
+          <Skeleton className="h-4 w-[200px]" />
         </TableCell>
         <TableCell>
-          <Skeleton className="h-8 w-[100px]" />
+          <Skeleton className="h-4 w-[100px]" />
         </TableCell>
         <TableCell>
-          <Skeleton className="h-8 w-[100px]" />
+          <Skeleton className="h-4 w-[100px]" />
         </TableCell>
         {role !== "clinician" && (
           <TableCell>
-            <Skeleton className="h-8 w-[150px]" />
+            <Skeleton className="h-4 w-[150px]" />
           </TableCell>
         )}
       </TableRow>
     ))}
   </>
 ));
+
 LoadingSkeleton.displayName = 'LoadingSkeleton';
 
 export function ReferralTable({ role }: ReferralTableProps) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<ReferralStatus | "all">("all");
   const [debouncedSearch] = useDebounce(search, 500);
+  const { user } = useUser();
 
   const fetchReferrals = useCallback(async ({ queryKey }: { queryKey: [string, { search: string; status: string }] }) => {
     const [_, { search, status }] = queryKey;
@@ -106,10 +110,7 @@ export function ReferralTable({ role }: ReferralTableProps) {
     queryFn: fetchReferrals,
     staleTime: 1000 * 60,
     retry: 3,
-    enabled: !!user, // Only run query when user is authenticated
-    onError: (error) => {
-      console.error('Error fetching referrals:', error);
-    }
+    enabled: !!user,
   });
 
   const tableContent = useMemo(() => {
