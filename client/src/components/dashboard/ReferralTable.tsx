@@ -1,5 +1,4 @@
-
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Table,
   TableBody,
@@ -24,6 +23,7 @@ interface ReferralTableProps {
 }
 
 export function ReferralTable({ role }: ReferralTableProps) {
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
 
@@ -33,7 +33,7 @@ export function ReferralTable({ role }: ReferralTableProps) {
       const params = new URLSearchParams();
       if (search) params.append("search", search);
       if (status !== "all") params.append("status", status);
-      
+
       const response = await fetch(`/api/referrals?${params.toString()}`);
       if (!response.ok) return [];
       return response.json();
@@ -99,9 +99,36 @@ export function ReferralTable({ role }: ReferralTableProps) {
                 </TableCell>
                 <TableCell>{referral.position}</TableCell>
                 <TableCell>
-                  <Badge className={getStatusColor(referral.status)}>
-                    {referral.status}
-                  </Badge>
+                  {role === "clinician" ? (
+                    <Badge className={getStatusColor(referral.status)}>
+                      {referral.status}
+                    </Badge>
+                  ) : (
+                    <Select
+                      value={referral.status}
+                      onValueChange={async (value) => {
+                        const response = await fetch(`/api/referrals/${referral.id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ status: value }),
+                        });
+                        if (response.ok) {
+                          queryClient.invalidateQueries({ queryKey: ["/api/referrals"] });
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="contacted">Contacted</SelectItem>
+                        <SelectItem value="interviewing">Interviewing</SelectItem>
+                        <SelectItem value="hired">Hired</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </TableCell>
                 <TableCell>{referral.department}</TableCell>
                 {role !== "clinician" && (

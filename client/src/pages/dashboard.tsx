@@ -60,6 +60,11 @@ export default function Dashboard() {
 
           {user?.role === 'clinician' && <RewardTracker />}
 
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Referrals</h2>
+            <ReferralForm />
+          </div>
+
           <ReferralTable role={user?.role || 'clinician'} />
         </div>
       </main>
