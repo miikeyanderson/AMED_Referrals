@@ -70,6 +70,7 @@ const LoadingSkeleton = React.memo(({ role }: { role: string }) => (
     )}
   </TableRow>
 ));
+LoadingSkeleton.displayName = 'LoadingSkeleton';
 
 export function ReferralTable({ role }: ReferralTableProps) {
   const [search, setSearch] = useState("");
