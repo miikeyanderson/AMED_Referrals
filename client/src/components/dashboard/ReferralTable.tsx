@@ -28,16 +28,20 @@ export function ReferralTable({ role }: ReferralTableProps) {
   const [status, setStatus] = useState("all");
   const [sortField, setSortField] = useState("createdAt");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const { data: referrals } = useQuery({
+  const { data: paginatedData } = useQuery({
     queryKey: ["/api/referrals", { search, status }],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (search) params.append("search", search);
       if (status !== "all") params.append("status", status);
+      params.append("page", page.toString());
+      params.append("limit", itemsPerPage.toString());
 
       const response = await fetch(`/api/referrals?${params.toString()}`);
-      if (!response.ok) return [];
+      if (!response.ok) return { referrals: [], total: 0 };
       return response.json();
     },
   });
@@ -170,6 +174,25 @@ export function ReferralTable({ role }: ReferralTableProps) {
             ))}
           </TableBody>
         </Table>
+      </div>
+      <div className="flex justify-center gap-2 mt-4">
+        <Button
+          variant="outline"
+          onClick={() => setPage(p => Math.max(1, p - 1))}
+          disabled={page === 1}
+        >
+          Previous
+        </Button>
+        <span className="py-2">
+          Page {page} of {Math.ceil((paginatedData?.total || 0) / itemsPerPage)}
+        </span>
+        <Button
+          variant="outline"
+          onClick={() => setPage(p => p + 1)}
+          disabled={page >= Math.ceil((paginatedData?.total || 0) / itemsPerPage)}
+        >
+          Next
+        </Button>
       </div>
     </div>
   );
