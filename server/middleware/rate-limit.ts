@@ -12,8 +12,8 @@ export const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   trustProxy: (ip) => {
-    // Only trust Replit's proxy
-    return ip === '127.0.0.1' || ip.startsWith('172.'); 
+    // Only trust Replit's internal proxy IPs
+    return ip === '127.0.0.1' || ip.startsWith('172.') || ip.startsWith('10.'); 
   },
   // Add request timestamp for monitoring
   handler: (req, res) => {
