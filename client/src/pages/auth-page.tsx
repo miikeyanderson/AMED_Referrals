@@ -185,14 +185,14 @@ export default function AuthPage() {
                         </div>
 
                         <div className="grid grid-cols-3 gap-3">
-                          <Button variant="outline" size="icon">
-                            <SiGoogle className="h-4 w-4" />
+                          <Button variant="outline" size="icon" className="hover:bg-primary/5">
+                            <SiGoogle className="h-5 w-5 text-primary/80 hover:text-primary" />
                           </Button>
-                          <Button variant="outline" size="icon">
-                            <SiApple className="h-4 w-4" />
+                          <Button variant="outline" size="icon" className="hover:bg-primary/5">
+                            <SiApple className="h-5 w-5 text-primary/80 hover:text-primary" />
                           </Button>
-                          <Button variant="outline" size="icon">
-                            <SiMeta className="h-4 w-4" />
+                          <Button variant="outline" size="icon" className="hover:bg-primary/5">
+                            <SiMeta className="h-5 w-5 text-primary/80 hover:text-primary" />
                           </Button>
                         </div>
                       </form>
