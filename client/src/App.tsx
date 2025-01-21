@@ -72,6 +72,12 @@ function Router() {
         setLocation(dashboardPath);
         return null;
       }} />
+      <Route path="/dashboard" component={() => {
+        // Redirect to role-specific dashboard if accessing /dashboard directly
+        const dashboardPath = `/dashboard/${user.role}`;
+        setLocation(dashboardPath);
+        return null;
+      }} />
 
       {/* Role-specific routes */}
       <Route path="/dashboard/clinician" component={() => 
