@@ -56,16 +56,32 @@ const STATUS_OPTIONS: StatusOption[] = [
 ] as const;
 
 const LoadingSkeleton = memo(({ role }: { role: string }) => (
-  <TableRow>
-    <TableCell colSpan={role === "clinician" ? 4 : 5}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="space-y-2 py-2">
-          <Skeleton className="h-4 w-[250px]" />
-          <Skeleton className="h-3 w-[180px]" />
-        </div>
-      ))}
-    </TableCell>
-  </TableRow>
+  <>
+    {Array.from({ length: 5 }).map((_, i) => (
+      <TableRow key={i}>
+        <TableCell>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-3 w-[180px]" />
+          </div>
+        </TableCell>
+        <TableCell>
+          <Skeleton className="h-4 w-[200px]" />
+        </TableCell>
+        <TableCell>
+          <Skeleton className="h-4 w-[100px]" />
+        </TableCell>
+        <TableCell>
+          <Skeleton className="h-4 w-[100px]" />
+        </TableCell>
+        {role !== "clinician" && (
+          <TableCell>
+            <Skeleton className="h-4 w-[150px]" />
+          </TableCell>
+        )}
+      </TableRow>
+    ))}
+  </>
 ));
 
 LoadingSkeleton.displayName = 'LoadingSkeleton';
