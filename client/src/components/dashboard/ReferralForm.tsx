@@ -17,6 +17,27 @@ export function ReferralForm() {
     experience: "",
     notes: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateField = (name: string, value: string) => {
+    switch (name) {
+      case 'candidateName':
+        return value.length < 2 ? 'Name must be at least 2 characters' : '';
+      case 'candidateEmail':
+        return !value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) ? 'Invalid email format' : '';
+      case 'position':
+        return value.length < 2 ? 'Position is required' : '';
+      default:
+        return '';
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    const error = validateField(name, value);
+    setErrors(prev => ({ ...prev, [name]: error }));
+  };
 
   const { mutate } = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -52,11 +73,18 @@ export function ReferralForm() {
           <DialogTitle>Add New Referral</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <Input
-            placeholder="Candidate Name"
-            value={formData.candidateName}
-            onChange={(e) => setFormData({ ...formData, candidateName: e.target.value })}
-          />
+          <div className="space-y-2">
+            <Input
+              name="candidateName"
+              placeholder="Candidate Name"
+              value={formData.candidateName}
+              onChange={handleChange}
+              className={errors.candidateName ? "border-red-500" : ""}
+            />
+            {errors.candidateName && (
+              <p className="text-sm text-red-500">{errors.candidateName}</p>
+            )}
+          </div>
           <Input
             placeholder="Candidate Email"
             type="email"
