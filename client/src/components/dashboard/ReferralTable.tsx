@@ -1,6 +1,6 @@
 import * as React from "react";
 const { useCallback, useMemo, useState, memo } = React;
-import { useDebounce } from "use-debounce";
+import useDebounce from 'react-use';
 import {
   Table,
   TableBody,
