@@ -3,7 +3,7 @@ import { useUser } from "@/hooks/use-user";
 import { AnalyticsCard } from "@/components/dashboard/AnalyticsCard";
 import { ReferralTable } from "@/components/dashboard/ReferralTable";
 import { RewardTracker } from "@/components/dashboard/RewardTracker";
-import { ReferralForm } from "@/components/dashboard/ReferralForm";
+import { ReferralForm } from "../components/dashboard/ReferralForm";
 import { useQuery } from "@tanstack/react-query";
 
 export default function Dashboard() {

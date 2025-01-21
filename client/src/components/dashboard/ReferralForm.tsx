@@ -1,12 +1,12 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function ReferralForm() {
+export const ReferralForm = () => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
