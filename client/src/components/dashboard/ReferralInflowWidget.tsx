@@ -24,16 +24,18 @@ interface ReferralInflowData {
   }>;
 }
 
+type RoleFilter = "all" | "clinician" | "recruiter";
+
 export function ReferralInflowWidget() {
   const [timeframe, setTimeframe] = useState<"week" | "month">("week");
-  const [role, setRole] = useState<string>("");
+  const [role, setRole] = useState<RoleFilter>("all");
 
   const { data, isLoading, error } = useQuery<ReferralInflowData>({
     queryKey: ["/api/recruiter/referrals/inflow", { timeframe, role }],
     queryFn: async () => {
       const params = new URLSearchParams({
         timeframe,
-        ...(role && { role }),
+        ...(role !== "all" && { role }),
       });
       const response = await fetch(`/api/recruiter/referrals/inflow?${params}`);
       if (!response.ok) {
@@ -69,12 +71,12 @@ export function ReferralInflowWidget() {
               <SelectItem value="month">Monthly</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={role} onValueChange={setRole}>
+          <Select value={role} onValueChange={(value: RoleFilter) => setRole(value)}>
             <SelectTrigger className="w-[120px]">
               <SelectValue placeholder="Filter role" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Roles</SelectItem>
+              <SelectItem value="all">All Roles</SelectItem>
               <SelectItem value="clinician">Clinicians</SelectItem>
               <SelectItem value="recruiter">Recruiters</SelectItem>
             </SelectContent>
@@ -132,7 +134,6 @@ export function ReferralInflowWidget() {
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",
                     }}
-                    className="text-sm"
                   />
                   <Line
                     type="monotone"

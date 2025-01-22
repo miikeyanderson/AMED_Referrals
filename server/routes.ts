@@ -308,7 +308,7 @@ export function registerRoutes(app: Express): Server {
    *                     resetTime:
    *                       type: string
    *                       format: date-time
-   * */
+   */
   app.get("/api/rate-limit-test", (req: Request, res: Response) => {
     const rateLimitInfo = req.rateLimit;
     res.json({
@@ -342,7 +342,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Not authenticated
    *       500:
    *         description: Server error while fetching analytics
-   * */
+   */
   app.get("/api/analytics", checkAuth, async (req: Request, res: Response) => {
     try {
       // Get total referrals count
@@ -473,7 +473,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Not authorized (non-clinician users)
    *       500:
    *         description: Server error while creating referral
-   * */
+   */
   app.get("/api/referrals", checkAuth, async (req: Request, res: Response) => {
     try {
       const { status, search, page = 1, limit = 10 } = req.query;
@@ -630,7 +630,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Referral not found
    *       500:
    *         description: Server error while updating referral
-   * */
+   */
   app.get("/api/referrals/:id", checkAuth, async (req: Request, res: Response) => {
     try {
       const [referral] = await db
@@ -736,7 +736,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Not authenticated
    *       500:
    *         description: Server error while fetching rewards
-   * */
+   */
   app.get("/api/rewards", checkAuth, async (req: Request, res: Response) => {
     try {
       const userRewards = await db
@@ -822,7 +822,7 @@ export function registerRoutes(app: Express): Server {
    *                         format: date
    *                       count:
    *                         type: integer
-   * */
+   */
   app.get("/api/recruiter/referrals/inflow", checkAuth, async (req: Request, res: Response) => {
     try {
       const { timeframe = 'week', department, role } = req.query;
@@ -1012,7 +1012,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Not authenticated
    *       500:
    *         description: Server error while fetching pipeline snapshot
-   * */
+   */
   app.get("/api/recruiter/referrals/pipeline", checkAuth, async (req: Request, res: Response) => {
     try {
       const { department, role, recruiterId } = req.query;
@@ -1128,7 +1128,7 @@ export function registerRoutes(app: Express): Server {
    *                     timeToHireChange:
    *                       type: number
    *                       description: Month-over-month change in average time to hire (days)
-   * */
+   */
   app.get("/api/recruiter/kpis", checkAuth, async (req: Request, res: Response) => {
     try {
       const now = new Date();
@@ -1283,7 +1283,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Not authenticated
    *       500:
    *         description: Server error
-   * */
+   */
   app.get("/api/recruiter/alerts", checkAuth, async (req: Request, res: Response) => {
     try {
       const { type, read, limit = 50 } = req.query;
@@ -1362,7 +1362,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Not authorized to mark these alerts
    *       500:
    *         description: Server error
-   * */
+   */
   app.post("/api/recruiter/alerts/mark-as-read", checkAuth, async (req: Request, res: Response) => {
     try {
       const { alertIds, all } = req.body;
