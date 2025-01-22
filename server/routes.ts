@@ -1,10 +1,10 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { WebSocketServer } from 'ws';
+import { WebSocketServer, WebSocket } from 'ws';
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { referrals, rewards, alerts, type User, type Referral, type Alert } from "@db/schema";
-import { eq, desc, and, or, like, sql, inArray } from "drizzle-orm";
+import { alerts, referrals, rewards, type Alert, type InsertAlert } from "@db/schema";
+import { eq, desc, and, or, like, sql, inArray, isNull } from "drizzle-orm";
 import { logUnauthorizedAccess, logServerError } from "./utils/logger";
 import { users } from "@db/schema";
 import { add, format, startOfWeek, endOfWeek, parseISO, isWithinInterval } from "date-fns";
@@ -18,65 +18,267 @@ declare global {
   }
 }
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Referral:
- *       type: object
- *       required:
- *         - candidateName
- *         - candidateEmail
- *         - position
- *       properties:
- *         id:
- *           type: integer
- *           description: Unique identifier for the referral
- *         candidateName:
- *           type: string
- *           description: Full name of the candidate
- *         candidateEmail:
- *           type: string
- *           format: email
- *           description: Email address of the candidate
- *         position:
- *           type: string
- *           description: Position the candidate is being referred for
- *         status:
- *           type: string
- *           enum: [pending, contacted, interviewing, hired, rejected]
- *           description: Current status of the referral
- *     Analytics:
- *       type: object
- *       properties:
- *         totalReferrals:
- *           type: integer
- *           description: Total number of referrals
- *         activeReferrals:
- *           type: integer
- *           description: Number of active referrals
- *         totalRewards:
- *           type: string
- *           description: Total rewards earned (formatted as currency)
- *     Alert:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *         type:
- *           type: string
- *         message:
- *           type: string
- *         read:
- *           type: boolean
- *         createdAt:
- *           type: string
- *           format: date-time
- * */
+// WebSocket clients store
+const clients = new Set<WebSocket>();
 
 export function registerRoutes(app: Express): Server {
+  // Initialize WebSocket server
+  const httpServer = createServer(app);
+  const wss = new WebSocketServer({ server: httpServer });
+
+  wss.on('connection', (ws: WebSocket) => {
+    clients.add(ws);
+
+    ws.on('close', () => {
+      clients.delete(ws);
+    });
+  });
+
   setupAuth(app);
 
+  // Existing middleware remains unchanged...
+  const checkAuth = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
+      logUnauthorizedAccess(-1, ip, req.path);
+      return res.status(401).send("Not authenticated");
+    }
+    next();
+  };
+
+  // Add recruiter role check middleware
+  const checkRecruiterRole = (req: Request, res: Response, next: NextFunction) => {
+    if (req.user?.role !== 'recruiter' && req.user?.role !== 'leadership') {
+      const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
+      logUnauthorizedAccess(
+        req.user?.id || -1,
+        ip,
+        req.path,
+        'recruiter/leadership'
+      );
+      return res.status(403).send("Access denied. Recruiter role required.");
+    }
+    next();
+  };
+
+  /**
+   * @swagger
+   * /api/recruiter/alerts:
+   *   get:
+   *     summary: Get recruiter alerts
+   *     description: Retrieve alerts with optional filtering for unread alerts and pagination
+   *     tags: [Alerts]
+   *     security:
+   *       - sessionAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: unreadOnly
+   *         schema:
+   *           type: boolean
+   *         description: Filter for unread alerts only
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           default: 1
+   *         description: Page number for pagination
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           maximum: 50
+   *           default: 20
+   *         description: Number of alerts per page
+   *     responses:
+   *       200:
+   *         description: List of alerts
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Alert'
+   */
+  app.get(
+    "/api/recruiter/alerts",
+    checkAuth,
+    checkRecruiterRole,
+    async (req: Request, res: Response) => {
+      try {
+        const { unreadOnly, page = 1, limit = 20 } = req.query;
+        const offset = (Number(page) - 1) * Number(limit);
+
+        let query = db
+          .select()
+          .from(alerts)
+          .where(eq(alerts.userId, req.user!.id));
+
+        if (unreadOnly === 'true') {
+          query = query.where(eq(alerts.read, false));
+        }
+
+        const alertsList = await query
+          .orderBy(desc(alerts.createdAt))
+          .limit(Number(limit))
+          .offset(offset);
+
+        res.json(alertsList);
+      } catch (error) {
+        logServerError(error as Error, {
+          context: 'get-alerts',
+          userId: req.user?.id,
+          role: req.user?.role,
+          query: req.query
+        });
+        res.status(500).send("Failed to fetch alerts");
+      }
+    }
+  );
+
+  /**
+   * @swagger
+   * /api/recruiter/alerts:
+   *   post:
+   *     summary: Create a new alert
+   *     description: Create a new alert and broadcast it via WebSocket
+   *     tags: [Alerts]
+   *     security:
+   *       - sessionAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - userId
+   *               - type
+   *               - message
+   *             properties:
+   *               userId:
+   *                 type: integer
+   *               type:
+   *                 type: string
+   *                 enum: [new_referral, pipeline_update, system_notification]
+   *               message:
+   *                 type: string
+   *               relatedReferralId:
+   *                 type: integer
+   *     responses:
+   *       201:
+   *         description: Alert created successfully
+   *       400:
+   *         description: Invalid request body
+   *       403:
+   *         description: Not authorized
+   */
+  app.post(
+    "/api/recruiter/alerts",
+    checkAuth,
+    checkRecruiterRole,
+    async (req: Request, res: Response) => {
+      try {
+        const newAlert: InsertAlert = {
+          userId: req.body.userId,
+          type: req.body.type,
+          message: req.body.message,
+          read: false,
+          relatedReferralId: req.body.relatedReferralId || null,
+          createdAt: new Date()
+        };
+
+        const [createdAlert] = await db
+          .insert(alerts)
+          .values(newAlert)
+          .returning();
+
+        // Broadcast the new alert to all connected WebSocket clients
+        const broadcastMessage = JSON.stringify({
+          type: 'NEW_ALERT',
+          data: createdAlert
+        });
+
+        clients.forEach(client => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(broadcastMessage);
+          }
+        });
+
+        res.status(201).json(createdAlert);
+      } catch (error) {
+        logServerError(error as Error, {
+          context: 'create-alert',
+          userId: req.user?.id,
+          role: req.user?.role,
+          body: req.body
+        });
+        res.status(500).send("Failed to create alert");
+      }
+    }
+  );
+
+  /**
+   * @swagger
+   * /api/recruiter/alerts/{id}/read:
+   *   patch:
+   *     summary: Mark an alert as read
+   *     description: Update the read status of a specific alert
+   *     tags: [Alerts]
+   *     security:
+   *       - sessionAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: Alert ID
+   *     responses:
+   *       200:
+   *         description: Alert updated successfully
+   *       404:
+   *         description: Alert not found
+   */
+  app.patch(
+    "/api/recruiter/alerts/:id/read",
+    checkAuth,
+    checkRecruiterRole,
+    async (req: Request, res: Response) => {
+      try {
+        const [updatedAlert] = await db
+          .update(alerts)
+          .set({
+            read: true,
+            readAt: new Date()
+          })
+          .where(
+            and(
+              eq(alerts.id, parseInt(req.params.id)),
+              eq(alerts.userId, req.user!.id)
+            )
+          )
+          .returning();
+
+        if (!updatedAlert) {
+          return res.status(404).send("Alert not found");
+        }
+
+        res.json(updatedAlert);
+      } catch (error) {
+        logServerError(error as Error, {
+          context: 'mark-alert-read',
+          userId: req.user?.id,
+          role: req.user?.role,
+          alertId: req.params.id
+        });
+        res.status(500).send("Failed to update alert");
+      }
+    }
+  );
+
+  // Keep existing routes...
   /**
    * @swagger
    * /api/rate-limit-test:
@@ -119,15 +321,6 @@ export function registerRoutes(app: Express): Server {
       }
     });
   });
-
-  const checkAuth = (req: Request, res: Response, next: NextFunction) => {
-    if (!req.isAuthenticated()) {
-      const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
-      logUnauthorizedAccess(-1, ip, req.path);
-      return res.status(401).send("Not authenticated");
-    }
-    next();
-  };
 
   /**
    * @swagger
@@ -1213,27 +1406,23 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Create HTTP server first
-  const httpServer = createServer(app);
-
   // Initialize WebSocket server for real-time notifications
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
-
-  wss.on('connection', (ws) => {
-    // Skip vite HMR connections
-    const protocol = ws.protocol;
-    if (protocol === 'vite-hmr') {
-      return;
-    }
-
-    ws.on('message', (message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        // Handle incoming WebSocket messages if needed
-      } catch (error) {
-        console.error('WebSocket message error:', error);
-      }
-    });
-  });
+  //wss.on('connection', (ws) => {
+  //  // Skip vite HMR connections
+  //  const protocol = ws.protocol;
+  //  if (protocol === 'vite-hmr') {
+  //    return;
+  //  }
+  //
+  //  ws.on('message', (message) => {
+  //    try {
+  //      const data = JSON.parse(message.toString());
+  //      // Handle incoming WebSocket messages if needed
+  //    } catch (error) {
+  //      console.error('WebSocket message error:', error);
+  //    }
+  //  });
+  //});
 
   return httpServer;
 }
