@@ -1070,27 +1070,30 @@ export function registerRoutes(app: Express): Server {
         percentage: string | number;
       }
 
-      const statusBreakdown = (await db.execute(sql`
+      const result = await db.execute(sql`
         WITH all_statuses AS (
           SELECT unnest(ARRAY['pending', 'contacted', 'interviewing', 'hired', 'rejected']::referral_status[]) as status
         ),
         status_counts AS (
           SELECT
-            all_statuses.status,
-            COUNT(r.id) as count
+            all_statuses.status::text as status,
+            COALESCE(COUNT(r.id), 0) as count
           FROM all_statuses
-          LEFT JOIN ${referrals} r ON r.status::text = all_statuses.status::text
+          LEFT JOIN ${referrals} r ON r.status = all_statuses.status
           ${whereClause}
           GROUP BY all_statuses.status
         ),
         total AS (
-          SELECT SUM(count) as total
+          SELECT COALESCE(SUM(count), 0) as total
           FROM status_counts
         )
         SELECT
           status_counts.status,
-          status_counts.count,
-          ROUND(CAST(status_counts.count AS DECIMAL) / NULLIF(total.total, 0) * 100, 2) as percentage
+          status_counts.count::integer as count,
+          ROUND(CASE 
+            WHEN total.total = 0 THEN 0
+            ELSE (status_counts.count::decimal / total.total * 100)
+          END, 2) as percentage
         FROM status_counts, total
         ORDER BY
           CASE status_counts.status
@@ -1100,7 +1103,13 @@ export function registerRoutes(app: Express): Server {
             WHEN 'hired' THEN 4
             WHEN 'rejected' THEN 5
           END
-      `)) as StatusRow[];
+      `);
+
+      const statusBreakdown = result.rows.map(row => ({
+        status: row.status,
+        count: Number(row.count),
+        percentage: Number(row.percentage)
+      }));
 
       if (!Array.isArray(statusBreakdown)) {
         throw new Error('Invalid database response format');
