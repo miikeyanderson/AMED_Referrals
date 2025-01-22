@@ -51,6 +51,13 @@ function Router() {
   const { user, isLoading } = useUser();
   const [, setLocation] = useLocation();
 
+  useEffect(() => {
+    if (user && (window.location.pathname === '/' || window.location.pathname === '/dashboard')) {
+      const dashboardPath = `/dashboard/${user.role}`;
+      setLocation(dashboardPath);
+    }
+  }, [user, setLocation]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -66,18 +73,8 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={() => {
-        // Redirect to role-specific dashboard
-        const dashboardPath = `/dashboard/${user.role}`;
-        setLocation(dashboardPath);
-        return null;
-      }} />
-      <Route path="/dashboard" component={() => {
-        // Redirect to role-specific dashboard if accessing /dashboard directly
-        const dashboardPath = `/dashboard/${user.role}`;
-        setLocation(dashboardPath);
-        return null;
-      }} />
+      <Route path="/" component={() => null} />
+      <Route path="/dashboard" component={() => null} />
 
       {/* Role-specific routes */}
       <Route path="/dashboard/clinician" component={() => 
