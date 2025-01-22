@@ -1,7 +1,19 @@
-import { Settings } from "lucide-react";
+import { Settings, Users, ChartBar, ClipboardList } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { useUser } from "@/hooks/use-user";
 import { useLocation } from "wouter";
+
+const roleRoutes = {
+  clinician: [
+    { href: "/dashboard/clinician", label: "Referrals", icon: ClipboardList },
+  ],
+  recruiter: [
+    { href: "/dashboard/recruiter", label: "Pipeline", icon: Users },
+  ],
+  leadership: [
+    { href: "/dashboard/leadership", label: "Analytics", icon: ChartBar },
+  ],
+};
 
 const commonRoutes = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
