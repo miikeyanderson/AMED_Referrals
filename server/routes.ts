@@ -2149,22 +2149,11 @@ export function registerRoutes(app: Express): Server {
    *       500:
    *         description: Server error
    */
-  import { getCachedData, setCachedData } from './utils/redis';
-
-app.get(
+  app.get(
     "/api/recruiter/team-comparisons",
     checkAuth,
     checkRecruiterRole,
     async (req: Request, res: Response) => {
-      // Generate cache key based on query parameters
-      const cacheKey = `team-comparisons:${JSON.stringify(req.query)}`;
-      
-      try {
-        // Try to get cached data
-        const cachedData = await getCachedData(cacheKey);
-        if (cachedData) {
-          return res.json(cachedData);
-        }
       try {
         const { timeframe = 'month', department, page = 1, limit = 10 } = req.query;
         const offset = (Number(page) - 1) * Number(limit);
@@ -2287,8 +2276,6 @@ app.get(
           }
         };
 
-        // Cache the response for 5 minutes
-        await setCachedData(cacheKey, response, 300);
         res.json(response);
       } catch (error) {
         logServerError(error as Error, {

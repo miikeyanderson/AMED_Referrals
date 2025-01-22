@@ -77,7 +77,6 @@
     "react-resizable-panels": "^2.1.4",
     "react-use": "^17.6.0",
     "recharts": "^2.13.0",
-    "redis": "^4.7.0",
     "rest-express": "file:",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
