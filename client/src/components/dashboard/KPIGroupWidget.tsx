@@ -145,7 +145,7 @@ export function KPIGroupWidget() {
             </CardHeader>
             <CardContent>
               <div style={{ width: '100%', height: '200px' }}>
-                <ResponsiveContainer width="100%" height="100%">
+                <ChartContainer config={{}}>
                   <LineChart data={kpiData.conversionRate.trend}>
                     <XAxis
                       dataKey="date"
@@ -195,7 +195,7 @@ export function KPIGroupWidget() {
             </CardHeader>
             <CardContent>
               <div style={{ width: '100%', height: '200px' }}>
-                <ResponsiveContainer width="100%" height="100%">
+                <ChartContainer config={{}}>
                   <LineChart data={kpiData.timeToHire.trend}>
                     <XAxis
                       dataKey="date"
