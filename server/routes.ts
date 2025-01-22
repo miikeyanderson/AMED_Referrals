@@ -1008,8 +1008,7 @@ export function registerRoutes(app: Express): Server {
                   currentPeriod:
                     type: object
                     properties:
-                      startDate:
-                        type: string
+                      startDate:                        type: string
                         format: date-time
                       endDate:
                         type: string
@@ -1405,10 +1404,11 @@ export function registerRoutes(app: Express): Server {
       };
 
       res.json(kpiData);
+      const now = new Date();
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
       // Get current month metrics
-      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const currentMetrics = await db.execute(sql`
         WITH hired_referrals AS (
           SELECT
@@ -2016,7 +2016,7 @@ export function registerRoutes(app: Express): Server {
         res.status(500).send("Failed to update candidate stage");
       }
     }
-  );
+  });
 
   return httpServer;
 }

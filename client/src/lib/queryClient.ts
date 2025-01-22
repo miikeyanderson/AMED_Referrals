@@ -8,6 +8,9 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       retry: false,
+      meta: {
+        credentials: 'include'
+      }
     },
     mutations: {
       retry: false,
