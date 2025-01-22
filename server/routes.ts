@@ -1004,39 +1004,41 @@ export function registerRoutes(app: Express): Server {
    *           application/json:
    *             schema:
    *               type: object
+   *               properties:
+                  currentPeriod:
+                    type: object
                     properties:
-                      currentPeriod:
-                        type: object
-                        properties:
-                          startDate:                        type: string
-                            format: date-time
-                          endDate:
-                            type: string
-                            format: date-time                          total:
-                            type: integer
-                      previousPeriod:
-                        type: object
-                        properties:
-                          startDate:
-                            type: string
-                            format: date-time
-                          endDate:
-                            type: string
-                            format: date-time
-                          total:
-                            type: integer
-                      percentageChange:
-                        type: number
-                      timeSeries:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            date:
-                              type: string
-                              format: date
-                            count:
-                              type: integer
+                      startDate:
+                        type: string
+                        format: date-time
+                      endDate:
+                        type: string
+                        format: date-time
+                      total:
+                        type: integer
+                  previousPeriod:
+                    type: object
+                    properties:
+                      startDate:
+                        type: string
+                        format: date-time
+                      endDate:
+                        type: string
+                        format: date-time
+                      total:
+                        type: integer
+                  percentageChange:
+                    type: number
+                  timeSeries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                        count:
+                          type: integer
    */
   app.get("/api/recruiter/referrals/inflow", checkAuth, async (req: Request, res: Response) => {
     try {
@@ -1205,33 +1207,24 @@ export function registerRoutes(app: Express): Server {
    *         description: Pipeline snapshot retrieved successfully
    *         content:
    *           application/json:
-   *             schema: {
-   *               type: "object",
-   *               properties: {
-   *                 total: {
-   *                   type: "integer",
-   *                   description: "Total number of referrals"
-   *                 },
-   *                 statusBreakdown: {
-   *                   type: "array",
-   *                   items: {
-   *                     type: "object",
-   *                     properties: {
-   *                       status: {
-   *                         type: "string",
-   *                         enum: ["pending", "contacted", "interviewing", "hired", "rejected"]
-   *                       },
-   *                       count: {
-   *                         type: "integer"
-   *                       },
-   *                       percentage: {
-   *                         type: "number"
-   *                       }
-   *                     }
-   *                   }
-   *                 }
-   *               }
-   *            }
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 total:
+   *                   type: integer
+   *                   description: Total number of referrals
+   *                 statusBreakdown:
+   *                   type: array
+   *                   items:
+   *                     type: object
+   *                     properties:
+   *                       status:
+   *                         type: string
+   *                         enum: [pending, contacted, interviewing, hired, rejected]
+   *                       count:
+   *                         type: integer
+   *                       percentage:
+   *                         type: number
    *       401:
    *         description: Not authenticated
    *       500:
@@ -1389,11 +1382,33 @@ export function registerRoutes(app: Express): Server {
    */
   app.get("/api/recruiter/kpis", checkAuth, async (req: Request, res: Response) => {
     try {
-      const now = new Date();
+      // Mock KPI data for demonstration
+      const kpiData = {
+        conversionRate: {
+          current: 65.5,
+          target: 75,
+          trend: Array.from({ length: 7 }, (_, i) => ({
+            date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            value: 60 + Math.random() * 10
+          })).reverse()
+        },
+        timeToHire: {
+          current: 25,
+          target: 21,
+          trend: Array.from({ length: 7 }, (_, i) => ({
+            date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            value: 20 + Math.random() * 10
+          })).reverse()
+        },
+        activeRequisitions: 12,
+        totalPlacements: 45
+      };
+
+      res.json(kpiData);
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
       // Get current month metrics
+      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const currentMetrics = await db.execute(sql`
         WITH hired_referrals AS (
           SELECT
@@ -1430,7 +1445,7 @@ export function registerRoutes(app: Express): Server {
           FROM ${referrals}
           WHERE
             status = 'hired'
-            AND updated_at >= ${lastMonth.toISOString()}
+            AND updatedat >= ${lastMonth.toISOString()}
             AND updated_at < ${currentMonth.toISOString()}
         ),
         total_referrals AS (
@@ -2001,7 +2016,7 @@ export function registerRoutes(app: Express): Server {
         res.status(500).send("Failed to update candidate stage");
       }
     }
-  });
+  );
 
   return httpServer;
 }
