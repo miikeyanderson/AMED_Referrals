@@ -1205,33 +1205,24 @@ export function registerRoutes(app: Express): Server {
    *         description: Pipeline snapshot retrieved successfully
    *         content:
    *           application/json:
-   *             schema: {
-   *               type: "object",
-   *               properties: {
-   *                 total: {
-   *                   type: "integer",
-   *                   description: "Total number of referrals"
-   *                 },
-   *                 statusBreakdown: {
-   *                   type: "array",
-   *                   items: {
-   *                     type: "object",
-   *                     properties: {
-   *                       status: {
-   *                         type: "string",
-   *                         enum: ["pending", "contacted", "interviewing", "hired", "rejected"]
-   *                       },
-   *                       count: {
-   *                         type: "integer"
-   *                       },
-   *                       percentage: {
-   *                         type: "number"
-   *                       }
-   *                     }
-   *                   }
-   *                 }
-   *               }
-   *            }
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 total:
+   *                   type: integer
+   *                   description: Total number of referrals
+   *                 statusBreakdown:
+   *                   type: array
+   *                   items:
+   *                     type: object
+   *                     properties:
+   *                       status:
+   *                         type: string
+   *                         enum: [pending, contacted, interviewing, hired, rejected]
+   *                       count:
+   *                         type: integer
+   *                       percentage:
+   *                         type: number
    *       401:
    *         description: Not authenticated
    *       500:
