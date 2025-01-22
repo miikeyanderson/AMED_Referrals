@@ -15,6 +15,18 @@ const roleRoutes = {
   ],
 };
 
+const roleRoutes = {
+  clinician: [
+    { href: "/dashboard/clinician", label: "Referrals", icon: ClipboardList },
+  ],
+  recruiter: [
+    { href: "/dashboard/recruiter", label: "Pipeline", icon: Users },
+  ],
+  leadership: [
+    { href: "/dashboard/leadership", label: "Analytics", icon: ChartBar },
+  ],
+};
+
 const commonRoutes = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
