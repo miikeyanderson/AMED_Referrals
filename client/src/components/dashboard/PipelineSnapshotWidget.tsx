@@ -25,13 +25,19 @@ interface PipelineData {
   }>;
 }
 
+interface ChartEntry {
+  status: string;
+  count: number;
+  percentage: number;
+}
+
 const STATUS_COLORS = {
   pending: "hsl(var(--warning))",
   contacted: "hsl(var(--info))",
   interviewing: "hsl(var(--primary))",
   hired: "hsl(var(--success))",
   rejected: "hsl(var(--destructive))",
-};
+} as const;
 
 const DEPARTMENTS = [
   { label: "All Departments", value: "all" },
@@ -62,7 +68,7 @@ export function PipelineSnapshotWidget() {
       if (!response.ok) {
         throw new Error("Failed to fetch pipeline data");
       }
-      return response.json();
+      return response.json() as Promise<PipelineData>;
     },
   });
 
@@ -114,9 +120,11 @@ export function PipelineSnapshotWidget() {
                   cy="50%"
                   outerRadius={150}
                   labelLine={false}
-                  label={({ name, value }) => `${name} ${((value / pipelineData.total) * 100).toFixed(0)}%`}
+                  label={({ name, value }: { name: string; value: number }) =>
+                    `${name} ${((value / pipelineData.total) * 100).toFixed(0)}%`
+                  }
                 >
-                  {pipelineData.statusBreakdown.map((entry, index: number) => (
+                  {pipelineData.statusBreakdown.map((entry: ChartEntry, index: number) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={STATUS_COLORS[entry.status as keyof typeof STATUS_COLORS]}

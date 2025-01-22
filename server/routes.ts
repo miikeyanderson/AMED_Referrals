@@ -4,43 +4,51 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { setupAuth } from "./auth";
 import { db } from "@db";
 import { alerts, referrals, rewards, users, type Alert, type InsertAlert, type Referral } from "@db/schema";
-import { eq, desc, and, or, like, sql, inArray } from "drizzle-orm";
+import { eq, desc, and, or, like, sql, inArray, asc } from "drizzle-orm";
+import { SQL } from "drizzle-orm";
 import { logUnauthorizedAccess, logServerError } from "./utils/logger";
-import { add, format, startOfWeek, endOfWeek, parseISO } from "date-fns";
+import { add, format, startOfWeek, endOfWeek, parseISO, isValid } from "date-fns";
 import { referralSubmissionSchema } from "@db/schema";
 import { ZodError } from "zod";
 import { sanitizeHtml } from "./utils/sanitize";
 
 // Type definitions
+interface PipelineQueryParams {
+  role?: string;
+  department?: string;
+  source?: string;
+  fromDate?: string;
+  toDate?: string;
+  sortBy?: 'lastActivity' | 'name' | 'role';
+  sortDirection?: 'asc' | 'desc';
+}
+
+interface PipelineCandidate {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  department: string | null;
+  lastActivity: Date;
+  nextSteps: string | null;
+  notes: string | null;
+  status: string;
+}
+
 interface PipelineStage {
   stage: string;
   count: number;
-  candidates: Array<{
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    department: string | null;
-    lastActivity: Date;
-    nextSteps: string | null;
-    notes: string | null;
-  }>;
+  candidates: PipelineCandidate[];
 }
 
-type PipelineStages = Record<Referral['status'], PipelineStage>;
+type PipelineStages = Record<string, PipelineStage>;
 
-interface CandidateActionHistory {
-  timestamp: string;
-  action: string;
-  userId: number;
-  notes?: string;
-}
-
+// Extend Express User interface without recursion
 declare global {
   namespace Express {
     interface User {
       id: number;
-      role: string;
+      role: 'clinician' | 'recruiter' | 'leadership';
     }
   }
 }
@@ -55,7 +63,6 @@ export function registerRoutes(app: Express): Server {
 
   wss.on('connection', (ws: WebSocket) => {
     clients.add(ws);
-
     ws.on('close', () => {
       clients.delete(ws);
     });
@@ -818,7 +825,7 @@ export function registerRoutes(app: Express): Server {
       const userRewards = await db
         .select()
         .from(rewards)
-        .where(eq(rewards.userId, req.user?.id))
+        .where(eq(rewards.userId, req.user?.id || 0))
         .orderBy(desc(rewards.createdAt));
       res.json(userRewards);
     } catch (error) {
@@ -993,10 +1000,10 @@ export function registerRoutes(app: Express): Server {
    *           type: string
    *         description: Filter by department
    *       - in: query
-   *         name: role
+   *        name: role
    *         schema:
    *           type: string
-            description: Filter by referrer role
+   *         description: Filter by referrer role
    *     responses:
    *       200:
    *         description: Metrics successfully retrieved
@@ -1005,40 +1012,40 @@ export function registerRoutes(app: Express): Server {
    *             schema:
    *               type: object
    *               properties:
-   *                 currentPeriod:
-   *                   type: object
-   *                   properties:
-   *                     startDate:
-   *                       type: string
-   *                       format: date-time
-   *                     endDate:
-   *                       type: string
-   *                       format: date-time
-   *                     total:
-   *                       type: integer
-   *                 previousPeriod:
-   *                   type: object
-   *                   properties:
-   *                     startDate:
-   *                       type: string
-   *                       format: date-time
-   *                     endDate:
-   *                       type: string
-   *                       format: date-time
-   *                     total:
-   *                       type: integer
-   *                 percentageChange:
-   *                   type: number
-   *                 timeSeries:
-   *                   type: array
-   *                   items:
-   *                     type: object
-   *                     properties:
-   *                       date:
-   *                         type: string
-   *                         format: date
-   *                       count:
-   *                         type: integer
+   *                  currentPeriod:
+   *                    type: object
+   *                    properties:
+   *                      startDate:
+   *                        type: string
+   *                        format: date-time
+   *                      endDate:
+   *                        type: string
+   *                        format: date-time
+   *                      total:
+   *                        type: integer
+   *                  previousPeriod:
+   *                    type: object
+   *                    properties:
+   *                      startDate:
+   *                        type: string
+   *                        format: date-time
+   *                      endDate:
+   *                        type: string
+   *                        format: date-time
+   *                      total:
+   *                        type: integer
+   *                  percentageChange:
+   *                    type: number
+   *                  timeSeries:
+   *                    type: array
+   *                    items:
+   *                      type: object
+   *                      properties:
+   *                        date:
+   *                          type: string
+   *                          format: date
+   *                        count:
+   *                          type: integer
    */
   app.get("/api/recruiter/referrals/inflow", checkAuth, async (req: Request, res: Response) => {
     try {
@@ -1425,6 +1432,7 @@ export function registerRoutes(app: Express): Server {
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
       // Get current month metrics
+      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const currentMetrics = await db.execute(sql`
         WITH hired_referrals AS (
           SELECT
@@ -1713,61 +1721,63 @@ export function registerRoutes(app: Express): Server {
   //  });
   //});
 
-  // Add the new pipeline route here
+  // Add new interface for query parameters
+  interface PipelineQueryParams {
+    role?: string;
+    department?: string;
+    source?: string;
+    fromDate?: string;
+    toDate?: string;
+    sortBy?: 'lastActivity' | 'name' | 'role';
+    sortDirection?: 'asc' | 'desc';
+  }
+
   /**
    * @swagger
    * /api/recruiter/pipeline:
    *   get:
-   *     summary: Get recruitment pipeline data
-   *     description: Retrieve candidate data grouped by pipeline stages with filtering and pagination
+   *     summary: Get recruiter pipeline with advanced filtering
+   *     description: Retrieve pipeline data with filtering and sorting capabilities
    *     tags: [Pipeline]
-   *     security:
-   *       - sessionAuth: []
    *     parameters:
    *       - in: query
    *         name: role
    *         schema:
    *           type: string
-   *         description: Filter by job role
+   *         description: Filter by candidate role
    *       - in: query
    *         name: source
    *         schema:
    *           type: string
    *         description: Filter by referral source
    *       - in: query
-   *         name: startDate
+   *         name: fromDate
    *         schema:
    *           type: string
    *           format: date
-   *         description: Start date for date range filter
+   *         description: Filter by submission date (from)
    *       - in: query
-   *         name: endDate
+   *         name: toDate
    *         schema:
    *           type: string
    *           format: date
-   *         description: End date for date range filter
+   *         description: Filter by submission date (to)
    *       - in: query
-   *         name: page
+   *         name: sortBy
    *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           default: 1
-   *         description: Page number
+   *           type: string
+   *           enum: [name, referralDate, lastActivity, role]
+   *         description: Sort field
    *       - in: query
-   *         name: limit
+   *         name: sortOrder
    *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           maximum: 50
-   *           default: 10
-   *         description: Number of items per page
+   *           type: string
+   *           enum: [asc, desc]
+   *         default: desc
+   *         description: Sort order
    *     responses:
    *       200:
    *         description: Pipeline data retrieved successfully
-   *       401:
-   *         description: Not authenticated
-   *       403:
-   *         description: Not authorized (non-recruiter users)
    */
   app.get(
     "/api/recruiter/pipeline",
@@ -1777,88 +1787,101 @@ export function registerRoutes(app: Express): Server {
       try {
         const {
           role,
+          department,
           source,
-          startDate,
-          endDate,
-          page = 1,
-          limit = 10
-        } = req.query;
+          fromDate,
+          toDate,
+          sortBy = 'lastActivity',
+          sortDirection = 'desc'
+        } = req.query as PipelineQueryParams;
 
-        const offset = (Number(page) - 1) * Number(limit);
+        // Build base conditions
+        const conditions: SQL[] = [];
 
-        // Build base query conditions
-        let conditions = [];
-
-        if (role) {
-          conditions.push(like(referrals.position, `%${role}%`));
+        // Add role filter
+        if (role && role !== 'all') {
+          conditions.push(eq(referrals.position, role));
         }
 
-        if (startDate && endDate) {
-          conditions.push(
-            and(
-              sql`${referrals.createdAt} >= ${new Date(startDate as string).toISOString()}`,
-              sql`${referrals.createdAt} <= ${new Date(endDate as string).toISOString()}`
-            )
-          );
+        // Add department filter
+        if (department && department !== 'all') {
+          conditions.push(eq(referrals.department, department));
         }
 
-        // Get total count for pagination
+        // Add date range filter
+        if (fromDate) {
+          const parsedFromDate = parseISO(fromDate);
+          if (isValid(parsedFromDate)) {
+            conditions.push(sql`${referrals.createdAt} >= ${parsedFromDate}`);
+          }
+        }
+        if (toDate) {
+          const parsedToDate = parseISO(toDate);
+          if (isValid(parsedToDate)) {
+            conditions.push(sql`${referrals.createdAt} <= ${parsedToDate}`);
+          }
+        }
+
+        // Build sort configuration
+        const getSortField = () => {
+          switch (sortBy) {
+            case 'name':
+              return referrals.candidateName;
+            case 'role':
+              return referrals.position;
+            case 'lastActivity':
+            default:
+              return referrals.updatedAt;
+          }
+        };
+
+        const sortField = getSortField();
+        const sortFn = sortDirection === 'asc' ? asc : desc;
+
+        // Get total count with filters
         const [{ count }] = await db
           .select({ count: sql<number>`cast(count(*) as integer)` })
           .from(referrals)
-          .where(conditions.length > 0 ? and(...conditions) : undefined);
+          .where(and(...conditions));
 
-        // Fetch referrals with pagination
-        const pipelineData = await db
+        // Get filtered and sorted referrals
+        const referralsList = await db
           .select({
             id: referrals.id,
-            candidateName: referrals.candidateName,
-            candidateEmail: referrals.candidateEmail,
-            position: referrals.position,
+            name: referrals.candidateName,
+            email: referrals.candidateEmail,
+            role: referrals.position,
             department: referrals.department,
-            status: referrals.status,
-            createdAt: referrals.createdAt,
-            updatedAt: referrals.updatedAt,
+            lastActivity: referrals.updatedAt,
             nextSteps: referrals.nextSteps,
-            notes: referrals.notes
+            notes: referrals.notes,
+            status: referrals.status
           })
           .from(referrals)
-          .where(conditions.length > 0 ? and(...conditions) : undefined)
-          .orderBy(desc(referrals.updatedAt))
-          .limit(Number(limit))
-          .offset(offset);
+          .where(and(...conditions))
+          .orderBy(sortFn(sortField));
 
-        // Define pipeline stages
-        const stages = ['pending', 'contacted', 'interviewing', 'hired', 'rejected'] as const;
-        const pipeline = stages.reduce((acc, stage) => {
-          const stageData: PipelineStage = {
-            stage,
-            count: pipelineData.filter(r => r.status === stage).length,
-            candidates: pipelineData
-              .filter(r => r.status === stage)
-              .map(r => ({
-                id: r.id,
-                name: r.candidateName,
-                email: r.candidateEmail,
-                role: r.position,
-                department: r.department,
-                lastActivity: r.updatedAt,
-                nextSteps: r.nextSteps,
-                notes: r.notes
-              }))
-          };
-          acc[stage] = stageData;
-          return acc;
-        }, {} as PipelineStages);
+        // Initialize pipeline stages
+        const pipelineStages: PipelineStages = {
+          pending: { stage: 'pending', count: 0, candidates: [] },
+          contacted: { stage: 'contacted', count: 0, candidates: [] },
+          interviewing: { stage: 'interviewing', count: 0, candidates: [] },
+          hired: { stage: 'hired', count: 0, candidates: [] },
+          rejected: { stage: 'rejected', count: 0, candidates: [] }
+        };
+
+        // Group referrals by status
+        referralsList.forEach((referral) => {
+          const status = referral.status || 'pending';
+          if (pipelineStages[status]) {
+            pipelineStages[status].candidates.push(referral);
+            pipelineStages[status].count++;
+          }
+        });
 
         res.json({
-          pipeline,
-          pagination: {
-            total: count,
-            page: Number(page),
-            limit: Number(limit),
-            pages: Math.ceil(count / Number(limit))
-          }
+          total: count,
+          pipeline: pipelineStages
         });
       } catch (error) {
         logServerError(error as Error, {
@@ -1871,110 +1894,6 @@ export function registerRoutes(app: Express): Server {
           error: "Failed to fetch pipeline data",
           code: "SERVER_ERROR"
         });
-      }
-    }
-  );
-
-  // Add after the existing /api/rewards endpoint...
-
-
-  /**
-   * @swagger
-   * /api/recruiter/pipeline/update-stage:
-   *   post:
-   *     summary: Update candidate stage
-   *     description: Update the pipeline stage of a candidate
-   *     tags: [Pipeline]
-   *     security:
-   *       - sessionAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - candidateId
-   *               - newStage
-   *             properties:
-   *               candidateId:
-   *                 type: integer
-   *               newStage:
-   *                 type: string
-   *                 enum: [new, contacted, interviewing, hired, rejected]
-   *     responses:
-   *       200:
-   *         description: Candidate stage updated successfully
-   *       400:
-   *         description: Invalid request body
-   *       401:
-   *         description: Not authenticated
-   *       403:
-   *         description: Not authorized
-   *       404:
-   *         description: Candidate not found
-   */
-  app.post(
-    "/api/recruiter/pipeline/update-stage",
-    checkAuth,
-    checkRecruiterRole,
-    async (req: Request, res: Response) => {
-      try {
-        const { candidateId, newStage } = req.body;
-
-        if (!candidateId || !newStage) {
-          return res.status(400).send("Missing required fields");
-        }
-
-        const [updatedReferral] = await db
-          .update(referrals)
-          .set({
-            status: newStage,
-            updatedAt: new Date(),
-          })
-          .where(eq(referrals.id, candidateId))
-          .returning();
-
-        if (!updatedReferral) {
-          return res.status(404).send("Candidate not found");
-        }
-
-        // Create an alert for the referrer
-        await db.insert(alerts).values({
-          userId: updatedReferral.referrerId,
-          type: "pipeline_update",
-          message: `Candidate ${updatedReferral.candidateName} has been moved to ${newStage} stage`,
-          read: false,
-          relatedReferralId: updatedReferral.id,
-          createdAt: new Date()
-        });
-
-        // Broadcast update via WebSocket
-        const broadcastMessage = JSON.stringify({
-          type: "PIPELINE_UPDATE",
-          data: {
-            candidateId,
-            newStage,
-            updatedAt: updatedReferral.updatedAt
-          }
-        });
-
-        clients.forEach(client => {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(broadcastMessage);
-          }
-        });
-
-        res.json(updatedReferral);
-      } catch (error) {
-        logServerError(error as Error, {
-          context: 'update-pipeline-stage',
-          userId: req.user?.id,
-          role: req.user?.role,
-          candidateId: req.body.candidateId,
-          newStage: req.body.newStage
-        });
-        res.status(500).send("Failed to update candidate stage");
       }
     }
   );
