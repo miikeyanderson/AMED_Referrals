@@ -27,11 +27,11 @@ interface PipelineStage {
 }
 
 const PIPELINE_STAGES = [
-  { id: "new", title: "New Referral", color: "text-blue-500 border-blue-500" },
-  { id: "contacted", title: "Contacted", color: "text-yellow-500 border-yellow-500" },
-  { id: "interviewing", title: "Interviewing", color: "text-purple-500 border-purple-500" },
-  { id: "hired", title: "Hired", color: "text-green-500 border-green-500" },
-  { id: "rejected", title: "Rejected", color: "text-red-500 border-red-500" },
+  { id: "new", title: "New Referral", color: "bg-blue-50 text-blue-700 border-blue-100" },
+  { id: "contacted", title: "Contacted", color: "bg-yellow-50 text-yellow-700 border-yellow-100" },
+  { id: "interviewing", title: "Interviewing", color: "bg-purple-50 text-purple-700 border-purple-100" },
+  { id: "hired", title: "Hired", color: "bg-green-50 text-green-700 border-green-100" },
+  { id: "rejected", title: "Rejected", color: "bg-red-50 text-red-700 border-red-100" },
 ];
 
 export function CandidatePipeline() {
@@ -179,7 +179,7 @@ export function CandidatePipeline() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`bg-card hover:bg-accent transition-colors cursor-pointer border-l-4 ${PIPELINE_STAGES.find(s => s.id === stage.id)?.color}`}
+                              className={`transition-colors cursor-pointer ${PIPELINE_STAGES.find(s => s.id === stage.id)?.color}`}
                               onClick={() => handleCandidateClick(candidate.id)}
                             >
                               <CardContent className="p-4 space-y-3">
