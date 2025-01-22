@@ -1065,13 +1065,17 @@ export function registerRoutes(app: Express): Server {
 
       // Get total count and status breakdown in a single query
       const statusBreakdown = await db.execute(sql`
-        WITH status_counts AS (
+        WITH all_statuses AS (
+          SELECT unnest(ARRAY['pending', 'contacted', 'interviewing', 'hired', 'rejected']) as status
+        ),
+        status_counts AS (
           SELECT
-            status,
-            COUNT(*) as count
-          FROM ${referrals}
+            all_statuses.status,
+            COUNT(r.id) as count
+          FROM all_statuses
+          LEFT JOIN ${referrals} r ON r.status = all_statuses.status
           ${whereClause}
-          GROUP BY status
+          GROUP BY all_statuses.status
         ),
         total AS (
           SELECT SUM(count) as total
@@ -1083,7 +1087,7 @@ export function registerRoutes(app: Express): Server {
           ROUND(CAST(status_counts.count AS DECIMAL) / NULLIF(total.total, 0) * 100, 2) as percentage
         FROM status_counts, total
         ORDER BY
-          CASE status
+          CASE status_counts.status
             WHEN 'pending' THEN 1
             WHEN 'contacted' THEN 2
             WHEN 'interviewing' THEN 3
