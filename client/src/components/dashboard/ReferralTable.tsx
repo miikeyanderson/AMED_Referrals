@@ -26,16 +26,22 @@ export function ReferralTable({ role }: ReferralTableProps) {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
+  const [sortField, setSortField] = useState("createdAt");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const { data: referrals } = useQuery({
+  const { data: { referrals = [], total = 0 } = {} } = useQuery({
     queryKey: ["/api/referrals", { search, status }],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (search) params.append("search", search);
       if (status !== "all") params.append("status", status);
+      params.append("page", page.toString());
+      params.append("limit", itemsPerPage.toString());
 
       const response = await fetch(`/api/referrals?${params.toString()}`);
-      if (!response.ok) return [];
+      if (!response.ok) return { referrals: [], total: 0 };
       return response.json();
     },
   });
@@ -79,15 +85,46 @@ export function ReferralTable({ role }: ReferralTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Candidate</TableHead>
-              <TableHead>Position</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Department</TableHead>
-              {role !== "clinician" && <TableHead>Next Steps</TableHead>}
+              <TableHead onClick={() => {
+                setSortField("candidateName");
+                setSortDirection(current => current === "asc" ? "desc" : "asc");
+              }} className="cursor-pointer hover:bg-secondary">
+                Candidate {sortField === "candidateName" && (sortDirection === "asc" ? "↑" : "↓")}
+              </TableHead>
+              <TableHead onClick={() => {
+                setSortField("position");
+                setSortDirection(current => current === "asc" ? "desc" : "asc");
+              }} className="cursor-pointer hover:bg-secondary">
+                Position {sortField === "position" && (sortDirection === "asc" ? "↑" : "↓")}
+              </TableHead>
+              <TableHead onClick={() => {
+                setSortField("status");
+                setSortDirection(current => current === "asc" ? "desc" : "asc");
+              }} className="cursor-pointer hover:bg-secondary">
+                Status {sortField === "status" && (sortDirection === "asc" ? "↑" : "↓")}
+              </TableHead>
+              <TableHead onClick={() => {
+                setSortField("department");
+                setSortDirection(current => current === "asc" ? "desc" : "asc");
+              }} className="cursor-pointer hover:bg-secondary">
+                Department {sortField === "department" && (sortDirection === "asc" ? "↑" : "↓")}
+              </TableHead>
+              {role !== "clinician" && (
+                <TableHead onClick={() => {
+                  setSortField("nextSteps");
+                  setSortDirection(current => current === "asc" ? "desc" : "asc");
+                }} className="cursor-pointer hover:bg-secondary">
+                  Next Steps {sortField === "nextSteps" && (sortDirection === "asc" ? "↑" : "↓")}
+                </TableHead>
+                <TableHead>Notes</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {referrals?.map((referral: any) => (
+            {referrals?.sort((a: any, b: any) => {
+              const modifier = sortDirection === "asc" ? 1 : -1;
+              return a[sortField] > b[sortField] ? modifier : -modifier;
+            }).map((referral: any) => (
               <TableRow key={referral.id}>
                 <TableCell>
                   <div>
@@ -132,12 +169,60 @@ export function ReferralTable({ role }: ReferralTableProps) {
                 </TableCell>
                 <TableCell>{referral.department}</TableCell>
                 {role !== "clinician" && (
-                  <TableCell>{referral.nextSteps || "No next steps"}</TableCell>
+                  <>
+                    <TableCell>{referral.nextSteps || "No next steps"}</TableCell>
+                    <TableCell>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80">
+                          <div className="space-y-2">
+                            <h4 className="font-medium">Notes</h4>
+                            <Textarea
+                              placeholder="Add notes about the candidate..."
+                              defaultValue={referral.recruiterNotes || ""}
+                              onChange={(e) => {
+                                fetch(`/api/referrals/${referral.id}`, {
+                                  method: "PATCH",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ recruiterNotes: e.target.value }),
+                                }).then(() => {
+                                  queryClient.invalidateQueries({ queryKey: ["/api/referrals"] });
+                                });
+                              }}
+                            />
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </TableCell>
+                  </>
                 )}
               </TableRow>
             ))}
           </TableBody>
         </Table>
+      </div>
+      <div className="flex justify-center gap-2 mt-4">
+        <Button
+          variant="outline"
+          onClick={() => setPage(p => Math.max(1, p - 1))}
+          disabled={page === 1}
+        >
+          Previous
+        </Button>
+        <span className="py-2">
+          Page {page} of {Math.ceil((paginatedData?.total || 0) / itemsPerPage)}
+        </span>
+        <Button
+          variant="outline"
+          onClick={() => setPage(p => p + 1)}
+          disabled={page >= Math.ceil((paginatedData?.total || 0) / itemsPerPage)}
+        >
+          Next
+        </Button>
       </div>
     </div>
   );

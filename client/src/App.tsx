@@ -12,6 +12,8 @@ import LeadershipDashboard from "@/pages/dashboard/leadership";
 import { useUser } from "@/hooks/use-user";
 import { Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
+import { ThemeProvider } from "@/components/themes/theme-provider";
+import { ThemeToggle } from "@/components/themes/theme-toggle";
 
 function ProtectedRoute({ 
   component: Component, 
@@ -67,7 +69,6 @@ function Router() {
     );
   }
 
-  // If user is not authenticated, show auth page
   if (!user) {
     return <AuthPage />;
   }
@@ -77,7 +78,6 @@ function Router() {
       <Route path="/" component={() => null} />
       <Route path="/dashboard" component={() => null} />
 
-      {/* Role-specific routes */}
       <Route path="/dashboard/clinician" component={() => 
         <ProtectedRoute component={ClinicianDashboard} allowedRoles={['clinician']} />
       } />
@@ -96,10 +96,17 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="system">
+      <QueryClientProvider client={queryClient}>
+        <div className="relative">
+          <div className="fixed top-4 right-4 z-50">
+            <ThemeToggle />
+          </div>
+          <Router />
+          <Toaster />
+        </div>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 
