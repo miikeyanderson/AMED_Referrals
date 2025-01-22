@@ -1,0 +1,34 @@
+The width(411) and height(231) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+The width(403) and height(227) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+The width(393) and height(221) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+The width(386) and height(217) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+The width(379) and height(213) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+The width(372) and height(209) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+The width(371) and height(209) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+The width(370) and height(208) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+The width(369) and height(207) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+The width(367) and height(207) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+The width(367) and height(206) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+The width(367) and height(207) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+The width(368) and height(207) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+[hmr] Failed to reload /src/components/dashboard/CandidatePipeline.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+[vite] hot updated: /src/components/dashboard/CandidatePipeline.tsx
+[vite] hot updated: /src/pages/dashboard/recruiter/index.tsx
+The width(368) and height(207) are both fixed numbers,
+       maybe you don't need to use a ResponsiveContainer.
+[vite] hot updated: /src/components/dashboard/CandidatePipeline.tsx
+[vite] hot updated: /src/pages/dashboard/recruiter/index.tsx
+The width(368) and height(207) are both fixed numbers,

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -36,7 +37,6 @@ export function CandidatePipeline() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Fetch pipeline data
   const { data: pipelineData, isLoading } = useQuery({
     queryKey: ["/api/recruiter/pipeline"],
     queryFn: async () => {
@@ -46,7 +46,6 @@ export function CandidatePipeline() {
     },
   });
 
-  // Update candidate stage mutation
   const updateStageMutation = useMutation({
     mutationFn: async ({ candidateId, newStage }: { candidateId: number; newStage: string }) => {
       const response = await fetch("/api/recruiter/pipeline/update-stage", {
@@ -75,19 +74,9 @@ export function CandidatePipeline() {
 
   const handleDragEnd = async (result: any) => {
     const { destination, source, draggableId } = result;
-
-    // Dropped outside a valid droppable
     if (!destination) return;
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-    // Dropped in the same position
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
-
-    // Update the candidate's stage
     try {
       await updateStageMutation.mutateAsync({
         candidateId: parseInt(draggableId),
@@ -100,7 +89,7 @@ export function CandidatePipeline() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {PIPELINE_STAGES.map((stage) => (
           <div key={stage.id} className="space-y-4">
             <h3 className="font-medium text-sm">{stage.title}</h3>
@@ -115,14 +104,14 @@ export function CandidatePipeline() {
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 min-w-0">
         {PIPELINE_STAGES.map((stage) => (
           <Droppable key={stage.id} droppableId={stage.id}>
             {(provided, snapshot) => (
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="space-y-4"
+                className="space-y-4 min-w-0"
               >
                 <h3 className="font-medium text-sm flex items-center justify-between">
                   {stage.title}
@@ -131,7 +120,7 @@ export function CandidatePipeline() {
                   </span>
                 </h3>
                 <div
-                  className={`min-h-[500px] rounded-lg p-4 space-y-4 transition-colors ${
+                  className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-4 space-y-4 transition-colors ${
                     snapshot.isDraggingOver ? "bg-muted/50" : "bg-muted/10"
                   }`}
                 >
@@ -150,8 +139,8 @@ export function CandidatePipeline() {
                         >
                           <CardContent className="p-4 space-y-3">
                             <div className="flex items-start justify-between">
-                              <div className="flex items-center space-x-3">
-                                <Avatar className="h-8 w-8">
+                              <div className="flex items-center space-x-3 min-w-0">
+                                <Avatar className="h-8 w-8 flex-shrink-0">
                                   <span className="font-semibold text-xs">
                                     {candidate.name
                                       .split(" ")
@@ -159,18 +148,18 @@ export function CandidatePipeline() {
                                       .join("")}
                                   </span>
                                 </Avatar>
-                                <div>
-                                  <h4 className="font-medium text-sm">
+                                <div className="min-w-0">
+                                  <h4 className="font-medium text-sm truncate">
                                     {candidate.name}
                                   </h4>
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-xs text-muted-foreground truncate">
                                     {candidate.role}
                                   </p>
                                 </div>
                               </div>
                             </div>
                             {candidate.department && (
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground truncate">
                                 Department: {candidate.department}
                               </p>
                             )}
