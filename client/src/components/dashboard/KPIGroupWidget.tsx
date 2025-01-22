@@ -183,7 +183,7 @@ export function KPIGroupWidget() {
                       }}
                     />
                   </LineChart>
-                </ResponsiveContainer>
+                </ChartContainer>
               </div>
             </CardContent>
           </Card>
@@ -233,7 +233,7 @@ export function KPIGroupWidget() {
                       }}
                     />
                   </LineChart>
-                </ResponsiveContainer>
+                </ChartContainer>
               </div>
             </CardContent>
           </Card>
