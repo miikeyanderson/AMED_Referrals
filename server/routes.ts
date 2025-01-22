@@ -852,14 +852,14 @@ export function registerRoutes(app: Express): Server {
       let conditions = [];
 
       if (department) {
-        conditions.push(eq(referrals.department, department));
+        conditions.push(sql`${referrals.department} = ${department}`);
       }
 
       if (role) {
         const usersByRole = db
           .select({ id: users.id })
           .from(users)
-          .where(eq(users.role, role))
+          .where(sql`${users.role}::text = ${role}`)
           .as('usersByRole');
 
         conditions.push(
@@ -869,6 +869,9 @@ export function registerRoutes(app: Express): Server {
           )
         );
       }
+
+      // Cast the status to the enum type
+      const statusClause = sql`${referrals.status}::referral_status = ${status}::referral_status`;
 
       // Get current period total
       const [currentTotal] = await db
