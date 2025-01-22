@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, index, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -75,6 +75,11 @@ export const referrals = pgTable("referrals", {
   notes: text("notes"),
   recruiterNotes: text("recruiter_notes"),
   nextSteps: text("next_steps"),
+  resumeUrl: text("resume_url"),  // URL to the stored resume file
+  skillTags: text("skill_tags").array(), // Array of skills
+  socialLinks: jsonb("social_links"), // JSON object containing LinkedIn, GitHub, etc.
+  source: text("source"), // Where the candidate was referred from
+  actionHistory: jsonb("action_history").array(), // Array of timestamped actions
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 }, (table) => ({

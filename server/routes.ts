@@ -29,6 +29,13 @@ interface PipelineStage {
 
 type PipelineStages = Record<Referral['status'], PipelineStage>;
 
+interface CandidateActionHistory {
+  timestamp: string;
+  action: string;
+  userId: number;
+  notes?: string;
+}
+
 declare global {
   namespace Express {
     interface User {
@@ -826,6 +833,147 @@ export function registerRoutes(app: Express): Server {
 
   /**
    * @swagger
+   * /api/candidate/{id}:
+   *   get:
+   *     summary: Get detailed candidate profile
+   *     description: Retrieve comprehensive candidate information including resume, contact details, and history
+   *     tags: [Candidates]
+   *     security:
+   *       - sessionAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: Candidate referral ID
+   *     responses:
+   *       200:
+   *         description: Detailed candidate profile
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized to view this candidate
+   *       404:
+   *         description: Candidate not found
+   *       500:
+   *         description: Server error
+   */
+  app.get("/api/candidate/:id", checkAuth, async (req: Request, res: Response) => {
+    try {
+      const candidateId = parseInt(req.params.id);
+
+      // Get the candidate referral with joined user information
+      const [candidateReferral] = await db
+        .select({
+          id: referrals.id,
+          referrerId: referrals.referrerId,
+          candidateName: referrals.candidateName,
+          candidateEmail: referrals.candidateEmail,
+          candidatePhone: referrals.candidatePhone,
+          position: referrals.position,
+          department: referrals.department,
+          experience: referrals.experience,
+          status: referrals.status,
+          notes: referrals.notes,
+          recruiterNotes: referrals.recruiterNotes,
+          nextSteps: referrals.nextSteps,
+          resumeUrl: referrals.resumeUrl,
+          skillTags: referrals.skillTags,
+          socialLinks: referrals.socialLinks,
+          source: referrals.source,
+          actionHistory: referrals.actionHistory,
+          createdAt: referrals.createdAt,
+          updatedAt: referrals.updatedAt,
+          referrerName: users.name,
+          referrerEmail: users.email
+        })
+        .from(referrals)
+        .leftJoin(users, eq(referrals.referrerId, users.id))
+        .where(eq(referrals.id, candidateId))
+        .limit(1);
+
+      if (!candidateReferral) {
+        return res.status(404).json({
+          error: "Candidate not found",
+          code: "NOT_FOUND"
+        });
+      }
+
+      // Implement role-based access control
+      const userRole = req.user?.role;
+      const isOwner = req.user?.id === candidateReferral.referrerId;
+
+      // Determine which fields to return based on role
+      let responseData: any = {
+        id: candidateReferral.id,
+        candidateName: candidateReferral.candidateName,
+        position: candidateReferral.position,
+        department: candidateReferral.department,
+        status: candidateReferral.status,
+        createdAt: candidateReferral.createdAt,
+        updatedAt: candidateReferral.updatedAt
+      };
+
+      // Add sensitive information based on role
+      if (userRole === 'recruiter' || userRole === 'leadership' || isOwner) {
+        responseData = {
+          ...responseData,
+          candidateEmail: candidateReferral.candidateEmail,
+          candidatePhone: candidateReferral.candidatePhone,
+          experience: candidateReferral.experience,
+          notes: candidateReferral.notes,
+          skillTags: candidateReferral.skillTags,
+          socialLinks: candidateReferral.socialLinks,
+          source: candidateReferral.source,
+          referrerName: candidateReferral.referrerName,
+          referrerEmail: candidateReferral.referrerEmail
+        };
+      }
+
+      // Add recruiter-specific information
+      if (userRole === 'recruiter' || userRole === 'leadership') {
+        responseData = {
+          ...responseData,
+          recruiterNotes: candidateReferral.recruiterNotes,
+          nextSteps: candidateReferral.nextSteps,
+          actionHistory: candidateReferral.actionHistory,
+          resumeUrl: candidateReferral.resumeUrl
+        };
+      }
+
+      // Log access attempt
+      if (!isOwner && userRole === 'clinician') {
+        const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
+        logUnauthorizedAccess(
+          req.user?.id || -1,
+          ip,
+          `/api/candidate/${candidateId}`,
+          'owner or recruiter'
+        );
+        return res.status(403).json({
+          error: "Access denied. Insufficient permissions.",
+          code: "FORBIDDEN"
+        });
+      }
+
+      res.json(responseData);
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'get-candidate',
+        userId: req.user?.id,
+        role: req.user?.role,
+        candidateId: req.params.id
+      });
+      res.status(500).json({
+        error: "Failed to fetch candidate information",
+        code: "SERVER_ERROR"
+      });
+    }
+  });
+
+  /**
+   * @swagger
    * /api/recruiter/referrals/inflow:
    *   get:
    *     summary: Get referral inflow metrics
@@ -848,7 +996,7 @@ export function registerRoutes(app: Express): Server {
    *         name: role
    *         schema:
    *           type: string
-   *         description: Filter by role
+            description: Filter by referrer role
    *     responses:
    *       200:
    *         description: Metrics successfully retrieved
@@ -1729,7 +1877,6 @@ export function registerRoutes(app: Express): Server {
 
   // Add after the existing /api/rewards endpoint...
 
-  
 
   /**
    * @swagger
