@@ -300,12 +300,20 @@ export function registerRoutes(app: Express): Server {
         ? baseQuery.where(and(...conditions))
         : baseQuery;
 
+      const [{ count }] = await db
+        .select({ count: sql<number>`cast(count(*) as integer)` })
+        .from(referrals)
+        .where(and(...conditions));
+
       const referralsList = await query
         .orderBy(desc(referrals.createdAt))
         .limit(Number(limit))
         .offset(offset);
 
-      res.json(referralsList);
+      res.json({
+        referrals: referralsList,
+        total: count
+      });
     } catch (error) {
       logServerError(error as Error, {
         context: 'get-referrals',

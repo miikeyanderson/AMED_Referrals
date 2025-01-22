@@ -71,4 +71,3 @@
 {"correlationId":"8827e024-543f-4843-8fa8-c36ad688c063","duration":4,"level":"info","message":"GET /api/user 401 in 4ms","method":"GET","path":"/api/user","rateLimit":{"currentCount":3,"limit":100,"remaining":97,"resetTime":1737492352922},"service":"arm-platform","statusCode":401,"timestamp":"2025-01-21T20:30:57.291Z"}
 {"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.88","resource":"/api/user","timestamp":"2025-01-21T20:30:57.300Z","userId":-1},"service":"arm-platform","timestamp":"2025-01-21T20:30:57.300Z"}
 {"correlationId":"0d9530c4-09e1-4844-8491-c00b6a17da0b","duration":4,"level":"info","message":"GET /api/user 401 in 4ms","method":"GET","path":"/api/user","rateLimit":{"currentCount":4,"limit":100,"remaining":96,"resetTime":1737492352922},"service":"arm-platform","statusCode":401,"timestamp":"2025-01-21T20:30:57.304Z"}
-<<<
