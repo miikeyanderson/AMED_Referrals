@@ -833,14 +833,14 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Construct the WHERE clause if conditions exist
-      const whereClause = conditions.length > 0 
+      const whereClause = conditions.length > 0
         ? sql`WHERE ${sql.join(conditions, sql` AND `)}`
         : sql``;
 
       // Get total count and status breakdown in a single query
       const statusBreakdown = await db.execute(sql`
         WITH status_counts AS (
-          SELECT 
+          SELECT
             status,
             COUNT(*) as count
           FROM ${referrals}
@@ -851,12 +851,12 @@ export function registerRoutes(app: Express): Server {
           SELECT SUM(count) as total
           FROM status_counts
         )
-        SELECT 
+        SELECT
           status_counts.status,
           status_counts.count,
           ROUND(CAST(status_counts.count AS DECIMAL) / NULLIF(total.total, 0) * 100, 2) as percentage
         FROM status_counts, total
-        ORDER BY 
+        ORDER BY
           CASE status
             WHEN 'pending' THEN 1
             WHEN 'contacted' THEN 2
@@ -885,6 +885,134 @@ export function registerRoutes(app: Express): Server {
         query: req.query
       });
       res.status(500).send("Failed to fetch pipeline snapshot");
+    }
+  });
+
+  /**
+   * @swagger
+   * /api/recruiter/kpis:
+   *   get:
+   *     summary: Get recruiter KPI metrics
+   *     description: Retrieve key performance indicators including conversion rates and time-to-hire metrics
+   *     tags: [Analytics]
+   *     security:
+   *       - sessionAuth: []
+   *     responses:
+   *       200:
+   *         description: KPI metrics retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 conversionRate:
+   *                   type: number
+   *                   description: Percentage of referrals converted to hires
+   *                 avgTimeToHire:
+   *                   type: number
+   *                   description: Average time to hire in days
+   *                 trendAnalysis:
+   *                   type: object
+   *                   properties:
+   *                     conversionRateChange:
+   *                       type: number
+   *                       description: Month-over-month change in conversion rate (percentage points)
+   *                     timeToHireChange:
+   *                       type: number
+   *                       description: Month-over-month change in average time to hire (days)
+   */
+  app.get("/api/recruiter/kpis", checkAuth, async (req: Request, res: Response) => {
+    try {
+      const now = new Date();
+      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+      // Get current month metrics
+      const currentMetrics = await db.execute(sql`
+        WITH hired_referrals AS (
+          SELECT
+            id,
+            created_at,
+            updated_at,
+            EXTRACT(EPOCH FROM (updated_at - created_at)) / 86400 as days_to_hire
+          FROM ${referrals}
+          WHERE
+            status = 'hired'
+            AND updated_at >= ${currentMonth.toISOString()}
+            AND updated_at < ${now.toISOString()}
+        ),
+        total_referrals AS (
+          SELECT COUNT(*) as total
+          FROM ${referrals}
+          WHERE created_at >= ${currentMonth.toISOString()}
+        )
+        SELECT
+          COALESCE(COUNT(hired_referrals.id), 0) as hired_count,
+          COALESCE(AVG(hired_referrals.days_to_hire), 0) as avg_days_to_hire,
+          (SELECT total FROM total_referrals) as total_referrals
+        FROM hired_referrals
+      `);
+
+      // Get last month metrics
+      const lastMonthMetrics = await db.execute(sql`
+        WITH hired_referrals AS (
+          SELECT
+            id,
+            created_at,
+            updated_at,
+            EXTRACT(EPOCH FROM (updated_at - created_at)) / 86400 as days_to_hire
+          FROM ${referrals}
+          WHERE
+            status = 'hired'
+            AND updated_at >= ${lastMonth.toISOString()}
+            AND updated_at < ${currentMonth.toISOString()}
+        ),
+        total_referrals AS (
+          SELECT COUNT(*) as total
+          FROM ${referrals}
+          WHERE created_at >= ${lastMonth.toISOString()}
+            AND created_at < ${currentMonth.toISOString()}
+        )
+        SELECT
+          COALESCE(COUNT(hired_referrals.id), 0) as hired_count,
+          COALESCE(AVG(hired_referrals.days_to_hire), 0) as avg_days_to_hire,
+          (SELECT total FROM total_referrals) as total_referrals
+        FROM hired_referrals
+      `);
+
+      // Calculate current month KPIs
+      const current = currentMetrics[0];
+      const currentConversionRate = current.total_referrals > 0
+        ? (Number(current.hired_count) / Number(current.total_referrals)) * 100
+        : 0;
+      const currentTimeToHire = Number(current.avg_days_to_hire);
+
+      // Calculate last month KPIs
+      const last = lastMonthMetrics[0];
+      const lastConversionRate = last.total_referrals > 0
+        ? (Number(last.hired_count) / Number(last.total_referrals)) * 100
+        : 0;
+      const lastTimeToHire = Number(last.avg_days_to_hire);
+
+      // Calculate month-over-month changes
+      const conversionRateChange = currentConversionRate - lastConversionRate;
+      const timeToHireChange = currentTimeToHire - lastTimeToHire;
+
+      res.json({
+        conversionRate: Number(currentConversionRate.toFixed(2)),
+        avgTimeToHire: Number(currentTimeToHire.toFixed(1)),
+        trendAnalysis: {
+          conversionRateChange: Number(conversionRateChange.toFixed(2)),
+          timeToHireChange: Number(timeToHireChange.toFixed(1))
+        }
+      });
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'recruiter-kpis',
+        userId: req.user?.id,
+        role: req.user?.role
+      });
+      res.status(500).send("Failed to fetch KPI metrics");
     }
   });
 
