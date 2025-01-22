@@ -8,12 +8,8 @@
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
-    "db:generate": "drizzle-kit generate:pg",
-    "db:migrate": "drizzle-kit migrate:pg",
-    "db:push": "drizzle-kit push:pg",
-    "db:pull": "drizzle-kit pull:pg",
-    "db:studio": "drizzle-kit studio",
-    "db:check": "drizzle-kit check:pg"
+    "db:push": "drizzle-kit push",
+    "create-test-referrals": "tsx scripts/create-test-referrals.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

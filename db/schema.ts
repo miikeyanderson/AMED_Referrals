@@ -5,6 +5,7 @@ import { z } from "zod";
 // Existing enums
 export const roleEnum = pgEnum('role', ['recruiter', 'clinician', 'leadership']);
 export const referralStatusEnum = pgEnum('referral_status', ['pending', 'contacted', 'interviewing', 'hired', 'rejected']);
+export const alertTypeEnum = pgEnum('alert_type', ['new_referral', 'pipeline_update', 'system_notification']);
 
 // Enhanced validation schema for referral submission
 export const referralSubmissionSchema = z.object({
@@ -96,6 +97,17 @@ export const rewards = pgTable("rewards", {
   statusIdx: index("reward_status_idx").on(table.status)
 }));
 
+export const alerts = pgTable("alerts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  type: alertTypeEnum("type").notNull(),
+  message: text("message").notNull(),
+  read: boolean("read").default(false).notNull(),
+  relatedReferralId: integer("related_referral_id").references(() => referrals.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  readAt: timestamp("read_at")
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -103,9 +115,13 @@ export type Referral = typeof referrals.$inferSelect;
 export type InsertReferral = typeof referrals.$inferInsert;
 export type Reward = typeof rewards.$inferSelect;
 export type InsertReward = typeof rewards.$inferInsert;
+export type Alert = typeof alerts.$inferSelect;
+export type InsertAlert = typeof alerts.$inferInsert;
 
 // Schemas
 export const insertUserSchema = createInsertSchema(users);
 export const selectUserSchema = createSelectSchema(users);
 export const insertReferralSchema = createInsertSchema(referrals);
 export const selectReferralSchema = createSelectSchema(referrals);
+export const insertAlertSchema = createInsertSchema(alerts);
+export const selectAlertSchema = createSelectSchema(alerts);

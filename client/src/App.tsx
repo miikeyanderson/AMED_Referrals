@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -53,6 +54,13 @@ function Router() {
   const { user, isLoading } = useUser();
   const [, setLocation] = useLocation();
 
+  useEffect(() => {
+    if (user && (window.location.pathname === '/' || window.location.pathname === '/dashboard')) {
+      const dashboardPath = `/dashboard/${user.role}`;
+      setLocation(dashboardPath);
+    }
+  }, [user, setLocation]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -67,16 +75,8 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={() => {
-        const dashboardPath = `/dashboard/${user.role}`;
-        setLocation(dashboardPath);
-        return null;
-      }} />
-      <Route path="/dashboard" component={() => {
-        const dashboardPath = `/dashboard/${user.role}`;
-        setLocation(dashboardPath);
-        return null;
-      }} />
+      <Route path="/" component={() => null} />
+      <Route path="/dashboard" component={() => null} />
 
       <Route path="/dashboard/clinician" component={() => 
         <ProtectedRoute component={ClinicianDashboard} allowedRoles={['clinician']} />

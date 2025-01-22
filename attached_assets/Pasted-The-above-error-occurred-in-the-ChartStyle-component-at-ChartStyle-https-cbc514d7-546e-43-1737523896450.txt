@@ -1,0 +1,32 @@
+The above error occurred in the <ChartStyle> component:
+
+    at ChartStyle (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/ui/chart.tsx:84:23)
+    at div
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/ui/chart.tsx:33:6
+    at div
+    at div
+    at _c9 (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/ui/card.tsx:106:12)
+    at div
+    at _c (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at div
+    at _c9 (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/ui/card.tsx:106:12)
+    at div
+    at _c (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/ui/card.tsx:20:11)
+    at KPIGroupWidget (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/dashboard/KPIGroupWidget.tsx:41:40)
+    at div
+    at RecruiterDashboard
+    at main
+    at div
+    at div
+    at DashboardLayout (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/layout/dashboard-layout.tsx:46:43)
+    at ProtectedRoute (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/App.tsx?v=vP2GV4d9_41rtcQcnx8e:33:14)
+    at component
+    at Route (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a2610313:323:16)
+    at Switch (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a2610313:379:17)
+    at Router (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/App.tsx?v=vP2GV4d9_41rtcQcnx8e:74:31)
+    at QueryClientProvider (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=a2610313:2805:3)
+    at App
+    at _ErrorBoundary (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@sentry_react.js?v=a2610313:40726:5)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, _ErrorBoundary.
