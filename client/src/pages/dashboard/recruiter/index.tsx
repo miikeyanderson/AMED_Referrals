@@ -4,6 +4,7 @@ import { ReferralInflowWidget } from "@/components/dashboard/ReferralInflowWidge
 import { PipelineSnapshotWidget } from "@/components/dashboard/PipelineSnapshotWidget";
 import { KPIGroupWidget } from "@/components/dashboard/KPIGroupWidget";
 import { CandidatePipeline } from "@/components/dashboard/CandidatePipeline";
+import { TeamComparisons } from "@/components/dashboard/recruiter/TeamComparisons";
 
 export default function RecruiterDashboard() {
   return (
@@ -12,6 +13,9 @@ export default function RecruiterDashboard() {
 
       {/* KPI Group Widget */}
       <KPIGroupWidget />
+
+      {/* Team Comparisons Widget */}
+      <TeamComparisons />
 
       {/* Pipeline Snapshot Widget */}
       <PipelineSnapshotWidget />

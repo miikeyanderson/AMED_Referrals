@@ -1003,7 +1003,7 @@ export function registerRoutes(app: Express): Server {
    *         name: role
    *         schema:
    *           type: string
-   *         description: Filter by referrer role
+   *         description: Filter byreferrer role
    *     responses:
    *       200:
    *         description: Metrics successfully retrieved
@@ -1979,10 +1979,10 @@ export function registerRoutes(app: Express): Server {
    *           type: string
    *           enum: [asc, desc]
    *         default: desc
-   *         description: Sort order
+*         description: Sort order
    *     responses:
    *         description: Pipeline data retrieved successfully
-   */
+   *   */
   app.get(
     "/api/recruiter/pipeline",
     checkAuth,
@@ -2286,6 +2286,151 @@ export function registerRoutes(app: Express): Server {
         });
         res.status(500).json({
           error: "Failed to fetch team comparisons",
+          code: "SERVER_ERROR"
+        });
+      }
+    }
+  );
+
+  /**
+   * @swagger
+   * /api/recruiter/team-comparisons:
+   *   get:
+   *     summary: Get team performance comparison metrics
+   *     description: Retrieve recruiter performance metrics compared to team averages
+   *     tags: [Analytics]
+   *     security:
+   *       - sessionAuth: []
+   *     responses:
+   *       200:
+   *         description: Team comparison metrics retrieved successfully
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized (non-recruiter users)
+   */
+  app.get(
+    "/api/recruiter/team-comparisons",
+    checkAuth,
+    checkRecruiterRole,
+    async (req: Request, res: Response) => {
+      try {
+        // Get the current user's metrics
+        const [userMetrics] = await db
+          .select({
+            total_referrals: sql<number>`count(*)`,
+            total_hires: sql<number>`count(case when ${referrals.status} = 'hired' then 1 end)`,
+            avg_time_to_hire: sql<number>`
+              avg(
+                case 
+                  when ${referrals.status} = 'hired' 
+                  then extract(epoch from ${referrals.updatedAt} - ${referrals.createdAt})/86400 
+                end
+              )
+            `,
+            conversion_rate: sql<number>`
+              round(
+                (count(case when ${referrals.status} = 'hired' then 1 end)::numeric / 
+                nullif(count(*), 0)::numeric) * 100,
+                1
+              )
+            `
+          })
+          .from(referrals)
+          .where(eq(referrals.referrerId, req.user!.id))
+          .groupBy(referrals.referrerId);
+
+        // Get team averages
+        const [teamAverages] = await db
+          .select({
+            avgTotalReferrals: sql<number>`avg(total_referrals)`,
+            avgTotalHires: sql<number>`avg(total_hires)`,
+            avgTimeToHire: sql<number>`avg(time_to_hire)`,
+            avgConversionRate: sql<number>`avg(conversion_rate)`
+          })
+          .from(
+            db
+              .select({
+                referrerId: referrals.referrerId,
+                total_referrals: sql<number>`count(*)`,
+                total_hires: sql<number>`count(case when ${referrals.status} = 'hired' then 1 end)`,
+                time_to_hire: sql<number>`
+                  avg(
+                    case 
+                      when ${referrals.status} = 'hired' 
+                      then extract(epoch from ${referrals.updatedAt} - ${referrals.createdAt})/86400 
+                    end
+                  )
+                `,
+                conversion_rate: sql<number>`
+                  round(
+                    (count(case when ${referrals.status} = 'hired' then 1 end)::numeric / 
+                    nullif(count(*), 0)::numeric) * 100,
+                    1
+                  )
+                `
+              })
+              .from(referrals)
+              .groupBy(referrals.referrerId)
+              .as('recruiter_metrics')
+          );
+
+        // Get leaderboard data
+        const leaderboard = await db
+          .select({
+            recruiterId: users.id,
+            recruiterName: users.name,
+            totalReferrals: sql<number>`count(*)`,
+            totalHires: sql<number>`count(case when ${referrals.status} = 'hired' then 1 end)`,
+            timeToHire: sql<number>`
+              avg(
+                case 
+                  when ${referrals.status} = 'hired' 
+                  then extract(epoch from ${referrals.updatedAt} - ${referrals.createdAt})/86400 
+                end
+              )
+            `,
+            conversionRate: sql<number>`
+              round(
+                (count(case when ${referrals.status} = 'hired' then 1 end)::numeric / 
+                nullif(count(*), 0)::numeric) * 100,
+                1
+              )
+            `
+          })
+          .from(users)
+          .leftJoin(referrals, eq(users.id, referrals.referrerId))
+          .where(or(
+            eq(users.role, 'recruiter'),
+            eq(users.role, 'leadership')
+          ))
+          .groupBy(users.id)
+          .orderBy(desc(sql<number>`count(case when ${referrals.status} = 'hired' then 1 end)`))
+          .limit(10);
+
+        res.json({
+          userMetrics: {
+            totalReferrals: userMetrics?.total_referrals || 0,
+            totalHires: userMetrics?.total_hires || 0,
+            timeToHire: userMetrics?.avg_time_to_hire || 0,
+            conversionRate: userMetrics?.conversion_rate || 0
+          },
+          teamAverages: {
+            totalReferrals: teamAverages?.avgTotalReferrals || 0,
+            totalHires: teamAverages?.avgTotalHires || 0,
+            timeToHire: teamAverages?.avgTimeToHire || 0,
+            conversionRate: teamAverages?.avgConversionRate || 0
+          },
+          leaderboard
+        });
+      } catch (error) {
+        logServerError(error as Error, {
+          context: 'team-comparisons',
+          userId: req.user?.id,
+          role: req.user?.role
+        });
+        res.status(500).json({
+          error: "Failed to fetch team comparison data",
           code: "SERVER_ERROR"
         });
       }
