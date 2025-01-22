@@ -144,48 +144,46 @@ export function KPIGroupWidget() {
               <CardTitle className="text-sm font-medium">Conversion Rate Trend</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[200px]">
-                <ChartContainer>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={kpiData.conversionRate.trend}>
-                      <XAxis
-                        dataKey="date"
-                        stroke="#888888"
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        stroke="#888888"
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(value) => `${value}%`}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="value"
-                        stroke="hsl(var(--primary))"
-                        strokeWidth={2}
-                        dot={false}
-                      />
-                      <ChartTooltip
-                        content={({ active, payload }) => {
-                          if (!active || !payload) return null;
-                          return (
-                            <ChartTooltipContent>
-                              {payload.map((entry) => (
-                                <div key={entry.value}>
-                                  {entry.value.toFixed(1)}%
-                                </div>
-                              ))}
-                            </ChartTooltipContent>
-                          );
-                        }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+              <div style={{ width: '100%', height: '200px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={kpiData.conversionRate.trend}>
+                    <XAxis
+                      dataKey="date"
+                      stroke="#888888"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      stroke="#888888"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => `${value}%`}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                    <ChartTooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload) return null;
+                        return (
+                          <ChartTooltipContent>
+                            {payload.map((entry) => (
+                              <div key={entry.value}>
+                                {entry.value.toFixed(1)}%
+                              </div>
+                            ))}
+                          </ChartTooltipContent>
+                        );
+                      }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
@@ -196,48 +194,46 @@ export function KPIGroupWidget() {
               <CardTitle className="text-sm font-medium">Time to Hire Trend</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[200px]">
-                <ChartContainer>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={kpiData.timeToHire.trend}>
-                      <XAxis
-                        dataKey="date"
-                        stroke="#888888"
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        stroke="#888888"
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(value) => `${value}d`}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="value"
-                        stroke="hsl(var(--primary))"
-                        strokeWidth={2}
-                        dot={false}
-                      />
-                      <ChartTooltip
-                        content={({ active, payload }) => {
-                          if (!active || !payload) return null;
-                          return (
-                            <ChartTooltipContent>
-                              {payload.map((entry) => (
-                                <div key={entry.value}>
-                                  {entry.value} days
-                                </div>
-                              ))}
-                            </ChartTooltipContent>
-                          );
-                        }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+              <div style={{ width: '100%', height: '200px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={kpiData.timeToHire.trend}>
+                    <XAxis
+                      dataKey="date"
+                      stroke="#888888"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      stroke="#888888"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => `${value}d`}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                    <ChartTooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload) return null;
+                        return (
+                          <ChartTooltipContent>
+                            {payload.map((entry) => (
+                              <div key={entry.value}>
+                                {entry.value} days
+                              </div>
+                            ))}
+                          </ChartTooltipContent>
+                        );
+                      }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
