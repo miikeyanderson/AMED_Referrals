@@ -6,6 +6,7 @@ import { apiLimiter, requestMonitor } from "./middleware/rate-limit";
 import logger from "./utils/logger";
 import swaggerUi from 'swagger-ui-express';
 import { specs } from './swagger';
+import { connectRedis } from './utils/redis';
 
 // Extend Express Request type to include our custom properties
 declare global {
@@ -140,3 +141,6 @@ app.use((req, res, next) => {
     }
   });
 })();
+
+// Initialize Redis connection
+connectRedis().catch(console.error);
