@@ -1,0 +1,62 @@
+Implement the Candidate Profile Modal in the recruiter dashboard:
+
+Component Creation
+Create the Modal Component:
+Add a new file: client/src/components/dashboard/recruiter/CandidateProfileModal.tsx.
+Use your existing modal UI components for consistent styling and behavior.
+Data Integration:
+Fetch candidate data from GET /api/candidate/:id using React Query.
+Pass the candidateId from the candidate card click event in CandidatePipeline.tsx.
+Handle loading states (e.g., skeleton loaders or spinners) while fetching data.
+Display fallback content if no data is returned (e.g., “No candidate information available”).
+Modal Layout
+Organize Sections:
+Basic Information: Candidate name, position, department, referral source (visible to all users).
+Contact Details: Email and phone (conditionally visible to recruiters or owners).
+Recruiter Notes:
+Editable notes section for recruiters.
+Display existing notes fetched from the API.
+Documents: Embed or link to the candidate’s resume (PDF).
+Action History: Show a list of past actions with timestamps (recruiters only).
+Quick Actions:
+Add buttons like:
+Schedule Interview (trigger external link or scheduling modal).
+Add Note (open an editable text field to update recruiter notes).
+Send Email (trigger email client with pre-filled recipient and subject).
+Role-Based Conditional Rendering
+Match the modal content with the user’s role:
+Use userRole to control what sections are displayed:
+tsx
+Copy
+Edit
+{userRole === 'recruiter' && <RecruiterOnlySection />}
+{(userRole === 'recruiter' || isOwner) && <ContactSection />}
+Ensure consistent permissions between the frontend and backend for:
+Basic details (all users).
+Contact details and recruiter notes (recruiters/owners).
+Resume and action history (recruiters only).
+Error Handling
+Display error messages based on API responses:
+401: Redirect users to the login page with a toast notification.
+403: Show a “Permission Denied” message in the modal.
+404: Display “Candidate Not Found” within the modal.
+Handle API errors gracefully with retry options for transient issues.
+Integration with CandidatePipeline
+Open Modal on Click:
+Update CandidatePipeline.tsx to include a click handler for candidate cards.
+Pass the candidateId to the CandidateProfileModal component.
+Modal Behavior:
+Ensure the modal closes cleanly without disrupting the pipeline view.
+Reset modal state when closed to avoid showing stale data.
+Testing and Validation
+Test the modal with mock data for all user roles:
+Validate that conditional rendering matches role-based permissions.
+Check quick actions for functionality (e.g., saving notes, triggering scheduling).
+Verify error handling by simulating API errors (e.g., 401, 403, 404).
+Confirm the modal’s responsive design works on desktop and mobile.
+Styling and Accessibility
+Match the modal’s theme with the current app’s UI (light and dark modes).
+Ensure accessibility:
+Add ARIA labels and keyboard navigation for modal controls.
+Test screen reader compatibility for all modal content and actions.
+Implement this modal to provide recruiters with a detailed, role-sensitive view of candidate profiles while maintaining consistency with backend permissions and API functionality."
