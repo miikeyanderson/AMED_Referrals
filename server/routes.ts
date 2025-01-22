@@ -1729,65 +1729,7 @@ export function registerRoutes(app: Express): Server {
 
   // Add after the existing /api/rewards endpoint...
 
-  /**
-   * @swagger
-   * /api/recruiter/pipeline:
-   *   get:
-   *     summary: Get recruiter pipeline data
-   *     description: Retrieve candidates grouped by their pipeline stages
-   *     tags: [Pipeline]
-   *     security:
-   *       - sessionAuth: []
-   *     responses:
-   *       200:
-   *         description: Pipeline data retrieved successfully
-   *       401:
-   *         description: Not authenticated
-   *       403:
-   *         description: Not authorized
-   */
-  app.get(
-    "/api/recruiter/pipeline",
-    checkAuth,
-    checkRecruiterRole,
-    async (req: Request, res: Response) => {
-      try {
-        const result = await db
-          .select({
-            id: referrals.id,
-            status: referrals.status,
-            candidateName: referrals.candidateName,
-            candidateEmail: referrals.candidateEmail,
-            role: referrals.position,
-            department: referrals.department,
-            lastActivity: referrals.updatedAt,
-            nextSteps: referrals.nextSteps,
-            notes: referrals.notes,
-          })
-          .from(referrals)
-          .orderBy(desc(referrals.updatedAt));
-
-        // Group candidates by their pipeline stage
-        const pipelineData = result.reduce((acc: Record<string, any[]>, candidate) => {
-          const stage = candidate.status;
-          if (!acc[stage]) {
-            acc[stage] = [];
-          }
-          acc[stage].push(candidate);
-          return acc;
-        }, {});
-
-        res.json(pipelineData);
-      } catch (error) {
-        logServerError(error as Error, {
-          context: 'get-pipeline',
-          userId: req.user?.id,
-          role: req.user?.role,
-        });
-        res.status(500).send("Failed to fetch pipeline data");
-      }
-    }
-  );
+  
 
   /**
    * @swagger
