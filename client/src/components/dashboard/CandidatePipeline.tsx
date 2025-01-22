@@ -127,7 +127,7 @@ export function CandidatePipeline() {
                 <h3 className="font-medium text-sm flex items-center justify-between">
                   {stage.title}
                   <span className="text-xs text-muted-foreground">
-                    {pipelineData?.[stage.id]?.length || 0}
+                    {pipelineData?.pipeline?.[stage.id]?.count || 0}
                   </span>
                 </h3>
                 <div
@@ -135,7 +135,7 @@ export function CandidatePipeline() {
                     snapshot.isDraggingOver ? "bg-muted/50" : "bg-muted/10"
                   }`}
                 >
-                  {pipelineData?.[stage.id]?.map((candidate: Candidate, index: number) => (
+                  {pipelineData?.pipeline?.[stage.id]?.candidates?.map((candidate: Candidate, index: number) => (
                     <Draggable
                       key={candidate.id}
                       draggableId={candidate.id.toString()}
