@@ -1804,8 +1804,26 @@ export function registerRoutes(app: Express): Server {
           }
         };
 
-        const sortField = getSortField();
-        const sortFn = sortOrder === 'asc' ? asc : desc;
+        // Build sort configuration
+        let orderByClause;
+        if (sortBy && sortOrder) {
+          const direction = sortOrder === 'asc' ? asc : desc;
+          switch (sortBy) {
+            case 'name':
+              orderByClause = direction(referrals.candidateName);
+              break;
+            case 'referralDate':
+              orderByClause = direction(referrals.createdAt);
+              break;
+            case 'lastActivity':
+              orderByClause = direction(referrals.updatedAt);
+              break;
+            default:
+              orderByClause = desc(referrals.updatedAt); // Default sort
+          }
+        } else {
+          orderByClause = desc(referrals.updatedAt); // Default sort
+        }
 
         // Get total count with filters
         const [{ count }] = await db
@@ -1825,10 +1843,11 @@ export function registerRoutes(app: Express): Server {
             nextSteps: referrals.nextSteps,
             notes: referrals.notes,
             status: referrals.status,
+            referralDate: referrals.createdAt,
           })
           .from(referrals)
           .where(and(...conditions))
-          .orderBy(sortFn(sortField));
+          .orderBy(orderByClause);
 
         // Group referrals by status
         const pipeline = referralsList.reduce((acc: PipelineStages, referral) => {
