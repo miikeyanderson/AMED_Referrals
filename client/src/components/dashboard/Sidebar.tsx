@@ -86,7 +86,7 @@ export function Sidebar() {
       animate={{
         width: isCollapsed ? 80 : 256,
       }}
-      className="relative flex h-screen flex-col bg-sidebar border-r"
+      className="fixed flex h-screen flex-col bg-sidebar border-r"
     >
       <div className={cn(
         "flex items-center p-6",
