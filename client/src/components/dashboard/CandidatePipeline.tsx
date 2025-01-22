@@ -135,7 +135,7 @@ export function CandidatePipeline() {
                     snapshot.isDraggingOver ? "bg-muted/50" : "bg-muted/10"
                   }`}
                 >
-                  {pipelineData?.pipeline?.[stage.id]?.candidates?.map((candidate: Candidate, index: number) => (
+                  {pipelineData?.pipeline?.[stage.id]?.candidates?.map((candidate, index) => (
                     <Draggable
                       key={candidate.id}
                       draggableId={candidate.id.toString()}
