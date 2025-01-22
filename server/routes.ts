@@ -870,9 +870,6 @@ export function registerRoutes(app: Express): Server {
         );
       }
 
-      // Cast the status to the enum type
-      const statusClause = sql`${referrals.status}::referral_status = ${status}::referral_status`;
-
       // Get current period total
       const [currentTotal] = await db
         .select({ count: sql<number>`cast(count(*) as integer)` })
@@ -1075,14 +1072,14 @@ export function registerRoutes(app: Express): Server {
 
       const statusBreakdown = (await db.execute(sql`
         WITH all_statuses AS (
-          SELECT unnest(ARRAY['pending', 'contacted', 'interviewing', 'hired', 'rejected']) as status
+          SELECT unnest(ARRAY['pending', 'contacted', 'interviewing', 'hired', 'rejected']::referral_status[]) as status
         ),
         status_counts AS (
           SELECT
             all_statuses.status,
             COUNT(r.id) as count
           FROM all_statuses
-          LEFT JOIN ${referrals} r ON r.status = all_statuses.status
+          LEFT JOIN ${referrals} r ON r.status::text = all_statuses.status::text
           ${whereClause}
           GROUP BY all_statuses.status
         ),
