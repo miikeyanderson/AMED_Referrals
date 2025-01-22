@@ -17,7 +17,6 @@ async function createTestUsers() {
   
   await db.insert(users).values([
     {
-      id: 1,
       username: "testuser1",
       password: hashedPassword,
       role: "clinician",
@@ -25,7 +24,6 @@ async function createTestUsers() {
       email: "test1@example.com"
     },
     {
-      id: 2, 
       username: "testuser2",
       password: hashedPassword,
       role: "clinician",
@@ -33,7 +31,6 @@ async function createTestUsers() {
       email: "test2@example.com"
     },
     {
-      id: 3,
       username: "testuser3", 
       password: hashedPassword,
       role: "clinician",
