@@ -1,5 +1,6 @@
 import { Settings } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import { useUser } from "@/hooks/use-user";
 
 const commonRoutes = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
