@@ -2238,7 +2238,7 @@ export function registerRoutes(app: Express): Server {
               )`,
           })
           .from(users)
-          .leftJoin(referrals, eq(users.id, referrals.recruiterId))
+          .leftJoin(referrals, eq(users.id, referrals.referrerId))
           .where(
             and(
               or(eq(users.role, 'recruiter'), eq(users.role, 'leadership')),
