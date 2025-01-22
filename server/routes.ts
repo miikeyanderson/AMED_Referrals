@@ -2165,7 +2165,7 @@ app.get(
         if (cachedData) {
           return res.json(cachedData);
         }
-      try {
+        
         const { timeframe = 'month', department, page = 1, limit = 10 } = req.query;
         const offset = (Number(page) - 1) * Number(limit);
 
