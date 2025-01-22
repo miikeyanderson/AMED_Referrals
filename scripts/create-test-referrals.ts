@@ -41,7 +41,7 @@ async function createTestReferrals() {
       nextSteps: "Review design samples"
     },
     {
-      referrerId: 2,
+      referrerId: 1,
       candidateName: "Emily Davis",
       candidateEmail: "emily.d@example.com",
       candidatePhone: "123-456-7893",
@@ -53,7 +53,7 @@ async function createTestReferrals() {
       nextSteps: "Onboarding scheduled"
     },
     {
-      referrerId: 2,
+      referrerId: 1,
       candidateName: "David Wilson",
       candidateEmail: "d.wilson@example.com",
       candidatePhone: "123-456-7894",
@@ -65,7 +65,7 @@ async function createTestReferrals() {
       nextSteps: "Send rejection email"
     },
     {
-      referrerId: 3,
+      referrerId: 1,
       candidateName: "Lisa Brown",
       candidateEmail: "lisa.b@example.com",
       candidatePhone: "123-456-7895",
