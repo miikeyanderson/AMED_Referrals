@@ -2180,22 +2180,28 @@ export function registerRoutes(app: Express): Server {
           recruiterId: users.id,
           recruiterName: users.name,
           department: users.department,
-          totalReferrals: sql<number>`COUNT(${referrals.id})`,
-          totalHires: sql<number>`COUNT(CASE WHEN ${referrals.status} = 'hired' THEN 1 END)`,
+          totalReferrals: sql<number>`COALESCE(COUNT(${referrals.id}), 0)`,
+          totalHires: sql<number>`COALESCE(COUNT(CASE WHEN ${referrals.status} = 'hired' THEN 1 END), 0)`,
           averageTimeToHire: sql<number>`
-            AVG(CASE 
-              WHEN ${referrals.status} = 'hired' 
-              THEN EXTRACT(EPOCH FROM (${referrals.updatedAt} - ${referrals.createdAt}))/86400.0 
-            END)`,
+            COALESCE(
+              AVG(CASE 
+                WHEN ${referrals.status} = 'hired' 
+                THEN EXTRACT(EPOCH FROM (${referrals.updatedAt} - ${referrals.createdAt}))/86400.0 
+              END),
+              0
+            )`,
           conversionRate: sql<number>`
-            ROUND(
-              COUNT(CASE WHEN ${referrals.status} = 'hired' THEN 1 END)::numeric / 
-              NULLIF(COUNT(${referrals.id}), 0) * 100,
-              2
+            COALESCE(
+              ROUND(
+                COUNT(CASE WHEN ${referrals.status} = 'hired' THEN 1 END)::numeric / 
+                NULLIF(COUNT(${referrals.id}), 0) * 100,
+                2
+              ),
+              0
             )`,
         })
         .from(users)
-        .leftJoin(referrals, eq(users.id, referrals.recruiterId))
+        .leftJoin(referrals, eq(users.id, referrals.referrerId))
         .where(
           and(
             or(eq(users.role, 'recruiter'), eq(users.role, 'leadership')),
@@ -2204,7 +2210,7 @@ export function registerRoutes(app: Express): Server {
           )
         )
         .groupBy(users.id, users.name, users.department)
-        .orderBy(desc(sql<number>`COUNT(CASE WHEN ${referrals.status} = 'hired' THEN 1 END)`))
+        .orderBy(desc(sql<number>`COALESCE(COUNT(CASE WHEN ${referrals.status} = 'hired' THEN 1 END), 0)`))
         .limit(Number(limit))
         .offset(offset);
 
