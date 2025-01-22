@@ -11,7 +11,7 @@ async function createTestReferrals() {
       candidatePhone: "123-456-7890",
       position: "Senior Frontend Developer",
       department: "Engineering",
-      status: "new",
+      status: "pending",
       experience: "8 years of React experience",
       notes: "Strong portfolio, previously at Google",
       nextSteps: "Schedule technical interview",
