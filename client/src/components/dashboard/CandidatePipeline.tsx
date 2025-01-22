@@ -33,20 +33,122 @@ const PIPELINE_STAGES = [
   { id: "rejected", title: "Rejected" },
 ];
 
+interface FilterState {
+  role: string;
+  source: string;
+  fromDate: string;
+  toDate: string;
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
+}
+
 export function CandidatePipeline() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedCandidateId, setSelectedCandidateId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    role: '',
+    source: '',
+    fromDate: '',
+    toDate: '',
+    sortBy: 'lastActivity',
+    sortOrder: 'desc'
+  });
 
   const { data: pipelineData, isLoading } = useQuery({
-    queryKey: ["/api/recruiter/pipeline"],
+    queryKey: ["/api/recruiter/pipeline", filters],
     queryFn: async () => {
-      const response = await fetch("/api/recruiter/pipeline");
+      const params = new URLSearchParams();
+      if (filters.role) params.append('role', filters.role);
+      if (filters.source) params.append('source', filters.source);
+      if (filters.fromDate) params.append('fromDate', filters.fromDate);
+      if (filters.toDate) params.append('toDate', filters.toDate);
+      if (filters.sortBy) {
+        params.append('sortBy', filters.sortBy);
+        params.append('sortOrder', filters.sortOrder);
+      }
+
+      const response = await fetch(`/api/recruiter/pipeline?${params}`);
       if (!response.ok) throw new Error("Failed to fetch pipeline data");
       return response.json();
     },
   });
+
+  const handleFilterChange = (key: keyof FilterState, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const filterBar = (
+    <div className="mb-6 flex flex-wrap gap-4">
+      <Select value={filters.role} onValueChange={value => handleFilterChange('role', value)}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Filter by role" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">All Roles</SelectItem>
+          <SelectItem value="engineer">Engineer</SelectItem>
+          <SelectItem value="designer">Designer</SelectItem>
+          <SelectItem value="product">Product Manager</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select value={filters.source} onValueChange={value => handleFilterChange('source', value)}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Filter by source" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">All Sources</SelectItem>
+          <SelectItem value="internal">Internal</SelectItem>
+          <SelectItem value="external">External</SelectItem>
+          <SelectItem value="referral">Referral</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <div className="flex items-center gap-2">
+        <input
+          type="date"
+          value={filters.fromDate}
+          onChange={e => handleFilterChange('fromDate', e.target.value)}
+          className="h-10 rounded-md border border-input bg-background px-3 py-2"
+        />
+        <span>to</span>
+        <input
+          type="date"
+          value={filters.toDate}
+          onChange={e => handleFilterChange('toDate', e.target.value)}
+          className="h-10 rounded-md border border-input bg-background px-3 py-2"
+        />
+      </div>
+
+      <Select 
+        value={filters.sortBy} 
+        onValueChange={value => handleFilterChange('sortBy', value)}
+      >
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Sort by" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="lastActivity">Last Activity</SelectItem>
+          <SelectItem value="name">Name</SelectItem>
+          <SelectItem value="referralDate">Referral Date</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select 
+        value={filters.sortOrder} 
+        onValueChange={value => handleFilterChange('sortOrder', value as 'asc' | 'desc')}
+      >
+        <SelectTrigger className="w-[120px]">
+          <SelectValue placeholder="Order" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="asc">Ascending</SelectItem>
+          <SelectItem value="desc">Descending</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
 
   const updateStageMutation = useMutation({
     mutationFn: async ({ candidateId, newStage }: { candidateId: number; newStage: string }) => {
@@ -111,6 +213,7 @@ export function CandidatePipeline() {
 
   return (
     <>
+      {filterBar}
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 min-w-0">
           {PIPELINE_STAGES.map((stage) => (
