@@ -752,6 +752,142 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  /**
+   * @swagger
+   * /api/recruiter/referrals/pipeline:
+   *   get:
+   *     summary: Get pipeline snapshot metrics
+   *     description: Retrieve aggregated counts of referrals grouped by status with optional filtering
+   *     tags: [Analytics]
+   *     security:
+   *       - sessionAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: department
+   *         schema:
+   *           type: string
+   *         description: Filter by department
+   *       - in: query
+   *         name: role
+   *         schema:
+   *           type: string
+   *         description: Filter by referrer role
+   *       - in: query
+   *         name: recruiterId
+   *         schema:
+   *           type: integer
+   *         description: Filter by specific recruiter ID
+   *     responses:
+   *       200:
+   *         description: Pipeline snapshot retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 total:
+   *                   type: integer
+   *                   description: Total number of referrals
+   *                 statusBreakdown:
+   *                   type: array
+   *                   items:
+   *                     type: object
+   *                     properties:
+   *                       status:
+   *                         type: string
+   *                         enum: [pending, contacted, interviewing, hired, rejected]
+   *                       count:
+   *                         type: integer
+   *                       percentage:
+   *                         type: number
+   *       401:
+   *         description: Not authenticated
+   *       500:
+   *         description: Server error while fetching pipeline snapshot
+   */
+  app.get("/api/recruiter/referrals/pipeline", checkAuth, async (req: Request, res: Response) => {
+    try {
+      const { department, role, recruiterId } = req.query;
+
+      // Build base conditions for filtering
+      let conditions = [];
+
+      if (department) {
+        conditions.push(sql`${referrals.department} = ${department}`);
+      }
+
+      if (role) {
+        const usersByRole = db
+          .select({ id: users.id })
+          .from(users)
+          .where(sql`${users.role} = ${role}`)
+          .as('usersByRole');
+
+        conditions.push(
+          sql`${referrals.referrerId} IN (SELECT id FROM ${usersByRole})`
+        );
+      }
+
+      if (recruiterId) {
+        conditions.push(sql`${referrals.referrerId} = ${parseInt(recruiterId as string)}`);
+      }
+
+      // Construct the WHERE clause if conditions exist
+      const whereClause = conditions.length > 0 
+        ? sql`WHERE ${sql.join(conditions, sql` AND `)}`
+        : sql``;
+
+      // Get total count and status breakdown in a single query
+      const statusBreakdown = await db.execute(sql`
+        WITH status_counts AS (
+          SELECT 
+            status,
+            COUNT(*) as count
+          FROM ${referrals}
+          ${whereClause}
+          GROUP BY status
+        ),
+        total AS (
+          SELECT SUM(count) as total
+          FROM status_counts
+        )
+        SELECT 
+          status_counts.status,
+          status_counts.count,
+          ROUND(CAST(status_counts.count AS DECIMAL) / NULLIF(total.total, 0) * 100, 2) as percentage
+        FROM status_counts, total
+        ORDER BY 
+          CASE status
+            WHEN 'pending' THEN 1
+            WHEN 'contacted' THEN 2
+            WHEN 'interviewing' THEN 3
+            WHEN 'hired' THEN 4
+            WHEN 'rejected' THEN 5
+          END
+      `);
+
+      // Calculate total from the results
+      const total = statusBreakdown.reduce((sum, row) => sum + Number(row.count), 0);
+
+      res.json({
+        total,
+        statusBreakdown: statusBreakdown.map(row => ({
+          status: row.status,
+          count: Number(row.count),
+          percentage: Number(row.percentage) || 0
+        }))
+      });
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'pipeline-snapshot',
+        userId: req.user?.id,
+        role: req.user?.role,
+        query: req.query
+      });
+      res.status(500).send("Failed to fetch pipeline snapshot");
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
