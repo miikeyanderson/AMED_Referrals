@@ -17,14 +17,11 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 import { Loader2 } from "lucide-react";
 
 interface PipelineData {
-  status: string;
-  count: number;
-  candidates: Array<{
-    id: number;
-    candidateName: string;
-    position: string;
-    department: string;
-    recruiter: string;
+  total: number;
+  statusBreakdown: Array<{
+    status: string;
+    count: number;
+    percentage: number;
   }>;
 }
 
@@ -110,16 +107,16 @@ export function PipelineSnapshotWidget() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={pipelineData}
+                  data={pipelineData.statusBreakdown}
                   dataKey="count"
                   nameKey="status"
                   cx="50%"
                   cy="50%"
                   outerRadius={150}
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, value }) => `${name} ${((value / pipelineData.total) * 100).toFixed(0)}%`}
                 >
-                  {pipelineData.map((entry: PipelineData, index: number) => (
+                  {pipelineData.statusBreakdown.map((entry, index: number) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={STATUS_COLORS[entry.status as keyof typeof STATUS_COLORS]}
