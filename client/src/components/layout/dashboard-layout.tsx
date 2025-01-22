@@ -1,6 +1,7 @@
 import { Settings } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { useUser } from "@/hooks/use-user";
+import { useLocation } from "wouter";
 
 const commonRoutes = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
