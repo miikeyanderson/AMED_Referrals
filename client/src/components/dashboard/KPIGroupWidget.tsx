@@ -144,7 +144,7 @@ export function KPIGroupWidget() {
               <CardTitle className="text-sm font-medium">Conversion Rate Trend</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={200}>
                 <ChartContainer config={{}}>
                   <LineChart data={kpiData.conversionRate.trend}>
                     <XAxis
@@ -194,7 +194,7 @@ export function KPIGroupWidget() {
               <CardTitle className="text-sm font-medium">Time to Hire Trend</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={200}>
                 <ChartContainer config={{}}>
                   <LineChart data={kpiData.timeToHire.trend}>
                     <XAxis
