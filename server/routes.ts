@@ -1249,26 +1249,9 @@ export function registerRoutes(app: Express): Server {
       }
 
       if (role) {
-        try {
-          const usersByRole = db
-            .select({ id: users.id })
-            .from(users)
-            .where(sql`${users.role} = ${role}`)
-            .as('usersByRole');
-
-          conditions.push(
-            sql`${referrals.referrerId} IN (SELECT id FROM ${usersByRole})`
-          );
-        } catch (error) {
-          logServerError(error as Error, {
-            context: 'pipeline-snapshot-role-query',
-            role: role,
-            error: error
-          });
-          return res.status(400).json({
-            error: "Invalid role parameter"
-          });
-        }
+        conditions.push(
+          like(referrals.position, `%${role}%`)
+        );
       }
 
       if (recruiterId) {
