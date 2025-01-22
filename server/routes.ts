@@ -1181,8 +1181,29 @@ export function registerRoutes(app: Express): Server {
    */
   app.get("/api/recruiter/kpis", checkAuth, async (req: Request, res: Response) => {
     try {
-      const now = new Date();
-      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      // Mock KPI data for demonstration
+      const kpiData = {
+        conversionRate: {
+          current: 65.5,
+          target: 75,
+          trend: Array.from({ length: 7 }, (_, i) => ({
+            date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            value: 60 + Math.random() * 10
+          })).reverse()
+        },
+        timeToHire: {
+          current: 25,
+          target: 21,
+          trend: Array.from({ length: 7 }, (_, i) => ({
+            date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            value: 20 + Math.random() * 10
+          })).reverse()
+        },
+        activeRequisitions: 12,
+        totalPlacements: 45
+      };
+
+      res.json(kpiData);
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
       // Get current month metrics
