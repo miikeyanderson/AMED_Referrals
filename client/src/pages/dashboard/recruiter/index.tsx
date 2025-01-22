@@ -1,11 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { ReferralInflowWidget } from "@/components/dashboard/ReferralInflowWidget";
+import { PipelineSnapshotWidget } from "@/components/dashboard/PipelineSnapshotWidget";
 
 export default function RecruiterDashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Referral Pipeline</h1>
+
+      {/* Pipeline Snapshot Widget */}
+      <PipelineSnapshotWidget />
 
       {/* Referral Inflow Widget */}
       <ReferralInflowWidget />
