@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -7,6 +6,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { CandidateProfileModal } from "./recruiter/CandidateProfileModal";
 
 interface Candidate {
   id: number;
@@ -36,7 +36,9 @@ const PIPELINE_STAGES = [
 export function CandidatePipeline() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+  const [selectedCandidateId, setSelectedCandidateId] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { data: pipelineData, isLoading } = useQuery({
     queryKey: ["/api/recruiter/pipeline"],
     queryFn: async () => {
@@ -87,6 +89,11 @@ export function CandidatePipeline() {
     }
   };
 
+  const handleCandidateClick = (candidateId: number) => {
+    setSelectedCandidateId(candidateId);
+    setIsModalOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -103,82 +110,92 @@ export function CandidatePipeline() {
   }
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 min-w-0">
-        {PIPELINE_STAGES.map((stage) => (
-          <Droppable key={stage.id} droppableId={stage.id}>
-            {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="space-y-4 min-w-0"
-              >
-                <h3 className="font-medium text-sm flex items-center justify-between">
-                  {stage.title}
-                  <span className="text-xs text-muted-foreground">
-                    {pipelineData?.pipeline?.[stage.id]?.count || 0}
-                  </span>
-                </h3>
+    <>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 min-w-0">
+          {PIPELINE_STAGES.map((stage) => (
+            <Droppable key={stage.id} droppableId={stage.id}>
+              {(provided, snapshot) => (
                 <div
-                  className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-4 space-y-4 transition-colors ${
-                    snapshot.isDraggingOver ? "bg-muted/50" : "bg-muted/10"
-                  }`}
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="space-y-4 min-w-0"
                 >
-                  {pipelineData?.pipeline?.[stage.id]?.candidates?.map((candidate, index) => (
-                    <Draggable
-                      key={candidate.id}
-                      draggableId={candidate.id.toString()}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <Card
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="bg-card hover:bg-accent transition-colors"
-                        >
-                          <CardContent className="p-4 space-y-3">
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-center space-x-3 min-w-0">
-                                <Avatar className="h-8 w-8 flex-shrink-0">
-                                  <span className="font-semibold text-xs">
-                                    {candidate.name
-                                      .split(" ")
-                                      .map((n) => n[0])
-                                      .join("")}
-                                  </span>
-                                </Avatar>
-                                <div className="min-w-0">
-                                  <h4 className="font-medium text-sm truncate">
-                                    {candidate.name}
-                                  </h4>
-                                  <p className="text-xs text-muted-foreground truncate">
-                                    {candidate.role}
-                                  </p>
+                  <h3 className="font-medium text-sm flex items-center justify-between">
+                    {stage.title}
+                    <span className="text-xs text-muted-foreground">
+                      {pipelineData?.pipeline?.[stage.id]?.count || 0}
+                    </span>
+                  </h3>
+                  <div
+                    className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-4 space-y-4 transition-colors ${
+                      snapshot.isDraggingOver ? "bg-muted/50" : "bg-muted/10"
+                    }`}
+                  >
+                    {pipelineData?.pipeline?.[stage.id]?.candidates?.map((candidate: Candidate, index: number) => (
+                      <Draggable
+                        key={candidate.id}
+                        draggableId={candidate.id.toString()}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <Card
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className="bg-card hover:bg-accent transition-colors cursor-pointer"
+                            onClick={() => handleCandidateClick(candidate.id)}
+                          >
+                            <CardContent className="p-4 space-y-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-center space-x-3 min-w-0">
+                                  <Avatar className="h-8 w-8 flex-shrink-0">
+                                    <span className="font-semibold text-xs">
+                                      {candidate.name
+                                        .split(" ")
+                                        .map((n: string) => n[0])
+                                        .join("")}
+                                    </span>
+                                  </Avatar>
+                                  <div className="min-w-0">
+                                    <h4 className="font-medium text-sm truncate">
+                                      {candidate.name}
+                                    </h4>
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      {candidate.role}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            {candidate.department && (
-                              <p className="text-xs text-muted-foreground truncate">
-                                Department: {candidate.department}
-                              </p>
-                            )}
-                            <div className="text-xs text-muted-foreground">
-                              Last activity:{" "}
-                              {format(new Date(candidate.lastActivity), "MMM d, yyyy")}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
+                              {candidate.department && (
+                                <p className="text-xs text-muted-foreground truncate">
+                                  Department: {candidate.department}
+                                </p>
+                              )}
+                              <div className="text-xs text-muted-foreground">
+                                Last activity:{" "}
+                                {format(new Date(candidate.lastActivity), "MMM d, yyyy")}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
                 </div>
-              </div>
-            )}
-          </Droppable>
-        ))}
-      </div>
-    </DragDropContext>
+              )}
+            </Droppable>
+          ))}
+        </div>
+      </DragDropContext>
+
+      <CandidateProfileModal
+        candidateId={selectedCandidateId}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        userRole="recruiter" // TODO: Get actual user role from auth context
+      />
+    </>
   );
 }
