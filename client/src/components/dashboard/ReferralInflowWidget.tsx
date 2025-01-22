@@ -64,7 +64,7 @@ export function ReferralInflowWidget() {
         <div className="flex items-center gap-2">
           <Select value={timeframe} onValueChange={(value: "week" | "month") => setTimeframe(value)}>
             <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Select period" />
+              <SelectValue defaultValue={timeframe} placeholder="Time period" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="week">Weekly</SelectItem>
@@ -73,7 +73,7 @@ export function ReferralInflowWidget() {
           </Select>
           <Select value={role} onValueChange={(value: RoleFilter) => setRole(value)}>
             <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Filter role" />
+              <SelectValue defaultValue={role} placeholder="Role" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Roles</SelectItem>
