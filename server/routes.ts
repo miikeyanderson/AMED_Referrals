@@ -1782,12 +1782,35 @@ export function registerRoutes(app: Express): Server {
           conditions.push(eq(referrals.source, source));
         }
 
-        // Add date range filter
-        if (fromDate && isValid(parseISO(fromDate))) {
-          conditions.push(sql`${referrals.createdAt} >= ${parseISO(fromDate)}`);
-        }
-        if (toDate && isValid(parseISO(toDate))) {
-          conditions.push(sql`${referrals.createdAt} <= ${parseISO(toDate)}`);
+        // Add date range filter with validation
+        if (fromDate || toDate) {
+          const parsedFromDate = fromDate ? parseISO(fromDate) : null;
+          const parsedToDate = toDate ? parseISO(toDate) : null;
+
+          if (fromDate && !isValid(parsedFromDate)) {
+            return res.status(400).json({
+              error: "Invalid fromDate format. Use YYYY-MM-DD"
+            });
+          }
+
+          if (toDate && !isValid(parsedToDate)) {
+            return res.status(400).json({
+              error: "Invalid toDate format. Use YYYY-MM-DD"
+            });
+          }
+
+          if (parsedFromDate && parsedToDate && parsedFromDate > parsedToDate) {
+            return res.status(400).json({
+              error: "fromDate cannot be after toDate"
+            });
+          }
+
+          if (parsedFromDate) {
+            conditions.push(sql`${referrals.createdAt} >= ${parsedFromDate}`);
+          }
+          if (parsedToDate) {
+            conditions.push(sql`${referrals.createdAt} <= ${parsedToDate}`);
+          }
         }
 
         // Build sort configuration
