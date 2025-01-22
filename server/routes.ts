@@ -3,8 +3,10 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
 import { referrals, rewards, type User, type Referral } from "@db/schema";
-import { eq, desc, and, or, like, sql } from "drizzle-orm";
+import { eq, desc, and, or, like, sql, inArray } from "drizzle-orm";
 import { logUnauthorizedAccess, logServerError } from "./utils/logger";
+import { users } from "@db/schema";
+import { add, format, startOfWeek, endOfWeek, parseISO, isWithinInterval } from "date-fns";
 
 declare global {
   namespace Express {
@@ -180,7 +182,7 @@ export function registerRoutes(app: Express): Server {
         totalRewards: `$${totalRewards?.sum || 0}`,
       });
     } catch (error) {
-      logServerError(error as Error, { 
+      logServerError(error as Error, {
         context: 'analytics',
         userId: req.user?.id,
         role: req.user?.role
@@ -304,7 +306,7 @@ export function registerRoutes(app: Express): Server {
 
       res.json(referralsList);
     } catch (error) {
-      logServerError(error as Error, { 
+      logServerError(error as Error, {
         context: 'get-referrals',
         userId: req.user?.id,
         role: req.user?.role,
@@ -542,6 +544,211 @@ export function registerRoutes(app: Express): Server {
         role: req.user?.role
       });
       res.status(500).send("Failed to fetch rewards");
+    }
+  });
+
+  /**
+   * @swagger
+   * /api/recruiter/referrals/inflow:
+   *   get:
+   *     summary: Get referral inflow metrics
+   *     description: Retrieve time-series data and metrics about referral inflow
+   *     tags: [Analytics]
+   *     parameters:
+   *       - in: query
+   *         name: timeframe
+   *         schema:
+   *           type: string
+   *           enum: [week, month]
+   *           default: week
+   *         description: Time period for the metrics
+   *       - in: query
+   *         name: department
+   *         schema:
+   *           type: string
+   *         description: Filter by department
+   *       - in: query
+   *         name: role
+   *         schema:
+   *           type: string
+   *         description: Filter by role
+   *     responses:
+   *       200:
+   *         description: Metrics successfully retrieved
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 currentPeriod:
+   *                   type: object
+   *                   properties:
+   *                     startDate:
+   *                       type: string
+   *                       format: date-time
+   *                     endDate:
+   *                       type: string
+   *                       format: date-time
+   *                     total:
+   *                       type: integer
+   *                 previousPeriod:
+   *                   type: object
+   *                   properties:
+   *                     startDate:
+   *                       type: string
+   *                       format: date-time
+   *                     endDate:
+   *                       type: string
+   *                       format: date-time
+   *                     total:
+   *                       type: integer
+   *                 percentageChange:
+   *                   type: number
+   *                 timeSeries:
+   *                   type: array
+   *                   items:
+   *                     type: object
+   *                     properties:
+   *                       date:
+   *                         type: string
+   *                         format: date
+   *                       count:
+   *                         type: integer
+   */
+  app.get("/api/recruiter/referrals/inflow", checkAuth, async (req: Request, res: Response) => {
+    try {
+      const { timeframe = 'week', department, role } = req.query;
+
+      // Validate timeframe
+      if (timeframe !== 'week' && timeframe !== 'month') {
+        return res.status(400).json({ message: "Invalid timeframe. Use 'week' or 'month'" });
+      }
+
+      // Calculate date ranges
+      const now = new Date();
+      let currentStart: Date, currentEnd: Date, previousStart: Date, previousEnd: Date;
+
+      if (timeframe === 'week') {
+        currentStart = startOfWeek(now, { weekStartsOn: 1 });
+        currentEnd = endOfWeek(now, { weekStartsOn: 1 });
+        previousStart = add(currentStart, { weeks: -1 });
+        previousEnd = add(currentEnd, { weeks: -1 });
+      } else {
+        currentStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        currentEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        previousStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        previousEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+      }
+
+      // Build base query conditions
+      let conditions = [];
+
+      if (department) {
+        conditions.push(eq(referrals.department, department));
+      }
+
+      if (role) {
+        const usersByRole = db
+          .select({ id: users.id })
+          .from(users)
+          .where(eq(users.role, role))
+          .as('usersByRole');
+
+        conditions.push(
+          inArray(
+            referrals.referrerId,
+            db.select({ id: usersByRole.id }).from(usersByRole)
+          )
+        );
+      }
+
+      // Get current period total
+      const [currentTotal] = await db
+        .select({ count: sql<number>`cast(count(*) as integer)` })
+        .from(referrals)
+        .where(
+          and(
+            sql`${referrals.createdAt} >= ${currentStart.toISOString()}`,
+            sql`${referrals.createdAt} <= ${currentEnd.toISOString()}`,
+            ...conditions
+          )
+        );
+
+      // Get previous period total
+      const [previousTotal] = await db
+        .select({ count: sql<number>`cast(count(*) as integer)` })
+        .from(referrals)
+        .where(
+          and(
+            sql`${referrals.createdAt} >= ${previousStart.toISOString()}`,
+            sql`${referrals.createdAt} <= ${previousEnd.toISOString()}`,
+            ...conditions
+          )
+        );
+
+      // Generate time series data for current period
+      const timeSeries = await db
+        .select({
+          date: sql`date_trunc('day', ${referrals.createdAt})::date`,
+          count: sql<number>`cast(count(*) as integer)`
+        })
+        .from(referrals)
+        .where(
+          and(
+            sql`${referrals.createdAt} >= ${currentStart.toISOString()}`,
+            sql`${referrals.createdAt} <= ${currentEnd.toISOString()}`,
+            ...conditions
+          )
+        )
+        .groupBy(sql`date_trunc('day', ${referrals.createdAt})::date`)
+        .orderBy(sql`date_trunc('day', ${referrals.createdAt})::date`);
+
+      // Fill in missing dates with zero counts
+      const fullTimeSeries = [];
+      let currentDate = currentStart;
+      while (currentDate <= currentEnd) {
+        const formattedDate = format(currentDate, 'yyyy-MM-dd');
+        const existingEntry = timeSeries.find(
+          entry => format(entry.date, 'yyyy-MM-dd') === formattedDate
+        );
+
+        fullTimeSeries.push({
+          date: formattedDate,
+          count: existingEntry ? existingEntry.count : 0
+        });
+
+        currentDate = add(currentDate, { days: 1 });
+      }
+
+      // Calculate percentage change
+      const current = currentTotal?.count || 0;
+      const previous = previousTotal?.count || 0;
+      const percentageChange = previous === 0
+        ? (current === 0 ? 0 : 100)
+        : ((current - previous) / previous) * 100;
+
+      res.json({
+        currentPeriod: {
+          startDate: currentStart.toISOString(),
+          endDate: currentEnd.toISOString(),
+          total: current
+        },
+        previousPeriod: {
+          startDate: previousStart.toISOString(),
+          endDate: previousEnd.toISOString(),
+          total: previous
+        },
+        percentageChange,
+        timeSeries: fullTimeSeries
+      });
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'referrals-inflow',
+        userId: req.user?.id,
+        role: req.user?.role,
+        query: req.query
+      });
+      res.status(500).send("Failed to fetch referral inflow metrics");
     }
   });
 
