@@ -1017,6 +1017,13 @@ export function registerRoutes(app: Express): Server {
     try {
       const { department, role, recruiterId } = req.query;
 
+      // Validate query parameters
+      if (recruiterId && isNaN(parseInt(recruiterId as string))) {
+        return res.status(400).json({
+          error: "Invalid recruiterId parameter - must be a number"
+        });
+      }
+
       // Build base conditions for filtering
       let conditions = [];
 
@@ -1025,15 +1032,26 @@ export function registerRoutes(app: Express): Server {
       }
 
       if (role) {
-        const usersByRole = db
-          .select({ id: users.id })
-          .from(users)
-          .where(sql`${users.role} = ${role}`)
-          .as('usersByRole');
+        try {
+          const usersByRole = db
+            .select({ id: users.id })
+            .from(users)
+            .where(sql`${users.role} = ${role}`)
+            .as('usersByRole');
 
-        conditions.push(
-          sql`${referrals.referrerId} IN (SELECT id FROM ${usersByRole})`
-        );
+          conditions.push(
+            sql`${referrals.referrerId} IN (SELECT id FROM ${usersByRole})`
+          );
+        } catch (error) {
+          logServerError(error as Error, {
+            context: 'pipeline-snapshot-role-query',
+            role: role,
+            error: error
+          });
+          return res.status(400).json({
+            error: "Invalid role parameter"
+          });
+        }
       }
 
       if (recruiterId) {
@@ -1074,6 +1092,10 @@ export function registerRoutes(app: Express): Server {
           END
       `);
 
+      if (!Array.isArray(statusBreakdown)) {
+        throw new Error('Invalid database response format');
+      }
+
       // Calculate total from the results
       const total = statusBreakdown.reduce((sum, row) => sum + Number(row.count), 0);
 
@@ -1086,13 +1108,21 @@ export function registerRoutes(app: Express): Server {
         }))
       });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       logServerError(error as Error, {
         context: 'pipeline-snapshot',
         userId: req.user?.id,
         role: req.user?.role,
-        query: req.query
+        query: req.query,
+        errorDetails: errorMessage
       });
-      res.status(500).send("Failed to fetch pipeline snapshot");
+
+      // Send more detailed error response
+      res.status(500).json({
+        error: "Failed to fetch pipeline snapshot",
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      });
     }
   });
 
