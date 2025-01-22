@@ -3,18 +3,35 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from 'ws';
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { alerts, referrals, rewards, type Alert, type InsertAlert } from "@db/schema";
-import { eq, desc, and, or, like, sql, inArray, isNull } from "drizzle-orm";
+import { alerts, referrals, rewards, users, type Alert, type InsertAlert, type Referral } from "@db/schema";
+import { eq, desc, and, or, like, sql, inArray } from "drizzle-orm";
 import { logUnauthorizedAccess, logServerError } from "./utils/logger";
-import { users } from "@db/schema";
-import { add, format, startOfWeek, endOfWeek, parseISO, isWithinInterval } from "date-fns";
-import { referralSubmissionSchema, referrals } from "@db/schema";
+import { add, format, startOfWeek, endOfWeek, parseISO } from "date-fns";
+import { referralSubmissionSchema } from "@db/schema";
 import { ZodError } from "zod";
 import { sanitizeHtml } from "./utils/sanitize";
 
+// Type definitions
+interface PipelineStage {
+  stage: string;
+  count: number;
+  candidates: Array<{
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    department: string | null;
+    lastActivity: Date;
+    nextSteps: string | null;
+    notes: string | null;
+  }>;
+}
+
+type PipelineStages = Record<Referral['status'], PipelineStage>;
+
 declare global {
   namespace Express {
-    interface User extends Omit<User, 'password'> {
+    interface User {
       id: number;
       role: string;
     }
@@ -39,7 +56,7 @@ export function registerRoutes(app: Express): Server {
 
   setupAuth(app);
 
-  // Existing middleware remains unchanged...
+  // Middleware for authentication check
   const checkAuth = (req: Request, res: Response, next: NextFunction) => {
     if (!req.isAuthenticated()) {
       const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
@@ -49,7 +66,7 @@ export function registerRoutes(app: Express): Server {
     next();
   };
 
-  // Add recruiter role check middleware
+  // Middleware for recruiter role check
   const checkRecruiterRole = (req: Request, res: Response, next: NextFunction) => {
     if (req.user?.role !== 'recruiter' && req.user?.role !== 'leadership') {
       const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
@@ -1182,7 +1199,8 @@ export function registerRoutes(app: Express): Server {
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
+
+
       logServerError(error as Error, {
         context: 'pipeline-snapshot',
         userId: req.user?.id,
@@ -1547,6 +1565,168 @@ export function registerRoutes(app: Express): Server {
   //    }
   //  });
   //});
+
+  // Add the new pipeline route here
+  /**
+   * @swagger
+   * /api/recruiter/pipeline:
+   *   get:
+   *     summary: Get recruitment pipeline data
+   *     description: Retrieve candidate data grouped by pipeline stages with filtering and pagination
+   *     tags: [Pipeline]
+   *     security:
+   *       - sessionAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: role
+   *         schema:
+   *           type: string
+   *         description: Filter by job role
+   *       - in: query
+   *         name: source
+   *         schema:
+   *           type: string
+   *         description: Filter by referral source
+   *       - in: query
+   *         name: startDate
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: Start date for date range filter
+   *       - in: query
+   *         name: endDate
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: End date for date range filter
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           default: 1
+   *         description: Page number
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           maximum: 50
+   *           default: 10
+   *         description: Number of items per page
+   *     responses:
+   *       200:
+   *         description: Pipeline data retrieved successfully
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized (non-recruiter users)
+   */
+  app.get(
+    "/api/recruiter/pipeline",
+    checkAuth,
+    checkRecruiterRole,
+    async (req: Request, res: Response) => {
+      try {
+        const {
+          role,
+          source,
+          startDate,
+          endDate,
+          page = 1,
+          limit = 10
+        } = req.query;
+
+        const offset = (Number(page) - 1) * Number(limit);
+
+        // Build base query conditions
+        let conditions = [];
+
+        if (role) {
+          conditions.push(like(referrals.position, `%${role}%`));
+        }
+
+        if (startDate && endDate) {
+          conditions.push(
+            and(
+              sql`${referrals.createdAt} >= ${new Date(startDate as string).toISOString()}`,
+              sql`${referrals.createdAt} <= ${new Date(endDate as string).toISOString()}`
+            )
+          );
+        }
+
+        // Get total count for pagination
+        const [{ count }] = await db
+          .select({ count: sql<number>`cast(count(*) as integer)` })
+          .from(referrals)
+          .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+        // Fetch referrals with pagination
+        const pipelineData = await db
+          .select({
+            id: referrals.id,
+            candidateName: referrals.candidateName,
+            candidateEmail: referrals.candidateEmail,
+            position: referrals.position,
+            department: referrals.department,
+            status: referrals.status,
+            createdAt: referrals.createdAt,
+            updatedAt: referrals.updatedAt,
+            nextSteps: referrals.nextSteps,
+            notes: referrals.notes
+          })
+          .from(referrals)
+          .where(conditions.length > 0 ? and(...conditions) : undefined)
+          .orderBy(desc(referrals.updatedAt))
+          .limit(Number(limit))
+          .offset(offset);
+
+        // Define pipeline stages
+        const stages = ['pending', 'contacted', 'interviewing', 'hired', 'rejected'] as const;
+        const pipeline = stages.reduce((acc, stage) => {
+          const stageData: PipelineStage = {
+            stage,
+            count: pipelineData.filter(r => r.status === stage).length,
+            candidates: pipelineData
+              .filter(r => r.status === stage)
+              .map(r => ({
+                id: r.id,
+                name: r.candidateName,
+                email: r.candidateEmail,
+                role: r.position,
+                department: r.department,
+                lastActivity: r.updatedAt,
+                nextSteps: r.nextSteps,
+                notes: r.notes
+              }))
+          };
+          acc[stage] = stageData;
+          return acc;
+        }, {} as PipelineStages);
+
+        res.json({
+          pipeline,
+          pagination: {
+            total: count,
+            page: Number(page),
+            limit: Number(limit),
+            pages: Math.ceil(count / Number(limit))
+          }
+        });
+      } catch (error) {
+        logServerError(error as Error, {
+          context: 'get-pipeline',
+          userId: req.user?.id,
+          role: req.user?.role,
+          query: req.query
+        });
+        res.status(500).json({
+          error: "Failed to fetch pipeline data",
+          code: "SERVER_ERROR"
+        });
+      }
+    }
+  );
 
   return httpServer;
 }
