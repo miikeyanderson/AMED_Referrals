@@ -1,3 +1,4 @@
+import { Settings } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 
 const commonRoutes = [
