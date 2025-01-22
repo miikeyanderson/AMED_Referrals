@@ -33,7 +33,7 @@ async function createTestReferrals() {
       updatedAt: new Date()
     },
     {
-      referrerId: 2,
+      referrerId: 1,
       candidateName: "Michael Chen",
       candidateEmail: "michael.chen@example.com",
       candidatePhone: "123-456-7892",
@@ -47,7 +47,7 @@ async function createTestReferrals() {
       updatedAt: new Date()
     },
     {
-      referrerId: 2,
+      referrerId: 1,
       candidateName: "Emily Davis",
       candidateEmail: "emily.davis@example.com",
       candidatePhone: "123-456-7893",
@@ -61,7 +61,7 @@ async function createTestReferrals() {
       updatedAt: new Date()
     },
     {
-      referrerId: 3,
+      referrerId: 1,
       candidateName: "David Kim",
       candidateEmail: "david.kim@example.com",
       candidatePhone: "123-456-7894",
