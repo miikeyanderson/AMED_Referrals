@@ -36,16 +36,30 @@ const STATUS_COLORS = {
   rejected: "hsl(var(--destructive))",
 };
 
+const DEPARTMENTS = [
+  { label: "All Departments", value: "all" },
+  { label: "Engineering", value: "engineering" },
+  { label: "Design", value: "design" },
+  { label: "Product", value: "product" },
+  { label: "Sales", value: "sales" },
+];
+
+const RECRUITERS = [
+  { label: "All Recruiters", value: "all" },
+  { label: "John Doe", value: "1" },
+  { label: "Jane Smith", value: "2" },
+];
+
 export function PipelineSnapshotWidget() {
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("");
-  const [selectedRecruiter, setSelectedRecruiter] = useState<string>("");
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
+  const [selectedRecruiter, setSelectedRecruiter] = useState<string>("all");
 
   const { data: pipelineData, isLoading } = useQuery({
     queryKey: ["/api/recruiter/referrals/pipeline", { department: selectedDepartment, recruiter: selectedRecruiter }],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (selectedDepartment) params.append("department", selectedDepartment);
-      if (selectedRecruiter) params.append("recruiter", selectedRecruiter);
+      if (selectedDepartment !== "all") params.append("department", selectedDepartment);
+      if (selectedRecruiter !== "all") params.append("recruiter", selectedRecruiter);
 
       const response = await fetch(`/api/recruiter/referrals/pipeline?${params}`);
       if (!response.ok) {
@@ -62,24 +76,26 @@ export function PipelineSnapshotWidget() {
         <div className="flex items-center gap-2">
           <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Departments" />
+              <SelectValue placeholder="Filter by department" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Departments</SelectItem>
-              <SelectItem value="Engineering">Engineering</SelectItem>
-              <SelectItem value="Design">Design</SelectItem>
-              <SelectItem value="Product">Product</SelectItem>
-              <SelectItem value="Sales">Sales</SelectItem>
+              {DEPARTMENTS.map((dept) => (
+                <SelectItem key={dept.value} value={dept.value}>
+                  {dept.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Select value={selectedRecruiter} onValueChange={setSelectedRecruiter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Recruiters" />
+              <SelectValue placeholder="Filter by recruiter" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Recruiters</SelectItem>
-              <SelectItem value="1">John Doe</SelectItem>
-              <SelectItem value="2">Jane Smith</SelectItem>
+              {RECRUITERS.map((recruiter) => (
+                <SelectItem key={recruiter.value} value={recruiter.value}>
+                  {recruiter.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

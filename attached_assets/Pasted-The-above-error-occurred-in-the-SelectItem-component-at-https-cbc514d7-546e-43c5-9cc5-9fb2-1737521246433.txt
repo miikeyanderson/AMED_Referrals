@@ -1,0 +1,51 @@
+The above error occurred in the <SelectItem> component:
+
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-select.js?v=a2610313:852:7
+    at _c11 (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/ui/select.tsx:195:13)
+    at div
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=a2610313:41:13
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=a2610313:52:11
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=a2610313:33:11
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=a2610313:98:15
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-select.js?v=a2610313:763:13
+    at div
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=a2610313:52:11
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=a2610313:33:11
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=a2610313:98:15
+    at Provider (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-R2T6YHTW.js?v=a2610313:43:15)
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-select.js?v=a2610313:307:58
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=a2610313:52:11
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=a2610313:33:11
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=a2610313:41:13
+    at https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-VY4PXIEJ.js?v=a2610313:258:22
+    at SelectPortal
+    at _c7 (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/ui/select.tsx:116:12)
+    at Provider (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-R2T6YHTW.js?v=a2610313:43:15)
+    at Provider (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=a2610313:28:15)
+    at CollectionProvider (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=a2610313:89:13)
+    at Provider (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-R2T6YHTW.js?v=a2610313:43:15)
+    at Provider (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-BRXSEJ3U.js?v=a2610313:1912:15)
+    at Popper (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-BRXSEJ3U.js?v=a2610313:2006:11)
+    at Select (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-select.js?v=a2610313:95:5)
+    at div
+    at div
+    at _c3 (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/ui/card.tsx:43:12)
+    at div
+    at _c (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/ui/card.tsx:20:11)
+    at PipelineSnapshotWidget (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/dashboard/PipelineSnapshotWidget.tsx:44:55)
+    at div
+    at RecruiterDashboard
+    at main
+    at div
+    at div
+    at DashboardLayout (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/components/layout/dashboard-layout.tsx:46:43)
+    at ProtectedRoute (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/App.tsx?v=Bhr2SDceXmTeFooM4vyGZ:33:14)
+    at component
+    at Route (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a2610313:323:16)
+    at Switch (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a2610313:379:17)
+    at Router (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/src/App.tsx?v=Bhr2SDceXmTeFooM4vyGZ:74:31)
+    at QueryClientProvider (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=a2610313:2805:3)
+    at App
+    at _ErrorBoundary (https://cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@sentry_react.js?v=a2610313:40726:5)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, _ErrorBoundary.
