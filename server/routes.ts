@@ -1782,35 +1782,12 @@ export function registerRoutes(app: Express): Server {
           conditions.push(eq(referrals.source, source));
         }
 
-        // Add date range filter with validation
-        if (fromDate || toDate) {
-          const parsedFromDate = fromDate ? parseISO(fromDate) : null;
-          const parsedToDate = toDate ? parseISO(toDate) : null;
-
-          if (fromDate && !isValid(parsedFromDate)) {
-            return res.status(400).json({
-              error: "Invalid fromDate format. Use YYYY-MM-DD"
-            });
-          }
-
-          if (toDate && !isValid(parsedToDate)) {
-            return res.status(400).json({
-              error: "Invalid toDate format. Use YYYY-MM-DD"
-            });
-          }
-
-          if (parsedFromDate && parsedToDate && parsedFromDate > parsedToDate) {
-            return res.status(400).json({
-              error: "fromDate cannot be after toDate"
-            });
-          }
-
-          if (parsedFromDate) {
-            conditions.push(sql`${referrals.createdAt} >= ${parsedFromDate}`);
-          }
-          if (parsedToDate) {
-            conditions.push(sql`${referrals.createdAt} <= ${parsedToDate}`);
-          }
+        // Add date range filter
+        if (fromDate && isValid(parseISO(fromDate))) {
+          conditions.push(sql`${referrals.createdAt} >= ${parseISO(fromDate)}`);
+        }
+        if (toDate && isValid(parseISO(toDate))) {
+          conditions.push(sql`${referrals.createdAt} <= ${parseISO(toDate)}`);
         }
 
         // Build sort configuration
@@ -1827,26 +1804,8 @@ export function registerRoutes(app: Express): Server {
           }
         };
 
-        // Build sort configuration
-        let orderByClause;
-        if (sortBy && sortOrder) {
-          const direction = sortOrder === 'asc' ? asc : desc;
-          switch (sortBy) {
-            case 'name':
-              orderByClause = direction(referrals.candidateName);
-              break;
-            case 'referralDate':
-              orderByClause = direction(referrals.createdAt);
-              break;
-            case 'lastActivity':
-              orderByClause = direction(referrals.updatedAt);
-              break;
-            default:
-              orderByClause = desc(referrals.updatedAt); // Default sort
-          }
-        } else {
-          orderByClause = desc(referrals.updatedAt); // Default sort
-        }
+        const sortField = getSortField();
+        const sortFn = sortOrder === 'asc' ? asc : desc;
 
         // Get total count with filters
         const [{ count }] = await db
@@ -1866,11 +1825,10 @@ export function registerRoutes(app: Express): Server {
             nextSteps: referrals.nextSteps,
             notes: referrals.notes,
             status: referrals.status,
-            referralDate: referrals.createdAt,
           })
           .from(referrals)
           .where(and(...conditions))
-          .orderBy(orderByClause);
+          .orderBy(sortFn(sortField));
 
         // Group referrals by status
         const pipeline = referralsList.reduce((acc: PipelineStages, referral) => {
