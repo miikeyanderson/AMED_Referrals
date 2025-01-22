@@ -6,6 +6,7 @@ import { z } from "zod";
 export const roleEnum = pgEnum('role', ['recruiter', 'clinician', 'leadership']);
 export const referralStatusEnum = pgEnum('referral_status', ['pending', 'contacted', 'interviewing', 'hired', 'rejected']);
 export const alertTypeEnum = pgEnum('alert_type', ['new_referral', 'pipeline_update', 'system_notification']);
+export const departmentEnum = pgEnum('department', ['engineering', 'medical', 'operations', 'sales', 'support', 'other']);
 
 // Enhanced validation schema for referral submission
 export const referralSubmissionSchema = z.object({
@@ -55,11 +56,15 @@ export const users = pgTable("users", {
   role: roleEnum("role").notNull().default('clinician'),
   name: text("name").notNull(),
   email: text("email").unique().notNull(),
+  department: departmentEnum("department").default('other'),
+  title: text("title"),
+  hireDate: timestamp("hire_date").defaultNow(),
   createdAt: timestamp("created_at").defaultNow().notNull()
 }, (table) => ({
   usernameIdx: index("username_idx").on(table.username),
   emailIdx: index("email_idx").on(table.email),
-  roleIdx: index("role_idx").on(table.role)
+  roleIdx: index("role_idx").on(table.role),
+  departmentIdx: index("department_idx").on(table.department)
 }));
 
 export const referrals = pgTable("referrals", {

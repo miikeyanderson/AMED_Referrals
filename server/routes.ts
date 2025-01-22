@@ -4,7 +4,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { setupAuth } from "./auth";
 import { db } from "@db";
 import { alerts, referrals, rewards, users, type Alert, type InsertAlert, type Referral } from "@db/schema";
-import { eq, desc, and, or, like, sql, inArray, asc } from "drizzle-orm";
+import { eq, desc, and, or, like, sql, inArray, asc, gte } from "drizzle-orm";
 import { SQL } from "drizzle-orm";
 import { logUnauthorizedAccess, logServerError } from "./utils/logger";
 import { add, format, startOfWeek, endOfWeek, parseISO, isValid } from "date-fns";
@@ -2096,6 +2096,196 @@ export function registerRoutes(app: Express): Server {
         });
         res.status(500).json({
           error: "Failed to fetch pipeline data",
+          code: "SERVER_ERROR"
+        });
+      }
+    }
+  );
+
+  /**
+   * @swagger
+   * /api/recruiter/team-comparisons:
+   *   get:
+   *     summary: Get recruiter team performance comparisons
+   *     description: Retrieve performance metrics and benchmarks for the recruiting team
+   *     tags: [Analytics]
+   *     security:
+   *       - sessionAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: timeframe
+   *         schema:
+   *           type: string
+   *           enum: [week, month, quarter, year]
+   *           default: month
+   *         description: Time period for metrics calculation
+   *       - in: query
+   *         name: department
+   *         schema:
+   *           type: string
+   *         description: Filter by department
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           default: 1
+   *         description: Page number for pagination
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           maximum: 50
+   *           default: 10
+   *         description: Number of records per page
+   *     responses:
+   *       200:
+   *         description: Team comparison metrics retrieved successfully
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized (non-recruiter users)
+   *       500:
+   *         description: Server error
+   */
+  app.get(
+    "/api/recruiter/team-comparisons",
+    checkAuth,
+    checkRecruiterRole,
+    async (req: Request, res: Response) => {
+      try {
+        const { timeframe = 'month', department, page = 1, limit = 10 } = req.query;
+        const offset = (Number(page) - 1) * Number(limit);
+
+        // Calculate date range based on timeframe
+        let startDate = new Date();
+        switch (timeframe) {
+          case 'week':
+            startDate = startOfWeek(new Date());
+            break;
+          case 'month':
+            startDate.setMonth(startDate.getMonth() - 1);
+            break;
+          case 'quarter':
+            startDate.setMonth(startDate.getMonth() - 3);
+            break;
+          case 'year':
+            startDate.setFullYear(startDate.getFullYear() - 1);
+            break;
+        }
+
+        // Base query for recruiters and their referrals
+        const recruiterMetrics = await db.select({
+          recruiterId: users.id,
+          recruiterName: users.name,
+          department: users.department,
+          totalReferrals: sql<number>`COUNT(${referrals.id})`,
+          totalHires: sql<number>`COUNT(CASE WHEN ${referrals.status} = 'hired' THEN 1 END)`,
+          averageTimeToHire: sql<number>`
+            AVG(CASE 
+              WHEN ${referrals.status} = 'hired' 
+              THEN EXTRACT(EPOCH FROM (${referrals.updatedAt} - ${referrals.createdAt}))/86400.0 
+            END)`,
+          conversionRate: sql<number>`
+            ROUND(
+              COUNT(CASE WHEN ${referrals.status} = 'hired' THEN 1 END)::numeric / 
+              NULLIF(COUNT(${referrals.id}), 0) * 100,
+              2
+            )`,
+        })
+        .from(users)
+        .leftJoin(referrals, eq(users.id, referrals.recruiterId))
+        .where(
+          and(
+            or(eq(users.role, 'recruiter'), eq(users.role, 'leadership')),
+            gte(referrals.createdAt, startDate),
+            department ? eq(users.department, department as string) : undefined
+          )
+        )
+        .groupBy(users.id, users.name, users.department)
+        .orderBy(desc(sql<number>`COUNT(CASE WHEN ${referrals.status} = 'hired' THEN 1 END)`))
+        .limit(Number(limit))
+        .offset(offset);
+
+        // Calculate team averages
+        const [teamAverages] = await db.select({
+          avgTotalReferrals: sql<number>`AVG(total_referrals)`,
+          avgTotalHires: sql<number>`AVG(total_hires)`,
+          avgTimeToHire: sql<number>`AVG(avg_time_to_hire)`,
+          avgConversionRate: sql<number>`AVG(conversion_rate)`,
+        })
+        .from(
+          db.select({
+            total_referrals: sql<number>`COUNT(${referrals.id})`,
+            total_hires: sql<number>`COUNT(CASE WHEN ${referrals.status} = 'hired' THEN 1 END)`,
+            avg_time_to_hire: sql<number>`
+              AVG(CASE 
+                WHEN ${referrals.status} = 'hired' 
+                THEN EXTRACT(EPOCH FROM (${referrals.updatedAt} - ${referrals.createdAt}))/86400.0 
+              END)`,
+            conversion_rate: sql<number>`
+              ROUND(
+                COUNT(CASE WHEN ${referrals.status} = 'hired' THEN 1 END)::numeric / 
+                NULLIF(COUNT(${referrals.id}), 0) * 100,
+                2
+              )`,
+          })
+          .from(users)
+          .leftJoin(referrals, eq(users.id, referrals.recruiterId))
+          .where(
+            and(
+              or(eq(users.role, 'recruiter'), eq(users.role, 'leadership')),
+              gte(referrals.createdAt, startDate),
+              department ? eq(users.department, department as string) : undefined
+            )
+          )
+          .groupBy(users.id)
+        ).as('team_metrics');
+
+        // Get total count for pagination
+        const [{ count }] = await db
+          .select({ count: sql<number>`COUNT(DISTINCT ${users.id})` })
+          .from(users)
+          .where(
+            and(
+              or(eq(users.role, 'recruiter'), eq(users.role, 'leadership')),
+              department ? eq(users.department, department as string) : undefined
+            )
+          );
+
+        // Format response
+        const response = {
+          metrics: recruiterMetrics.map(metric => ({
+            ...metric,
+            averageTimeToHire: metric.averageTimeToHire ? Number(metric.averageTimeToHire.toFixed(1)) : null,
+            conversionRate: metric.conversionRate ? Number(metric.conversionRate.toFixed(1)) : null,
+            isCurrentUser: metric.recruiterId === req.user?.id
+          })),
+          teamAverages: {
+            avgTotalReferrals: Number(teamAverages?.avgTotalReferrals?.toFixed(1)) || 0,
+            avgTotalHires: Number(teamAverages?.avgTotalHires?.toFixed(1)) || 0,
+            avgTimeToHire: Number(teamAverages?.avgTimeToHire?.toFixed(1)) || 0,
+            avgConversionRate: Number(teamAverages?.avgConversionRate?.toFixed(1)) || 0,
+          },
+          pagination: {
+            total: Number(count),
+            page: Number(page),
+            limit: Number(limit),
+            totalPages: Math.ceil(Number(count) / Number(limit))
+          }
+        };
+
+        res.json(response);
+      } catch (error) {
+        logServerError(error as Error, {
+          context: 'team-comparisons',
+          userId: req.user?.id,
+          role: req.user?.role,
+          query: req.query
+        });
+        res.status(500).json({
+          error: "Failed to fetch team comparisons",
           code: "SERVER_ERROR"
         });
       }
