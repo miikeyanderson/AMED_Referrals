@@ -124,7 +124,14 @@ function MetricComparison({
 
 export function TeamComparisons() {
   const { data, isLoading } = useQuery<TeamComparisonsData>({
-    queryKey: ["/api/recruiter/team-comparisons"],
+    queryKey: ["team-comparisons"],
+    queryFn: async () => {
+      const response = await fetch("/api/recruiter/team-comparisons");
+      if (!response.ok) {
+        throw new Error("Failed to fetch team comparisons");
+      }
+      return response.json();
+    }
   });
 
   if (isLoading) {
