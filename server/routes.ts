@@ -1,8 +1,9 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer } from 'ws';
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { referrals, rewards, type User, type Referral } from "@db/schema";
+import { referrals, rewards, alerts, type User, type Referral, type Alert } from "@db/schema";
 import { eq, desc, and, or, like, sql, inArray } from "drizzle-orm";
 import { logUnauthorizedAccess, logServerError } from "./utils/logger";
 import { users } from "@db/schema";
@@ -57,7 +58,21 @@ declare global {
  *         totalRewards:
  *           type: string
  *           description: Total rewards earned (formatted as currency)
- */
+ *     Alert:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         type:
+ *           type: string
+ *         message:
+ *           type: string
+ *         read:
+ *           type: boolean
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ * */
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
@@ -91,7 +106,7 @@ export function registerRoutes(app: Express): Server {
    *                     resetTime:
    *                       type: string
    *                       format: date-time
-   */
+   * */
   app.get("/api/rate-limit-test", (req: Request, res: Response) => {
     const rateLimitInfo = req.rateLimit;
     res.json({
@@ -134,7 +149,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Not authenticated
    *       500:
    *         description: Server error while fetching analytics
-   */
+   * */
   app.get("/api/analytics", checkAuth, async (req: Request, res: Response) => {
     try {
       // Get total referrals count
@@ -265,7 +280,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Not authorized (non-clinician users)
    *       500:
    *         description: Server error while creating referral
-   */
+   * */
   app.get("/api/referrals", checkAuth, async (req: Request, res: Response) => {
     try {
       const { status, search, page = 1, limit = 10 } = req.query;
@@ -422,7 +437,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Referral not found
    *       500:
    *         description: Server error while updating referral
-   */
+   * */
   app.get("/api/referrals/:id", checkAuth, async (req: Request, res: Response) => {
     try {
       const [referral] = await db
@@ -528,7 +543,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Not authenticated
    *       500:
    *         description: Server error while fetching rewards
-   */
+   * */
   app.get("/api/rewards", checkAuth, async (req: Request, res: Response) => {
     try {
       const userRewards = await db
@@ -614,7 +629,7 @@ export function registerRoutes(app: Express): Server {
    *                         format: date
    *                       count:
    *                         type: integer
-   */
+   * */
   app.get("/api/recruiter/referrals/inflow", checkAuth, async (req: Request, res: Response) => {
     try {
       const { timeframe = 'week', department, role } = req.query;
@@ -804,7 +819,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Not authenticated
    *       500:
    *         description: Server error while fetching pipeline snapshot
-   */
+   * */
   app.get("/api/recruiter/referrals/pipeline", checkAuth, async (req: Request, res: Response) => {
     try {
       const { department, role, recruiterId } = req.query;
@@ -920,7 +935,7 @@ export function registerRoutes(app: Express): Server {
    *                     timeToHireChange:
    *                       type: number
    *                       description: Month-over-month change in average time to hire (days)
-   */
+   * */
   app.get("/api/recruiter/kpis", checkAuth, async (req: Request, res: Response) => {
     try {
       const now = new Date();
@@ -964,7 +979,7 @@ export function registerRoutes(app: Express): Server {
           FROM ${referrals}
           WHERE
             status = 'hired'
-            AND updated_at >= ${lastMonth.toISOString()}
+            AND updatedat >= ${lastMonth.toISOString()}
             AND updated_at < ${currentMonth.toISOString()}
         ),
         total_referrals AS (
@@ -1016,6 +1031,209 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  /**
+   * @swagger
+   * /api/recruiter/alerts:
+   *   get:
+   *     summary: Get user alerts
+   *     description: Retrieve alerts/notifications for the authenticated user
+   *     tags: [Alerts]
+   *     security:
+   *       - sessionAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: type
+   *         schema:
+   *           type: string
+   *           enum: [new_referral, pipeline_update, system_notification]
+   *         description: Filter alerts by type
+   *       - in: query
+   *         name: read
+   *         schema:
+   *           type: boolean
+   *         description: Filter by read status
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           maximum: 100
+   *           default: 50
+   *         description: Number of alerts to return
+   *     responses:
+   *       200:
+   *         description: List of alerts
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 alerts:
+   *                   type: array
+   *                   items:
+   *                     type: object
+   *                     properties:
+   *                       id:
+   *                         type: integer
+   *                       type:
+   *                         type: string
+   *                       message:
+   *                         type: string
+   *                       read:
+   *                         type: boolean
+   *                       createdAt:
+   *                         type: string
+   *                         format: date-time
+   *                 unreadCount:
+   *                   type: integer
+   *       401:
+   *         description: Not authenticated
+   *       500:
+   *         description: Server error
+   * */
+  app.get("/api/recruiter/alerts", checkAuth, async (req: Request, res: Response) => {
+    try {
+      const { type, read, limit = 50 } = req.query;
+
+      // Build query conditions
+      let conditions = [eq(alerts.userId, req.user!.id)];
+
+      if (type) {
+        conditions.push(eq(alerts.type, type as Alert['type']));
+      }
+
+      if (typeof read !== 'undefined') {
+        conditions.push(eq(alerts.read, read === 'true'));
+      }
+
+      // Get alerts with pagination
+      const userAlerts = await db
+        .select()
+        .from(alerts)
+        .where(and(...conditions))
+        .orderBy(desc(alerts.createdAt))
+        .limit(Number(limit));
+
+      // Get unread count
+      const [unreadCount] = await db
+        .select({ count: sql<number>`cast(count(*) as integer)` })
+        .from(alerts)
+        .where(and(
+          eq(alerts.userId, req.user!.id),
+          eq(alerts.read, false)
+        ));
+
+      res.json({
+        alerts: userAlerts,
+        unreadCount: unreadCount?.count || 0
+      });
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'get-alerts',
+        userId: req.user?.id,
+        role: req.user?.role
+      });
+      res.status(500).send("Failed to fetch alerts");
+    }
+  });
+
+  /**
+   * @swagger
+   * /api/recruiter/alerts/mark-as-read:
+   *   post:
+   *     summary: Mark alerts as read
+   *     description: Mark one or multiple alerts as read
+   *     tags: [Alerts]
+   *     security:
+   *       - sessionAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               alertIds:
+   *                 type: array
+   *                 items:
+   *                   type: integer
+   *               all:
+   *                 type: boolean
+   *                 description: If true, mark all alerts as read
+   *     responses:
+   *       200:
+   *         description: Alerts marked as read successfully
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized to mark these alerts
+   *       500:
+   *         description: Server error
+   * */
+  app.post("/api/recruiter/alerts/mark-as-read", checkAuth, async (req: Request, res: Response) => {
+    try {
+      const { alertIds, all } = req.body;
+
+      if (all) {
+        // Mark all user's alerts as read
+        await db
+          .update(alerts)
+          .set({
+            read: true,
+            readAt: new Date()
+          })
+          .where(eq(alerts.userId, req.user!.id));
+      } else if (Array.isArray(alertIds) && alertIds.length > 0) {
+        // Mark specific alerts as read
+        await db
+          .update(alerts)
+          .set({
+            read: true,
+            readAt: new Date()
+          })
+          .where(
+            and(
+              eq(alerts.userId, req.user!.id),
+              inArray(alerts.id, alertIds)
+            )
+          );
+      } else {
+        return res.status(400).json({ message: "Either 'alertIds' array or 'all' must be provided" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'mark-alerts-read',
+        userId: req.user?.id,
+        role: req.user?.role
+      });
+      res.status(500).send("Failed to mark alerts as read");
+    }
+  });
+
+  // Create HTTP server first
   const httpServer = createServer(app);
+
+  // Initialize WebSocket server for real-time notifications
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+
+  wss.on('connection', (ws) => {
+    // Skip vite HMR connections
+    const protocol = ws.protocol;
+    if (protocol === 'vite-hmr') {
+      return;
+    }
+
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        // Handle incoming WebSocket messages if needed
+      } catch (error) {
+        console.error('WebSocket message error:', error);
+      }
+    });
+  });
+
   return httpServer;
 }
