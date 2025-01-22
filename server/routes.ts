@@ -2019,4 +2019,3 @@ export function registerRoutes(app: Express): Server {
   });
 
   return httpServer;
-}
