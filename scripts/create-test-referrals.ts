@@ -1,3 +1,4 @@
+
 import { db } from "@db";
 import { referrals } from "@db/schema";
 
@@ -6,52 +7,72 @@ async function createTestReferrals() {
     {
       referrerId: 1,
       candidateName: "John Smith",
-      candidateEmail: "john.s@example.com",
-      candidatePhone: "123-456-7891",
-      position: "Frontend Developer",
+      candidateEmail: "john.smith@example.com",
+      candidatePhone: "123-456-7890",
+      position: "Senior Frontend Developer",
       department: "Engineering",
-      status: "pending",
-      nextSteps: "Initial screening"
+      status: "new",
+      experience: "8 years of React experience",
+      notes: "Strong portfolio, previously at Google",
+      nextSteps: "Schedule technical interview",
+      createdAt: new Date(),
+      updatedAt: new Date()
     },
     {
       referrerId: 1,
       candidateName: "Sarah Wilson",
-      candidateEmail: "sarah.w@example.com",
-      candidatePhone: "123-456-7892",
-      position: "UI Designer",
-      department: "Design",
-      status: "contacted",
-      nextSteps: "Schedule interview"
-    },
-    {
-      referrerId: 1,
-      candidateName: "Mike Johnson",
-      candidateEmail: "mike.j@example.com",
-      candidatePhone: "123-456-7893",
-      position: "Backend Developer",
-      department: "Engineering",
-      status: "interviewing",
-      nextSteps: "Technical interview"
-    },
-    {
-      referrerId: 1,
-      candidateName: "Emily Davis",
-      candidateEmail: "emily.d@example.com",
-      candidatePhone: "123-456-7894",
+      candidateEmail: "sarah.wilson@example.com",
+      candidatePhone: "123-456-7891",
       position: "Product Designer",
       department: "Design",
-      status: "hired",
-      nextSteps: "Onboarding"
+      status: "contacted",
+      experience: "6 years in product design",
+      notes: "Great portfolio, interested in UI/UX",
+      nextSteps: "Design challenge review",
+      createdAt: new Date(),
+      updatedAt: new Date()
     },
     {
-      referrerId: 1,
-      candidateName: "Chris Wilson",
-      candidateEmail: "chris.w@example.com",
-      candidatePhone: "123-456-7895",
-      position: "DevOps Engineer",
+      referrerId: 2,
+      candidateName: "Michael Chen",
+      candidateEmail: "michael.chen@example.com",
+      candidatePhone: "123-456-7892",
+      position: "Backend Engineer",
       department: "Engineering",
+      status: "interviewing",
+      experience: "5 years Node.js experience",
+      notes: "Strong system design skills",
+      nextSteps: "Final interview round",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      referrerId: 2,
+      candidateName: "Emily Davis",
+      candidateEmail: "emily.davis@example.com",
+      candidatePhone: "123-456-7893",
+      position: "DevOps Engineer",
+      department: "Infrastructure",
+      status: "hired",
+      experience: "7 years of DevOps experience",
+      notes: "Excellent cultural fit",
+      nextSteps: "Onboarding preparation",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      referrerId: 3,
+      candidateName: "David Kim",
+      candidateEmail: "david.kim@example.com",
+      candidatePhone: "123-456-7894",
+      position: "Data Scientist",
+      department: "Data",
       status: "rejected",
-      nextSteps: "Close candidacy"
+      experience: "3 years ML experience",
+      notes: "Good technical skills, misaligned expectations",
+      nextSteps: "Send rejection email",
+      createdAt: new Date(),
+      updatedAt: new Date()
     }
   ]);
 
