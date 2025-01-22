@@ -1064,7 +1064,13 @@ export function registerRoutes(app: Express): Server {
         : sql``;
 
       // Get total count and status breakdown in a single query
-      const statusBreakdown = await db.execute(sql`
+      interface StatusRow {
+        status: string;
+        count: string | number;
+        percentage: string | number;
+      }
+
+      const statusBreakdown = (await db.execute(sql`
         WITH all_statuses AS (
           SELECT unnest(ARRAY['pending', 'contacted', 'interviewing', 'hired', 'rejected']) as status
         ),
@@ -1094,7 +1100,7 @@ export function registerRoutes(app: Express): Server {
             WHEN 'hired' THEN 4
             WHEN 'rejected' THEN 5
           END
-      `);
+      `)) as StatusRow[];
 
       if (!Array.isArray(statusBreakdown)) {
         throw new Error('Invalid database response format');
@@ -1103,12 +1109,13 @@ export function registerRoutes(app: Express): Server {
       // Calculate total from the results
       const total = statusBreakdown.reduce((sum, row) => sum + Number(row.count), 0);
 
+      // Ensure proper typing and null handling
       res.json({
         total,
         statusBreakdown: statusBreakdown.map(row => ({
-          status: row.status,
-          count: Number(row.count),
-          percentage: Number(row.percentage) || 0
+          status: row.status || 'unknown',
+          count: row.count ? Number(row.count) : 0,
+          percentage: row.percentage ? Number(row.percentage) : 0
         }))
       });
     } catch (error) {
