@@ -298,7 +298,6 @@ export function registerRoutes(app: Express): Server {
     }
   );
 
-  // Keep existing routes...
   /**
    * @swagger
    * /api/rate-limit-test:
@@ -1724,6 +1723,169 @@ export function registerRoutes(app: Express): Server {
           error: "Failed to fetch pipeline data",
           code: "SERVER_ERROR"
         });
+      }
+    }
+  );
+
+  // Add after the existing /api/rewards endpoint...
+
+  /**
+   * @swagger
+   * /api/recruiter/pipeline:
+   *   get:
+   *     summary: Get recruiter pipeline data
+   *     description: Retrieve candidates grouped by their pipeline stages
+   *     tags: [Pipeline]
+   *     security:
+   *       - sessionAuth: []
+   *     responses:
+   *       200:
+   *         description: Pipeline data retrieved successfully
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized
+   */
+  app.get(
+    "/api/recruiter/pipeline",
+    checkAuth,
+    checkRecruiterRole,
+    async (req: Request, res: Response) => {
+      try {
+        const result = await db
+          .select({
+            id: referrals.id,
+            status: referrals.status,
+            candidateName: referrals.candidateName,
+            candidateEmail: referrals.candidateEmail,
+            role: referrals.position,
+            department: referrals.department,
+            lastActivity: referrals.updatedAt,
+            nextSteps: referrals.nextSteps,
+            notes: referrals.notes,
+          })
+          .from(referrals)
+          .orderBy(desc(referrals.updatedAt));
+
+        // Group candidates by their pipeline stage
+        const pipelineData = result.reduce((acc: Record<string, any[]>, candidate) => {
+          const stage = candidate.status;
+          if (!acc[stage]) {
+            acc[stage] = [];
+          }
+          acc[stage].push(candidate);
+          return acc;
+        }, {});
+
+        res.json(pipelineData);
+      } catch (error) {
+        logServerError(error as Error, {
+          context: 'get-pipeline',
+          userId: req.user?.id,
+          role: req.user?.role,
+        });
+        res.status(500).send("Failed to fetch pipeline data");
+      }
+    }
+  );
+
+  /**
+   * @swagger
+   * /api/recruiter/pipeline/update-stage:
+   *   post:
+   *     summary: Update candidate stage
+   *     description: Update the pipeline stage of a candidate
+   *     tags: [Pipeline]
+   *     security:
+   *       - sessionAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - candidateId
+   *               - newStage
+   *             properties:
+   *               candidateId:
+   *                 type: integer
+   *               newStage:
+   *                 type: string
+   *                 enum: [new, contacted, interviewing, hired, rejected]
+   *     responses:
+   *       200:
+   *         description: Candidate stage updated successfully
+   *       400:
+   *         description: Invalid request body
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized
+   *       404:
+   *         description: Candidate not found
+   */
+  app.post(
+    "/api/recruiter/pipeline/update-stage",
+    checkAuth,
+    checkRecruiterRole,
+    async (req: Request, res: Response) => {
+      try {
+        const { candidateId, newStage } = req.body;
+
+        if (!candidateId || !newStage) {
+          return res.status(400).send("Missing required fields");
+        }
+
+        const [updatedReferral] = await db
+          .update(referrals)
+          .set({
+            status: newStage,
+            updatedAt: new Date(),
+          })
+          .where(eq(referrals.id, candidateId))
+          .returning();
+
+        if (!updatedReferral) {
+          return res.status(404).send("Candidate not found");
+        }
+
+        // Create an alert for the referrer
+        await db.insert(alerts).values({
+          userId: updatedReferral.referrerId,
+          type: "pipeline_update",
+          message: `Candidate ${updatedReferral.candidateName} has been moved to ${newStage} stage`,
+          read: false,
+          relatedReferralId: updatedReferral.id,
+          createdAt: new Date()
+        });
+
+        // Broadcast update via WebSocket
+        const broadcastMessage = JSON.stringify({
+          type: "PIPELINE_UPDATE",
+          data: {
+            candidateId,
+            newStage,
+            updatedAt: updatedReferral.updatedAt
+          }
+        });
+
+        clients.forEach(client => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(broadcastMessage);
+          }
+        });
+
+        res.json(updatedReferral);
+      } catch (error) {
+        logServerError(error as Error, {
+          context: 'update-pipeline-stage',
+          userId: req.user?.id,
+          role: req.user?.role,
+          candidateId: req.body.candidateId,
+          newStage: req.body.newStage
+        });
+        res.status(500).send("Failed to update candidate stage");
       }
     }
   );
