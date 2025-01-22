@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { CandidateProfileModal } from "./recruiter/CandidateProfileModal";
+import { FilterBar, type FilterState } from "./recruiter/FilterBar";
 
 interface Candidate {
   id: number;
@@ -38,11 +39,37 @@ export function CandidatePipeline() {
   const queryClient = useQueryClient();
   const [selectedCandidateId, setSelectedCandidateId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    role: "all",
+    department: "all",
+    dateRange: {
+      from: undefined,
+      to: undefined,
+    },
+    sortBy: "lastActivity",
+    sortDirection: "desc",
+  });
 
   const { data: pipelineData, isLoading } = useQuery({
-    queryKey: ["/api/recruiter/pipeline"],
+    queryKey: [
+      "/api/recruiter/pipeline",
+      filters.role,
+      filters.department,
+      filters.dateRange.from?.toISOString(),
+      filters.dateRange.to?.toISOString(),
+      filters.sortBy,
+      filters.sortDirection,
+    ],
     queryFn: async () => {
-      const response = await fetch("/api/recruiter/pipeline");
+      const params = new URLSearchParams();
+      if (filters.role !== "all") params.append("role", filters.role);
+      if (filters.department !== "all") params.append("department", filters.department);
+      if (filters.dateRange.from) params.append("fromDate", filters.dateRange.from.toISOString());
+      if (filters.dateRange.to) params.append("toDate", filters.dateRange.to.toISOString());
+      params.append("sortBy", filters.sortBy);
+      params.append("sortDirection", filters.sortDirection);
+
+      const response = await fetch(`/api/recruiter/pipeline?${params}`);
       if (!response.ok) throw new Error("Failed to fetch pipeline data");
       return response.json();
     },
@@ -94,107 +121,117 @@ export function CandidatePipeline() {
     setIsModalOpen(true);
   };
 
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+  };
+
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {PIPELINE_STAGES.map((stage) => (
-          <div key={stage.id} className="space-y-4">
-            <h3 className="font-medium text-sm">{stage.title}</h3>
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-32 w-full" />
-            ))}
-          </div>
-        ))}
+      <div className="space-y-4">
+        <FilterBar onFilterChange={handleFilterChange} isLoading={true} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          {PIPELINE_STAGES.map((stage) => (
+            <div key={stage.id} className="space-y-4">
+              <h3 className="font-medium text-sm">{stage.title}</h3>
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-32 w-full" />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 min-w-0">
-          {PIPELINE_STAGES.map((stage) => (
-            <Droppable key={stage.id} droppableId={stage.id}>
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="space-y-4 min-w-0"
-                >
-                  <h3 className="font-medium text-sm flex items-center justify-between">
-                    {stage.title}
-                    <span className="text-xs text-muted-foreground">
-                      {pipelineData?.pipeline?.[stage.id]?.count || 0}
-                    </span>
-                  </h3>
+      <div className="space-y-4">
+        <FilterBar onFilterChange={handleFilterChange} isLoading={isLoading} />
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 min-w-0">
+            {PIPELINE_STAGES.map((stage) => (
+              <Droppable key={stage.id} droppableId={stage.id}>
+                {(provided, snapshot) => (
                   <div
-                    className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-4 space-y-4 transition-colors ${
-                      snapshot.isDraggingOver ? "bg-muted/50" : "bg-muted/10"
-                    }`}
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="space-y-4 min-w-0"
                   >
-                    {pipelineData?.pipeline?.[stage.id]?.candidates?.map((candidate: Candidate, index: number) => (
-                      <Draggable
-                        key={candidate.id}
-                        draggableId={candidate.id.toString()}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <Card
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="bg-card hover:bg-accent transition-colors cursor-pointer"
-                            onClick={() => handleCandidateClick(candidate.id)}
-                          >
-                            <CardContent className="p-4 space-y-3">
-                              <div className="flex items-start justify-between">
-                                <div className="flex items-center space-x-3 min-w-0">
-                                  <Avatar className="h-8 w-8 flex-shrink-0">
-                                    <span className="font-semibold text-xs">
-                                      {candidate.name
-                                        .split(" ")
-                                        .map((n: string) => n[0])
-                                        .join("")}
-                                    </span>
-                                  </Avatar>
-                                  <div className="min-w-0">
-                                    <h4 className="font-medium text-sm truncate">
-                                      {candidate.name}
-                                    </h4>
-                                    <p className="text-xs text-muted-foreground truncate">
-                                      {candidate.role}
-                                    </p>
+                    <h3 className="font-medium text-sm flex items-center justify-between">
+                      {stage.title}
+                      <span className="text-xs text-muted-foreground">
+                        {pipelineData?.pipeline?.[stage.id]?.count || 0}
+                      </span>
+                    </h3>
+                    <div
+                      className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-4 space-y-4 transition-colors ${
+                        snapshot.isDraggingOver ? "bg-muted/50" : "bg-muted/10"
+                      }`}
+                    >
+                      {pipelineData?.pipeline?.[stage.id]?.candidates?.map((candidate: Candidate, index: number) => (
+                        <Draggable
+                          key={candidate.id}
+                          draggableId={candidate.id.toString()}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <Card
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="bg-card hover:bg-accent transition-colors cursor-pointer"
+                              onClick={() => handleCandidateClick(candidate.id)}
+                            >
+                              <CardContent className="p-4 space-y-3">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-center space-x-3 min-w-0">
+                                    <Avatar className="h-8 w-8 flex-shrink-0">
+                                      <span className="font-semibold text-xs">
+                                        {candidate.name
+                                          .split(" ")
+                                          .map((n: string) => n[0])
+                                          .join("")}
+                                      </span>
+                                    </Avatar>
+                                    <div className="min-w-0">
+                                      <h4 className="font-medium text-sm truncate">
+                                        {candidate.name}
+                                      </h4>
+                                      <p className="text-xs text-muted-foreground truncate">
+                                        {candidate.role}
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                              {candidate.department && (
-                                <p className="text-xs text-muted-foreground truncate">
-                                  Department: {candidate.department}
-                                </p>
-                              )}
-                              <div className="text-xs text-muted-foreground">
-                                Last activity:{" "}
-                                {format(new Date(candidate.lastActivity), "MMM d, yyyy")}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
+                                {candidate.department && (
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    Department: {candidate.department}
+                                  </p>
+                                )}
+                                <div className="text-xs text-muted-foreground">
+                                  Last activity:{" "}
+                                  {format(new Date(candidate.lastActivity), "MMM d, yyyy")}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
                   </div>
-                </div>
-              )}
-            </Droppable>
-          ))}
-        </div>
-      </DragDropContext>
+                )}
+              </Droppable>
+            ))}
+          </div>
+        </DragDropContext>
+      </div>
 
       <CandidateProfileModal
         candidateId={selectedCandidateId}
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        userRole="recruiter" // TODO: Get actual user role from auth context
+        userRole="recruiter"
       />
     </>
   );
