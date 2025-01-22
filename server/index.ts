@@ -4,6 +4,23 @@ import { setupVite, serveStatic, log } from "./vite";
 import { correlationMiddleware } from "./middleware/correlation";
 import { apiLimiter, requestMonitor } from "./middleware/rate-limit";
 import logger from "./utils/logger";
+import swaggerUi from 'swagger-ui-express';
+import { specs } from './swagger';
+
+// Extend Express Request type to include our custom properties
+declare global {
+  namespace Express {
+    interface Request {
+      correlationId?: string;
+      rateLimit?: {
+        limit: number;
+        current: number;
+        remaining: number;
+        resetTime: number;
+      };
+    }
+  }
+}
 
 const app = express();
 // Trust proxy disabled for security
@@ -14,6 +31,20 @@ app.use(correlationMiddleware);
 app.use('/api', apiLimiter);
 // Apply request monitoring middleware for dashboard
 app.use('/api', requestMonitor.middleware);
+
+// Serve Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: "ARM Platform API Documentation",
+  customfavIcon: "/favicon.ico",
+  swaggerOptions: {
+    docExpansion: 'list',
+    filter: true,
+    defaultModelsExpandDepth: 1,
+    defaultModelExpandDepth: 1
+  }
+}));
 
 // Request logging middleware with correlation ID
 app.use((req, res, next) => {
@@ -47,7 +78,7 @@ app.use((req, res, next) => {
         statusCode: res.statusCode,
         duration,
         response: capturedJsonResponse,
-        rateLimit: req.rateLimit // Add rate limit info to logs
+        rateLimit: req.rateLimit // Now TypeScript knows about rateLimit
       });
     }
   });
@@ -87,7 +118,7 @@ app.use((req, res, next) => {
   const port = parseInt(process.env.PORT || '5000', 10);
   const fallbackPort = 5001;
 
-  app.listen(port, hostname, () => {
+  server.listen(port, hostname, () => {
     logger.info({
       message: `Server running at http://${hostname}:${port}/`,
       port,
@@ -99,7 +130,7 @@ app.use((req, res, next) => {
         message: `Port ${port} is busy, trying ${fallbackPort}...`,
         error: err
       });
-      app.listen(fallbackPort, hostname, () => {
+      server.listen(fallbackPort, hostname, () => {
         logger.info({
           message: `Server running at http://${hostname}:${fallbackPort}/`,
           port: fallbackPort,
