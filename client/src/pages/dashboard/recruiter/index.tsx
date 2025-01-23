@@ -11,6 +11,9 @@ export default function RecruiterDashboard() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Recruiter Dashboard</h1>
 
+      {/* KPI Group Widget */}
+      <KPIGroupWidget />
+
       {/* Candidate Pipeline */}
       <Card>
         <CardHeader className="flex flex-row items-center gap-2">
@@ -21,9 +24,6 @@ export default function RecruiterDashboard() {
           <CandidatePipeline />
         </CardContent>
       </Card>
-
-      {/* KPI Group Widget */}
-      <KPIGroupWidget />
 
       {/* Pipeline Snapshot Widget */}
       <PipelineSnapshotWidget />
