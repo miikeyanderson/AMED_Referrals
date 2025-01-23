@@ -7,9 +7,9 @@ import { alerts, referrals, rewards, users, type Alert, type InsertAlert, type R
 import { eq, desc, and, or, like, sql, inArray, asc } from "drizzle-orm";
 import { SQL } from "drizzle-orm";
 import { logUnauthorizedAccess, logServerError } from "./utils/logger";
-import { add, format, startOfWeek, endOfWeek, parseISO, isValid } from "date-fns";
+import { add, format, startOfWeek, endOfWeek, parseISO, isValid, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter } from "date-fns";
 import { referralSubmissionSchema } from "@db/schema";
-import { ZodError } from "zod";
+import { ZodError, z } from "zod";
 import { sanitizeHtml } from "./utils/sanitize";
 
 // Type definitions
@@ -94,6 +94,191 @@ export function registerRoutes(app: Express): Server {
     }
     next();
   };
+
+  // Middleware for clinician role check
+  const checkClinicianRole = (req: Request, res: Response, next: NextFunction) => {
+    if (req.user?.role !== 'clinician') {
+      const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
+      logUnauthorizedAccess(
+        req.user?.id || -1,
+        ip,
+        req.path,
+        'clinician'
+      );
+      return res.status(403).send("Access denied. Clinician role required.");
+    }
+    next();
+  };
+
+  // Validate date range query parameters
+  const dateRangeSchema = z.object({
+    range: z.enum(['week', 'month', 'quarter', 'custom']).default('week'),
+    fromDate: z.string().optional(),
+    toDate: z.string().optional(),
+  });
+
+  /**
+   * @swagger
+   * /api/clinician/referrals-stats:
+   *   get:
+   *     summary: Get clinician referral statistics
+   *     description: Retrieve detailed referral statistics with date filtering
+   *     tags: [Statistics]
+   *     security:
+   *       - sessionAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: range
+   *         schema:
+   *           type: string
+   *           enum: [week, month, quarter, custom]
+   *           default: week
+   *         description: Time range for the statistics
+   *       - in: query
+   *         name: fromDate
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: Start date for custom range (YYYY-MM-DD)
+   *       - in: query
+   *         name: toDate
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: End date for custom range (YYYY-MM-DD)
+   *     responses:
+   *       200:
+   *         description: Referral statistics retrieved successfully
+   *       400:
+   *         description: Invalid date range parameters
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized (non-clinician users)
+   *       500:
+   *         description: Server error while fetching statistics
+   */
+  app.get(
+    "/api/clinician/referrals-stats",
+    checkAuth,
+    checkClinicianRole,
+    async (req: Request, res: Response) => {
+      try {
+        // Validate and parse query parameters
+        const { range, fromDate, toDate } = dateRangeSchema.parse(req.query);
+
+        // Calculate date range
+        let startDate: Date;
+        let endDate: Date = new Date();
+
+        switch (range) {
+          case 'week':
+            startDate = startOfWeek(endDate);
+            endDate = endOfWeek(endDate);
+            break;
+          case 'month':
+            startDate = startOfMonth(endDate);
+            endDate = endOfMonth(endDate);
+            break;
+          case 'quarter':
+            startDate = startOfQuarter(endDate);
+            endDate = endOfQuarter(endDate);
+            break;
+          case 'custom':
+            if (!fromDate || !toDate) {
+              return res.status(400).json({
+                error: "Custom range requires both fromDate and toDate",
+                code: "INVALID_DATE_RANGE"
+              });
+            }
+            startDate = parseISO(fromDate);
+            endDate = parseISO(toDate);
+            if (!isValid(startDate) || !isValid(endDate)) {
+              return res.status(400).json({
+                error: "Invalid date format. Use YYYY-MM-DD",
+                code: "INVALID_DATE_FORMAT"
+              });
+            }
+            break;
+          default:
+            startDate = startOfWeek(endDate);
+            endDate = endOfWeek(endDate);
+        }
+
+        // Base condition for user's referrals
+        const baseCondition = and(
+          eq(referrals.referrerId, req.user!.id),
+          sql`${referrals.createdAt} >= ${startDate}`,
+          sql`${referrals.createdAt} <= ${endDate}`
+        );
+
+        // Get total referrals count
+        const [totalCount] = await db
+          .select({ count: sql<number>`cast(count(*) as integer)` })
+          .from(referrals)
+          .where(baseCondition);
+
+        // Get counts by status
+        const statusCounts = await Promise.all([
+          db
+            .select({ count: sql<number>`cast(count(*) as integer)` })
+            .from(referrals)
+            .where(and(baseCondition, eq(referrals.status, 'pending'))),
+          db
+            .select({ count: sql<number>`cast(count(*) as integer)` })
+            .from(referrals)
+            .where(and(baseCondition, or(
+              eq(referrals.status, 'contacted'),
+              eq(referrals.status, 'interviewing')
+            ))),
+          db
+            .select({ count: sql<number>`cast(count(*) as integer)` })
+            .from(referrals)
+            .where(and(baseCondition, eq(referrals.status, 'hired'))),
+          db
+            .select({ count: sql<number>`cast(count(*) as integer)` })
+            .from(referrals)
+            .where(and(baseCondition, eq(referrals.status, 'rejected')))
+        ]);
+
+        res.json({
+          timeframe: {
+            start: format(startDate, 'yyyy-MM-dd'),
+            end: format(endDate, 'yyyy-MM-dd'),
+            range
+          },
+          statistics: {
+            totalReferrals: totalCount?.count || 0,
+            pendingReferrals: statusCounts[0][0]?.count || 0,
+            inProgressReferrals: statusCounts[1][0]?.count || 0,
+            completedReferrals: statusCounts[2][0]?.count || 0,
+            rejectedReferrals: statusCounts[3][0]?.count || 0
+          }
+        });
+
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return res.status(400).json({
+            error: "Invalid query parameters",
+            code: "VALIDATION_ERROR",
+            details: error.errors
+          });
+        }
+
+        logServerError(error as Error, {
+          context: 'get-referral-stats',
+          userId: req.user?.id,
+          role: req.user?.role,
+          query: req.query
+        });
+
+        res.status(500).json({
+          error: "Failed to fetch referral statistics",
+          code: "SERVER_ERROR"
+        });
+      }
+    }
+  );
 
   /**
    * @swagger
@@ -807,19 +992,19 @@ export function registerRoutes(app: Express): Server {
    *                 type: object
    *                 properties:
    *                   id:
-   *                     type: integer
-   *                   userId:
-   *                     type: integer
-   *                   amount:
-   *                     type: number
-   *                   createdAt:
-   *                     type: string
-   *                     format: date-time
-   *       401:
-   *         description: Not authenticated
-   *       500:
-   *         description: Server error while fetching rewards
-   */
+                    *                     type: integer
+                    *                   userId:
+                    *                     type: integer
+                    *                   amount:
+                    *                     type: number
+                    *                   createdAt:
+                    *                     type: string
+                    *                     format: date-time
+                    *       401:
+                    *         description: Not authenticated
+                    *       500:
+                    *         description: Server error while fetching rewards
+                    */
   app.get("/api/rewards", checkAuth, async (req: Request, res: Response) => {
     try {
       const userRewards = await db
@@ -1564,7 +1749,6 @@ export function registerRoutes(app: Express): Server {
     }
   );
 
-  // Add new route for /api/recruiter/kpis
   /**
    * @swagger
    * /api/recruiter/kpis:
