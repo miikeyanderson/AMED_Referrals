@@ -280,6 +280,129 @@ export function registerRoutes(app: Express): Server {
     }
   );
 
+
+  /**
+   * @swagger
+   * /api/clinician/rewards-snapshot:
+   *   get:
+   *     summary: Get clinician rewards snapshot
+   *     description: Retrieve comprehensive rewards data including pending, paid, and total earned amounts
+   *     tags: [Clinician]
+   *     security:
+   *       - sessionAuth: []
+   *     responses:
+   *       200:
+   *         description: Rewards snapshot retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 pending:
+   *                   type: object
+   *                   properties:
+   *                     count: 
+   *                       type: integer
+   *                     amount:
+   *                       type: number
+   *                 paid:
+   *                   type: object
+   *                   properties:
+   *                     count:
+   *                       type: integer
+   *                     amount:
+   *                       type: number
+   *                 totalEarned:
+   *                   type: number
+   *                 recentPayments:
+   *                   type: array
+   *                   items:
+   *                     type: object
+   *                     properties:
+   *                       id:
+   *                         type: integer
+   *                       amount:
+   *                         type: number
+   *                       status:
+   *                         type: string
+   *                       createdAt:
+   *                         type: string
+   *                         format: date-time
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized (non-clinician users)
+   *       500:
+   *         description: Server error
+   */
+  app.get("/api/clinician/rewards-snapshot", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
+    try {
+      // Get pending rewards (rewards with status 'pending')
+      const [pendingRewards] = await db
+        .select({
+          count: sql<number>`cast(count(*) as integer)`,
+          amount: sql<number>`coalesce(sum(${rewards.amount}), 0)`
+        })
+        .from(rewards)
+        .where(
+          and(
+            eq(rewards.userId, req.user.id),
+            eq(rewards.status, 'pending')
+          )
+        );
+
+      // Get paid rewards (rewards with status 'paid')
+      const [paidRewards] = await db
+        .select({
+          count: sql<number>`cast(count(*) as integer)`,
+          amount: sql<number>`coalesce(sum(${rewards.amount}), 0)`
+        })
+        .from(rewards)
+        .where(
+          and(
+            eq(rewards.userId, req.user.id),
+            eq(rewards.status, 'paid')
+          )
+        );
+
+      // Get recent payments (last 5 rewards, ordered by creation date)
+      const recentPayments = await db
+        .select({
+          id: rewards.id,
+          amount: rewards.amount,
+          status: rewards.status,
+          createdAt: rewards.createdAt
+        })
+        .from(rewards)
+        .where(eq(rewards.userId, req.user.id))
+        .orderBy(desc(rewards.createdAt))
+        .limit(5);
+
+      res.json({
+        pending: {
+          count: pendingRewards?.count || 0,
+          amount: pendingRewards?.amount || 0
+        },
+        paid: {
+          count: paidRewards?.count || 0,
+          amount: paidRewards?.amount || 0
+        },
+        totalEarned: (pendingRewards?.amount || 0) + (paidRewards?.amount || 0),
+        recentPayments
+      });
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'rewards-snapshot',
+        userId: req.user?.id,
+        role: req.user?.role
+      });
+      res.status(500).json({
+        error: "Failed to fetch rewards snapshot",
+        code: "SERVER_ERROR"
+      });
+    }
+  });
+
   /**
    * @swagger
    * /api/recruiter/alerts:
@@ -992,19 +1115,19 @@ export function registerRoutes(app: Express): Server {
    *                 type: object
    *                 properties:
    *                   id:
-                    *                     type: integer
-                    *                   userId:
-                    *                     type: integer
-                    *                   amount:
-                    *                     type: number
-                    *                   createdAt:
-                    *                     type: string
-                    *                     format: date-time
-                    *       401:
-                    *         description: Not authenticated
-                    *       500:
-                    *         description: Server error while fetching rewards
-                    */
+   *                     type: integer
+   *                   userId:
+   *                     type: integer
+   *                   amount:
+   *                     type: number
+   *                   createdAt:
+   *                     type: string
+   *                     format: date-time
+   *       401:
+   *         description: Not authenticated
+   *       500:
+   *         description: Server error while fetching rewards
+   */
   app.get("/api/rewards", checkAuth, async (req: Request, res: Response) => {
     try {
       const userRewards = await db
