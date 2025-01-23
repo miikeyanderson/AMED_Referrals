@@ -164,7 +164,7 @@ export function CandidatePipeline() {
                       </span>
                     </h3>
                     <div
-                      className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-4 space-y-4 transition-colors ${
+                      className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-2 space-y-2 transition-colors ${
                         snapshot.isDraggingOver ? "bg-muted/50" : "bg-muted/10"
                       }`}
                     >
