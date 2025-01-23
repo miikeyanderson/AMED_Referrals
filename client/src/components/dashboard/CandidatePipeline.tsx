@@ -27,11 +27,11 @@ interface PipelineStage {
 }
 
 const PIPELINE_STAGES = [
-  { id: "new", title: "New Referral", color: "bg-blue-50 text-blue-700 border-blue-100" },
-  { id: "contacted", title: "Contacted", color: "bg-yellow-50 text-yellow-700 border-yellow-100" },
-  { id: "interviewing", title: "Interviewing", color: "bg-purple-50 text-purple-700 border-purple-100" },
-  { id: "hired", title: "Hired", color: "bg-green-50 text-green-700 border-green-100" },
-  { id: "rejected", title: "Rejected", color: "bg-red-50 text-red-700 border-red-100" },
+  { id: "new", title: "New Referral", color: "bg-blue-950/50 text-blue-100 border-blue-200" },
+  { id: "contacted", title: "Contacted", color: "bg-yellow-950/50 text-yellow-100 border-yellow-200" },
+  { id: "interviewing", title: "Interviewing", color: "bg-purple-950/50 text-purple-100 border-purple-200" },
+  { id: "hired", title: "Hired", color: "bg-green-950/50 text-green-100 border-green-200" },
+  { id: "rejected", title: "Rejected", color: "bg-red-950/50 text-red-100 border-red-200" },
 ];
 
 export function CandidatePipeline() {
@@ -148,23 +148,25 @@ export function CandidatePipeline() {
       <div className="space-y-4">
         <FilterBar onFilterChange={handleFilterChange} isLoading={isLoading} />
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 min-w-0">
+          <div className="flex gap-2 overflow-x-auto pb-2 min-w-0">
             {PIPELINE_STAGES.map((stage) => (
               <Droppable key={stage.id} droppableId={stage.id}>
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="space-y-4 min-w-0"
+                    className="space-y-2 min-w-[280px] flex-shrink-0"
                   >
-                    <h3 className={`font-medium text-sm flex items-center justify-between ${stage.color}`}>
-                      {stage.title}
-                      <span className="text-xs text-muted-foreground">
-                        {pipelineData?.pipeline?.[stage.id]?.count || 0}
-                      </span>
+                    <h3 className={`flex items-center justify-between p-2 rounded-md ${stage.color}`}>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium">{stage.title}</span>
+                        <span className="text-sm opacity-70">
+                          {pipelineData?.pipeline?.[stage.id]?.count || 0}
+                        </span>
+                      </div>
                     </h3>
                     <div
-                      className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-4 space-y-4 transition-colors ${
+                      className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-2 space-y-2 transition-colors ${
                         snapshot.isDraggingOver ? "bg-muted/50" : "bg-muted/10"
                       }`}
                     >
@@ -179,12 +181,12 @@ export function CandidatePipeline() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`transition-colors cursor-pointer ${PIPELINE_STAGES.find(s => s.id === stage.id)?.color}`}
+                              className={`transition-colors cursor-pointer border ${PIPELINE_STAGES.find(s => s.id === stage.id)?.color} hover:bg-accent`}
                               onClick={() => handleCandidateClick(candidate.id)}
                             >
-                              <CardContent className="p-4 space-y-3">
+                              <CardContent className="p-3 space-y-2.5">
                                 <div className="flex items-start justify-between">
-                                  <div className="flex items-center space-x-3 min-w-0">
+                                  <div className="flex items-center space-x-2 min-w-0">
                                     <Avatar className="h-8 w-8 flex-shrink-0">
                                       <span className="font-semibold text-xs">
                                         {candidate.name

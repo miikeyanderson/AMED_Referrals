@@ -181,11 +181,14 @@ export function Sidebar() {
       animate={{
         width: isCollapsed ? 80 : 256,
       }}
-      className="fixed flex h-screen flex-col bg-sidebar border-r"
+      className="fixed z-[100] flex h-screen flex-col border-r backdrop-blur-sm bg-sidebar/95"
+      onAnimationComplete={() => {
+        document.documentElement.setAttribute('data-sidebar-expanded', (!isCollapsed).toString());
+      }}
     >
       <div className={cn(
-        "flex items-center p-6",
-        isCollapsed && "justify-center p-4"
+        "flex items-center p-4 lg:p-6",
+        isCollapsed && "justify-center lg:p-4"
       )}>
         <h2 className={cn(
           "text-lg font-semibold text-sidebar-foreground",
