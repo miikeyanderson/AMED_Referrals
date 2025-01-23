@@ -35,6 +35,13 @@ interface RewardsSnapshot {
 export function RewardsSnapshotWidget() {
   const { data, error, isLoading } = useQuery<RewardsSnapshot>({
     queryKey: ['/api/clinician/rewards-snapshot'],
+    queryFn: async () => {
+      const response = await fetch('/api/clinician/rewards-snapshot');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch rewards: ${response.statusText}`);
+      }
+      return response.json();
+    }
   });
 
   if (isLoading) {
@@ -60,7 +67,9 @@ export function RewardsSnapshotWidget() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>Failed to load rewards data. Please try again later.</AlertDescription>
+        <AlertDescription>
+          {error instanceof Error ? error.message : 'Failed to load rewards data. Please try again later.'}
+        </AlertDescription>
       </Alert>
     );
   }
