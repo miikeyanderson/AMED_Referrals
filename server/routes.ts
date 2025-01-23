@@ -429,16 +429,19 @@ export function registerRoutes(app: Express): Server {
         achievements: achievementsData
       });
     } catch (error) {
-      logServerError(error as Error, {
-        context: 'rewards-snapshot',
-        userId: req.user?.id,
-        role: req.user?.role
-      });
-      res.status(500).json({
-        error: "Failed to fetch rewards snapshot",
-        code: "SERVER_ERROR"
-      });
-    }
+        console.error('Rewards snapshot error:', error);
+        logServerError(error as Error, {
+          context: 'rewards-snapshot',
+          userId: req.user?.id,
+          role: req.user?.role,
+          error: error instanceof Error ? error.message : String(error)
+        });
+        res.status(500).json({
+          error: "Failed to fetch rewards snapshot",
+          code: "SERVER_ERROR",
+          details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+        });
+      }
   });
 
   /**
@@ -1981,8 +1984,7 @@ export function registerRoutes(app: Express): Server {
           WHERE created_at >= ${currentMonth.toISOString()}
         )
         SELECT
-          COALESCE(COUNT(hired_referrals.id), 0) as hired_count,
-          COALESCE(AVG(hired_referrals.days_to_hire), 0) as avg_daysto_hire,
+          COALESCE(COUNT(hired_referrals.id), 0) as hired_count,          COALESCE(AVG(hired_referrals.days_to_hire), 0) as avg_daysto_hire,
           (SELECT total FROM total_referrals) as total_referrals
         FROM hired_referrals
       `);
