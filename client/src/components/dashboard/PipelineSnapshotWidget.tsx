@@ -19,11 +19,11 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STATUS_COLORS = {
-  pending: "hsl(var(--blue-950))",
-  contacted: "hsl(var(--yellow-950))",
-  interviewing: "hsl(var(--purple-950))",
-  hired: "hsl(var(--green-950))",
-  rejected: "hsl(var(--red-950))",
+  pending: "hsl(221.2 83.2% 53.3%)",     // Bright blue
+  contacted: "hsl(45 93% 47%)",          // Bright yellow
+  interviewing: "hsl(262.1 83.3% 57.8%)", // Bright purple
+  hired: "hsl(142.1 76.2% 46.3%)",       // Bright green
+  rejected: "hsl(346.8 77.2% 49.8%)",    // Bright red
 } as const;
 
 const DEPARTMENTS = [
