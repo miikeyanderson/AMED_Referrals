@@ -66,7 +66,7 @@ export function KPIGroupWidget() {
           <>
             <Progress 
               value={(value / target) * 100} 
-              className="mt-3 relative z-0"
+              className="mt-3"
             />
             <p className="text-xs text-muted-foreground mt-2">
               Target: {label.includes('days') ? `${target} days` : `${target}%`}
