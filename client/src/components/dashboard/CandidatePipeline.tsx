@@ -196,21 +196,21 @@ export function CandidatePipeline() {
                                       </span>
                                     </Avatar>
                                     <div className="min-w-0">
-                                      <h4 className="font-medium text-sm truncate">
+                                      <h4 className="font-medium text-sm text-card-foreground truncate">
                                         {candidate.name}
                                       </h4>
-                                      <p className="text-xs text-foreground/80 truncate">
+                                      <p className="text-xs text-card-foreground/80 truncate">
                                         {candidate.role}
                                       </p>
                                     </div>
                                   </div>
                                 </div>
                                 {candidate.department && (
-                                  <p className="text-xs text-foreground/70 truncate">
+                                  <p className="text-xs text-card-foreground/70 truncate">
                                     Department: {candidate.department}
                                   </p>
                                 )}
-                                <div className="text-xs text-foreground/70">
+                                <div className="text-xs text-card-foreground/70">
                                   Last activity:{" "}
                                   {format(new Date(candidate.lastActivity), "MMM d, yyyy")}
                                 </div>
