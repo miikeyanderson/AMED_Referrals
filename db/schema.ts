@@ -7,6 +7,27 @@ export const roleEnum = pgEnum('role', ['recruiter', 'clinician', 'leadership'])
 export const referralStatusEnum = pgEnum('referral_status', ['pending', 'contacted', 'interviewing', 'hired', 'rejected']);
 export const alertTypeEnum = pgEnum('alert_type', ['new_referral', 'pipeline_update', 'system_notification']);
 
+// Enhanced user profile schema
+export const userProfileSchema = z.object({
+  bio: z.string().max(500, "Bio cannot exceed 500 characters").optional(),
+  specialty: z.string().max(100, "Specialty cannot exceed 100 characters").optional(),
+  yearsOfExperience: z.number().min(0).max(100).optional(),
+  certifications: z.array(z.string()).optional(),
+  preferredContactMethod: z.enum(['email', 'phone', 'both']).optional(),
+  availability: z.enum(['full-time', 'part-time', 'contract']).optional(),
+  profileSettings: z.object({
+    emailNotifications: z.boolean().default(true),
+    referralUpdates: z.boolean().default(true),
+    displayPhone: z.boolean().default(false),
+    displayAvailability: z.boolean().default(true),
+  }).optional(),
+  socialLinks: z.object({
+    linkedin: z.string().url().optional(),
+    twitter: z.string().url().optional(),
+    website: z.string().url().optional(),
+  }).optional(),
+});
+
 // Enhanced validation schema for referral submission
 export const referralSubmissionSchema = z.object({
   candidateName: z.string()
@@ -55,7 +76,18 @@ export const users = pgTable("users", {
   role: roleEnum("role").notNull().default('clinician'),
   name: text("name").notNull(),
   email: text("email").unique().notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull()
+  phone: text("phone"),
+  bio: text("bio"),
+  specialty: text("specialty"),
+  yearsOfExperience: integer("years_of_experience"),
+  certifications: text("certifications").array(),
+  preferredContactMethod: text("preferred_contact_method"),
+  availability: text("availability"),
+  profileSettings: jsonb("profile_settings"),
+  socialLinks: jsonb("social_links"),
+  avatarUrl: text("avatar_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
 }, (table) => ({
   usernameIdx: index("username_idx").on(table.username),
   emailIdx: index("email_idx").on(table.email),
