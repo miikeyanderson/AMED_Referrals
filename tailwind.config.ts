@@ -51,6 +51,11 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+        "blue-950": "221.2 83.2% 53.3%",
+        "yellow-950": "45 93% 47%",
+        "purple-950": "262.1 83.3% 57.8%",
+        "green-950": "142.1 76.2% 36.3%",
+        "red-950": "346.8 77.2% 49.8%",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -15,28 +16,14 @@ import {
 } from "@/components/ui/select";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { Loader2 } from "lucide-react";
-
-interface PipelineData {
-  total: number;
-  statusBreakdown: Array<{
-    status: string;
-    count: number;
-    percentage: number;
-  }>;
-}
-
-interface ChartEntry {
-  status: string;
-  count: number;
-  percentage: number;
-}
+import { cn } from "@/lib/utils";
 
 const STATUS_COLORS = {
-  pending: "hsl(var(--warning))",
-  contacted: "hsl(var(--info))",
-  interviewing: "hsl(var(--primary))",
-  hired: "hsl(var(--success))",
-  rejected: "hsl(var(--destructive))",
+  pending: "hsl(var(--blue-950))",
+  contacted: "hsl(var(--yellow-950))",
+  interviewing: "hsl(var(--purple-950))",
+  hired: "hsl(var(--green-950))",
+  rejected: "hsl(var(--red-950))",
 } as const;
 
 const DEPARTMENTS = [
@@ -68,17 +55,33 @@ export function PipelineSnapshotWidget() {
       if (!response.ok) {
         throw new Error("Failed to fetch pipeline data");
       }
-      return response.json() as Promise<PipelineData>;
+      return response.json();
     },
   });
 
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-card p-3 rounded-lg border shadow-lg">
+          <p className="font-medium text-sm text-foreground">{data.status}</p>
+          <p className="text-xs text-muted-foreground">Count: {data.count}</p>
+          <p className="text-xs text-muted-foreground">
+            {data.percentage.toFixed(1)}%
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <Card>
+    <Card className="border-border/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-base font-medium">Pipeline Snapshot</CardTitle>
         <div className="flex items-center gap-2">
           <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] bg-background border-border/50">
               <SelectValue placeholder="Filter by department" />
             </SelectTrigger>
             <SelectContent>
@@ -90,7 +93,7 @@ export function PipelineSnapshotWidget() {
             </SelectContent>
           </Select>
           <Select value={selectedRecruiter} onValueChange={setSelectedRecruiter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] bg-background border-border/50">
               <SelectValue placeholder="Filter by recruiter" />
             </SelectTrigger>
             <SelectContent>
@@ -120,19 +123,26 @@ export function PipelineSnapshotWidget() {
                   cy="50%"
                   outerRadius={150}
                   labelLine={false}
-                  label={({ name, value }: { name: string; value: number }) =>
-                    `${name} ${((value / pipelineData.total) * 100).toFixed(0)}%`
-                  }
+                  label={({ name, value, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
-                  {pipelineData.statusBreakdown.map((entry: ChartEntry, index: number) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={STATUS_COLORS[entry.status as keyof typeof STATUS_COLORS]}
+                  {pipelineData.statusBreakdown.map((entry: any) => (
+                    <Cell 
+                      key={entry.status}
+                      fill={STATUS_COLORS[entry.status as keyof typeof STATUS_COLORS]} 
+                      className="opacity-80 hover:opacity-100 transition-opacity"
+                      stroke="hsl(var(--background))"
+                      strokeWidth={2}
                     />
                   ))}
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend
+                  formatter={(value: string) => (
+                    <span className="text-sm text-muted-foreground">
+                      {value.charAt(0).toUpperCase() + value.slice(1)}
+                    </span>
+                  )}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
