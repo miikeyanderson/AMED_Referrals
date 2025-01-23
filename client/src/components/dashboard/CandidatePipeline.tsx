@@ -4,7 +4,6 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { CandidateProfileModal } from "./recruiter/CandidateProfileModal";
@@ -28,11 +27,11 @@ interface PipelineStage {
 }
 
 const PIPELINE_STAGES = [
-  { id: "new", title: "New Referral", color: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100/50" },
-  { id: "contacted", title: "Contacted", color: "bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100/50" },
-  { id: "interviewing", title: "Interviewing", color: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100/50" },
-  { id: "hired", title: "Hired", color: "bg-green-50 text-green-700 border-green-200 hover:bg-green-100/50" },
-  { id: "rejected", title: "Rejected", color: "bg-red-50 text-red-700 border-red-200 hover:bg-red-100/50" },
+  { id: "new", title: "New Referral", color: "bg-blue-50 text-blue-700 border-blue-100" },
+  { id: "contacted", title: "Contacted", color: "bg-yellow-50 text-yellow-700 border-yellow-100" },
+  { id: "interviewing", title: "Interviewing", color: "bg-purple-50 text-purple-700 border-purple-100" },
+  { id: "hired", title: "Hired", color: "bg-green-50 text-green-700 border-green-100" },
+  { id: "rejected", title: "Rejected", color: "bg-red-50 text-red-700 border-red-100" },
 ];
 
 export function CandidatePipeline() {
@@ -133,10 +132,7 @@ export function CandidatePipeline() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {PIPELINE_STAGES.map((stage) => (
             <div key={stage.id} className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium text-sm">{stage.title}</h3>
-                <Skeleton className="h-6 w-8" />
-              </div>
+              <h3 className="font-medium text-sm">{stage.title}</h3>
               {[1, 2, 3].map((i) => (
                 <Skeleton key={i} className="h-32 w-full" />
               ))}
@@ -152,24 +148,24 @@ export function CandidatePipeline() {
       <div className="space-y-4">
         <FilterBar onFilterChange={handleFilterChange} isLoading={isLoading} />
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="flex gap-2 overflow-x-auto pb-2 min-w-0">
             {PIPELINE_STAGES.map((stage) => (
               <Droppable key={stage.id} droppableId={stage.id}>
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="flex flex-col min-h-[500px]"
+                    className="space-y-2 min-w-[250px] flex-shrink-0"
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-sm text-gray-900">{stage.title}</h3>
-                      <Badge variant="secondary" className="text-xs font-medium">
+                    <h3 className={`font-medium text-sm flex items-center justify-between ${stage.color}`}>
+                      {stage.title}
+                      <span className="text-xs text-muted-foreground">
                         {pipelineData?.pipeline?.[stage.id]?.count || 0}
-                      </Badge>
-                    </div>
+                      </span>
+                    </h3>
                     <div
-                      className={`flex-1 rounded-lg p-3 space-y-3 transition-colors ${
-                        snapshot.isDraggingOver ? "bg-gray-100/80" : "bg-gray-50"
+                      className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-2 space-y-2 transition-colors ${
+                        snapshot.isDraggingOver ? "bg-muted/50" : "bg-muted/10"
                       }`}
                     >
                       {pipelineData?.pipeline?.[stage.id]?.candidates?.map((candidate: Candidate, index: number) => (
@@ -183,36 +179,38 @@ export function CandidatePipeline() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`transition-all border shadow-sm hover:shadow-md cursor-pointer ${stage.color}`}
+                              className={`transition-colors cursor-pointer ${PIPELINE_STAGES.find(s => s.id === stage.id)?.color}`}
                               onClick={() => handleCandidateClick(candidate.id)}
                             >
-                              <CardContent className="p-3 space-y-2">
-                                <div className="flex items-start space-x-3">
-                                  <Avatar className="h-8 w-8 border-2 border-white bg-gray-100">
-                                    <span className="font-semibold text-xs">
-                                      {candidate.name
-                                        .split(" ")
-                                        .map((n: string) => n[0])
-                                        .join("")}
-                                    </span>
-                                  </Avatar>
-                                  <div className="min-w-0 flex-1">
-                                    <h4 className="font-medium text-sm truncate">
-                                      {candidate.name}
-                                    </h4>
-                                    <p className="text-xs text-gray-500 truncate">
-                                      {candidate.role}
-                                    </p>
+                              <CardContent className="p-2 space-y-2">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-center space-x-2 min-w-0">
+                                    <Avatar className="h-8 w-8 flex-shrink-0">
+                                      <span className="font-semibold text-xs">
+                                        {candidate.name
+                                          .split(" ")
+                                          .map((n: string) => n[0])
+                                          .join("")}
+                                      </span>
+                                    </Avatar>
+                                    <div className="min-w-0">
+                                      <h4 className="font-medium text-sm truncate">
+                                        {candidate.name}
+                                      </h4>
+                                      <p className="text-xs text-muted-foreground truncate">
+                                        {candidate.role}
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
                                 {candidate.department && (
-                                  <p className="text-xs text-gray-500 truncate">
-                                    {candidate.department}
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    Department: {candidate.department}
                                   </p>
                                 )}
-                                <div className="text-xs text-gray-500 flex items-center gap-1">
-                                  <span>Last activity:</span>
-                                  <span>{format(new Date(candidate.lastActivity), "MMM d")}</span>
+                                <div className="text-xs text-muted-foreground">
+                                  Last activity:{" "}
+                                  {format(new Date(candidate.lastActivity), "MMM d, yyyy")}
                                 </div>
                               </CardContent>
                             </Card>
