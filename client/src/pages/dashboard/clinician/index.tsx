@@ -1,13 +1,42 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClipboardList } from "lucide-react";
 import { ReferralStatsWidget } from "@/components/dashboard/ReferralStatsWidget";
+import { ClinicianBadges } from "@/components/dashboard/ClinicianBadges";
+import { useQuery } from "@tanstack/react-query";
 
 export default function ClinicianDashboard() {
+  const { data: stats } = useQuery({
+    queryKey: ['/api/clinician/referrals-stats', { range: 'week' }],
+    queryFn: async () => {
+      const response = await fetch('/api/clinician/referrals-stats?range=week');
+      if (!response.ok) {
+        return {
+          statistics: {
+            totalReferrals: 0,
+            inProgressReferrals: 0,
+            completedReferrals: 0,
+            pendingReferrals: 0,
+            rejectedReferrals: 0
+          }
+        };
+      }
+      return response.json();
+    }
+  });
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">My Referrals</h1>
 
       <ReferralStatsWidget />
+
+      <ClinicianBadges
+        stats={{
+          totalReferrals: stats?.statistics.totalReferrals || 0,
+          inProgressReferrals: stats?.statistics.inProgressReferrals || 0,
+          completedReferrals: stats?.statistics.completedReferrals || 0,
+        }}
+      />
 
       <Card>
         <CardHeader className="flex flex-row items-center gap-2">
