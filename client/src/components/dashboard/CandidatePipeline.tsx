@@ -28,7 +28,7 @@ interface PipelineStage {
 
 const PIPELINE_STAGES = [
   { id: "new", title: "New Referral", color: "bg-blue-50 text-blue-700 border-blue-100" },
-  { id: "contacted", title: "Contacted", color: "bg-yellow-50 text-yellow-700 border-yellow-100" },
+  { id: "contacted", title: "Contacted", color: "bg-[hsl(47.9,95.8%,90%)] text-[hsl(47.9,95.8%,30%)] border-[hsl(47.9,95.8%,85%)]" },
   { id: "interviewing", title: "Interviewing", color: "bg-purple-50 text-purple-700 border-purple-100" },
   { id: "hired", title: "Hired", color: "bg-green-50 text-green-700 border-green-100" },
   { id: "rejected", title: "Rejected", color: "bg-red-50 text-red-700 border-red-100" },
