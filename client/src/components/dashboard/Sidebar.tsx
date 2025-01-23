@@ -215,6 +215,12 @@ export function Sidebar() {
             </div>
           )}
 
+          {user?.role === "recruiter" && (
+            <div className="px-4">
+              <div className="h-[1px] bg-border/40 my-4" />
+            </div>
+          )}
+
           {/* Navigation Section */}
           {!isCollapsed && (
             <h3 className="text-xs font-medium text-sidebar-foreground/70 px-2">
