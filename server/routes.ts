@@ -378,6 +378,7 @@ export function registerRoutes(app: Express): Server {
         .orderBy(desc(rewards.createdAt))
         .limit(5);
 
+      const totalAmount = (pendingRewards?.amount || 0) + (paidRewards?.amount || 0);
       res.json({
         pending: {
           count: pendingRewards?.count || 0,
@@ -387,7 +388,7 @@ export function registerRoutes(app: Express): Server {
           count: paidRewards?.count || 0,
           amount: paidRewards?.amount || 0
         },
-        totalEarned: (pendingRewards?.amount || 0) + (paidRewards?.amount || 0),
+        totalEarned: totalAmount || 0,
         recentPayments
       });
     } catch (error) {
@@ -1005,7 +1006,7 @@ export function registerRoutes(app: Express): Server {
    *             properties:
    *               status:
    *                 type: string
-   *                 enum: [pending, contacted, interviewing, hired, rejected]
+                    enum: [pending, contacted, interviewing, hired, rejected]
    *     responses:
    *       200:
    *         description: Referral updated successfully
