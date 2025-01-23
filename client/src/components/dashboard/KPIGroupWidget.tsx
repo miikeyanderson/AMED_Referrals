@@ -48,15 +48,34 @@ export function KPIGroupWidget() {
     },
   });
 
-  if (isLoading) {
-    return (
-      <Card className="col-span-full">
-        <CardContent className="flex h-[400px] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
-    );
-  }
+  const renderMetric = (value: number | undefined, label: string, target?: number) => {
+    if (isLoading) {
+      return (
+        <div className="animate-pulse">
+          <div className="h-8 w-24 bg-muted rounded" />
+          {target && <Progress value={0} className="mt-3 opacity-50" />}
+        </div>
+      );
+    }
+    return value !== undefined ? (
+      <>
+        <div className="text-2xl font-bold">
+          {label.includes('days') ? `${value} days` : `${value.toFixed(1)}%`}
+        </div>
+        {target && (
+          <>
+            <Progress 
+              value={(value / target) * 100} 
+              className="mt-3"
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+              Target: {label.includes('days') ? `${target} days` : `${target}%`}
+            </p>
+          </>
+        )}
+      </>
+    ) : null;
+  };
 
   if (!kpiData) {
     return null;
@@ -77,16 +96,11 @@ export function KPIGroupWidget() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {kpiData.conversionRate.current.toFixed(1)}%
-              </div>
-              <Progress 
-                value={(kpiData.conversionRate.current / kpiData.conversionRate.target) * 100} 
-                className="mt-3"
-              />
-              <p className="text-xs text-muted-foreground mt-2">
-                Target: {kpiData.conversionRate.target}%
-              </p>
+              {renderMetric(
+                kpiData?.conversionRate.current,
+                'percentage',
+                kpiData?.conversionRate.target
+              )}
             </CardContent>
           </Card>
 
