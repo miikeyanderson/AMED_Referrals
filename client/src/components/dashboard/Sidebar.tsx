@@ -315,8 +315,8 @@ export function Sidebar() {
               </Button>
             </div>
           )}
-
-          {/* Profile Section */}
+        </div>
+      {/* Profile Section */}
           <div className="mt-auto">
             <div className="p-4 pb-2">
               <div className={cn(
