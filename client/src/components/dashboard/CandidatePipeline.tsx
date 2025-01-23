@@ -27,12 +27,12 @@ interface PipelineStage {
 }
 
 const PIPELINE_STAGES = [
-  { id: "new", title: "New Referral", color: "bg-[hsl(210,40%,20%)] text-[hsl(210,40%,80%)] border-[hsl(210,40%,25%)]" },
-  { id: "contacted", title: "Contacted", color: "bg-[hsl(45,40%,20%)] text-[hsl(45,40%,80%)] border-[hsl(45,40%,25%)]" },
-  { id: "interviewing", title: "Interviewing", color: "bg-[hsl(270,40%,20%)] text-[hsl(270,40%,80%)] border-[hsl(270,40%,25%)]" },
-  { id: "hired", title: "Hired", color: "bg-[hsl(140,40%,20%)] text-[hsl(140,40%,80%)] border-[hsl(140,40%,25%)]" },
-  { id: "rejected", title: "Rejected", color: "bg-[hsl(0,40%,20%)] text-[hsl(0,40%,80%)] border-[hsl(0,40%,25%)]" },
-];
+    { id: "new", title: "New Referral", color: "border-blue-200 bg-blue-50/10" },
+    { id: "contacted", title: "Contacted", color: "border-yellow-200 bg-yellow-50/10" },
+    { id: "interviewing", title: "Interviewing", color: "border-purple-200 bg-purple-50/10" },
+    { id: "hired", title: "Hired", color: "border-green-200 bg-green-50/10" },
+    { id: "rejected", title: "Rejected", color: "border-red-200 bg-red-50/10" },
+  ];
 
 export function CandidatePipeline() {
   const { toast } = useToast();
@@ -155,11 +155,11 @@ export function CandidatePipeline() {
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="space-y-2 min-w-[250px] flex-shrink-0"
+                    className="space-y-2 min-w-[280px] flex-shrink-0"
                   >
-                    <h3 className={`font-medium text-sm flex items-center justify-between ${stage.color}`}>
+                    <h3 className="font-medium text-sm flex items-center justify-between p-2 rounded-md bg-muted/50">
                       {stage.title}
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs font-normal text-muted-foreground">
                         {pipelineData?.pipeline?.[stage.id]?.count || 0}
                       </span>
                     </h3>
@@ -179,10 +179,10 @@ export function CandidatePipeline() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`transition-colors cursor-pointer ${PIPELINE_STAGES.find(s => s.id === stage.id)?.color}`}
+                              className={`transition-colors cursor-pointer border ${PIPELINE_STAGES.find(s => s.id === stage.id)?.color} hover:bg-accent`}
                               onClick={() => handleCandidateClick(candidate.id)}
                             >
-                              <CardContent className="p-2 space-y-2">
+                              <CardContent className="p-3 space-y-2.5">
                                 <div className="flex items-start justify-between">
                                   <div className="flex items-center space-x-2 min-w-0">
                                     <Avatar className="h-8 w-8 flex-shrink-0">
