@@ -60,11 +60,11 @@ interface RewardsSnapshot {
 }
 
 const tierColors = {
-  bronze: 'bg-orange-500/90 hover:bg-orange-500',
-  silver: 'bg-slate-400/90 hover:bg-slate-400',
-  gold: 'bg-amber-400/90 hover:bg-amber-400',
-  platinum: 'bg-sky-400/90 hover:bg-sky-400',
-  diamond: 'bg-purple-500/90 hover:bg-purple-500'
+  bronze: 'bg-orange-500',
+  silver: 'bg-gray-400',
+  gold: 'bg-yellow-400',
+  platinum: 'bg-blue-400',
+  diamond: 'bg-purple-500'
 };
 
 const achievementIcons = {
@@ -73,12 +73,7 @@ const achievementIcons = {
   career_milestone: Star,
   quality_rating: Award,
   speed_hero: Zap,
-  team_player: Users,
-  default: Award
-};
-
-const getAchievementIcon = (type: string) => {
-  return achievementIcons[type] || achievementIcons.default;
+  team_player: Users
 };
 
 export function RewardsSnapshotWidget() {
@@ -267,10 +262,8 @@ export function RewardsSnapshotWidget() {
                         </div>
                         <Progress
                           value={(achievement.progress / achievement.requiredScore) * 100}
-                          className={`h-2 transition-all ${
-                            achievement.isCompleted 
-                              ? 'bg-green-200 shadow-[0_0_10px_rgba(34,197,94,0.3)]' 
-                              : ''
+                          className={`h-2 ${
+                            achievement.isCompleted ? 'bg-green-200' : ''
                           }`}
                         />
                       </div>
