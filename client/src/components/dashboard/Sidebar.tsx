@@ -318,25 +318,26 @@ export function Sidebar() {
         </div>
       </ScrollArea>
 
-      <div className="p-4 pb-2">
-        <div className={cn(
-          "flex items-center gap-4 rounded-lg bg-sidebar-accent/10 p-4",
-          isCollapsed && "flex-col gap-2"
-        )}>
-          <Avatar>
-            <AvatarImage src={user?.avatar} />
-            <AvatarFallback>{user?.name?.[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
-          {!isCollapsed && (
-            <div className="flex flex-col flex-1">
-              <span className="font-medium text-sidebar-foreground">{user?.name}</span>
-              <span className="text-sm text-sidebar-foreground/60 capitalize">{user?.role}</span>
-            </div>
-          )}
+      <div className="mt-auto border-t">
+        <div className="p-4 pb-2">
+          <div className={cn(
+            "flex items-center gap-4 rounded-lg bg-sidebar-accent/10 p-4",
+            isCollapsed && "flex-col gap-2"
+          )}>
+            <Avatar>
+              <AvatarImage src={user?.avatar} />
+              <AvatarFallback>{user?.name?.[0]?.toUpperCase()}</AvatarFallback>
+            </Avatar>
+            {!isCollapsed && (
+              <div className="flex flex-col flex-1">
+                <span className="font-medium text-sidebar-foreground">{user?.name}</span>
+                <span className="text-sm text-sidebar-foreground/60 capitalize">{user?.role}</span>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      <div className="p-4 border-t space-y-2">
+        <div className="p-4 border-t space-y-2">
         <div className={cn(
           "flex items-center justify-center",
           isCollapsed && "flex-col"
