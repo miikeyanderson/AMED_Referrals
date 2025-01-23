@@ -58,7 +58,7 @@ export function ReferralInflowWidget() {
   }
 
   return (
-    <Card className="col-span-full">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-base font-medium">Referral Inflow</CardTitle>
         <div className="flex items-center gap-2">
