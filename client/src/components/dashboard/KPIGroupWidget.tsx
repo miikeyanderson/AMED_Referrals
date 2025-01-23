@@ -82,7 +82,7 @@ export function KPIGroupWidget() {
   }
 
   return (
-    <Card className="col-span-full relative">
+    <Card className="col-span-full relative z-[1]">
       <CardHeader>
         <CardTitle className="text-lg font-medium">Recruiter Performance KPIs</CardTitle>
       </CardHeader>

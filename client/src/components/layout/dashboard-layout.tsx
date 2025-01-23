@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen flex">
-      <div className="fixed inset-y-0 left-0">
+      <div className="fixed inset-y-0 left-0 z-[100]">
         <Sidebar />
       </div>
       
