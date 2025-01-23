@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
       
       {/* Main content */}
-      <div className="flex-1 pl-[80px] transition-all duration-300">
+      <div className="flex-1 pl-[80px] transition-all duration-300 relative z-0">
         <div className="h-16 border-b flex items-center px-6">
           <div className="ml-auto flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
