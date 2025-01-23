@@ -27,11 +27,11 @@ interface PipelineStage {
 }
 
 const PIPELINE_STAGES = [
-  { id: "new", title: "New Referral", color: "bg-[hsl(210,40%,20%)] text-[hsl(210,40%,80%)] border-blue-200" },
-  { id: "contacted", title: "Contacted", color: "bg-[hsl(45,40%,20%)] text-[hsl(45,40%,80%)] border-yellow-200" },
-  { id: "interviewing", title: "Interviewing", color: "bg-[hsl(270,40%,20%)] text-[hsl(270,40%,80%)] border-purple-200" },
-  { id: "hired", title: "Hired", color: "bg-[hsl(140,40%,20%)] text-[hsl(140,40%,80%)] border-green-200" },
-  { id: "rejected", title: "Rejected", color: "bg-[hsl(0,40%,20%)] text-[hsl(0,40%,80%)] border-red-200" },
+  { id: "new", title: "New Referral", color: "bg-blue-950/50 text-blue-100 border-blue-200" },
+  { id: "contacted", title: "Contacted", color: "bg-yellow-950/50 text-yellow-100 border-yellow-200" },
+  { id: "interviewing", title: "Interviewing", color: "bg-purple-950/50 text-purple-100 border-purple-200" },
+  { id: "hired", title: "Hired", color: "bg-green-950/50 text-green-100 border-green-200" },
+  { id: "rejected", title: "Rejected", color: "bg-red-950/50 text-red-100 border-red-200" },
 ];
 
 export function CandidatePipeline() {
