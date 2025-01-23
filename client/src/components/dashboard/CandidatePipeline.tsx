@@ -157,11 +157,13 @@ export function CandidatePipeline() {
                     {...provided.droppableProps}
                     className="space-y-2 min-w-[280px] flex-shrink-0"
                   >
-                    <h3 className="font-medium text-sm flex items-center justify-between p-2 rounded-md bg-muted/50">
-                      {stage.title}
-                      <span className="text-xs font-normal text-muted-foreground">
-                        {pipelineData?.pipeline?.[stage.id]?.count || 0}
-                      </span>
+                    <h3 className={`flex items-center justify-between p-2 rounded-md ${stage.color}`}>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium">{stage.title}</span>
+                        <span className="text-sm opacity-70">
+                          {pipelineData?.pipeline?.[stage.id]?.count || 0}
+                        </span>
+                      </div>
                     </h3>
                     <div
                       className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-2 space-y-2 transition-colors ${
