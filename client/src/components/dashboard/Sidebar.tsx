@@ -181,7 +181,7 @@ export function Sidebar() {
       animate={{
         width: isCollapsed ? 80 : 256,
       }}
-      className="fixed z-50 flex h-screen flex-col border-r backdrop-blur-sm bg-sidebar/98"
+      className="fixed z-[100] flex h-screen flex-col border-r backdrop-blur-sm bg-sidebar/98"
       onAnimationComplete={() => {
         document.documentElement.setAttribute('data-sidebar-expanded', (!isCollapsed).toString());
       }}
