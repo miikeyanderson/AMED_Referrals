@@ -199,18 +199,18 @@ export function CandidatePipeline() {
                                       <h4 className="font-medium text-sm truncate">
                                         {candidate.name}
                                       </h4>
-                                      <p className="text-xs text-muted-foreground truncate">
+                                      <p className="text-xs text-foreground/80 truncate">
                                         {candidate.role}
                                       </p>
                                     </div>
                                   </div>
                                 </div>
                                 {candidate.department && (
-                                  <p className="text-xs text-muted-foreground truncate">
+                                  <p className="text-xs text-foreground/70 truncate">
                                     Department: {candidate.department}
                                   </p>
                                 )}
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-xs text-foreground/70">
                                   Last activity:{" "}
                                   {format(new Date(candidate.lastActivity), "MMM d, yyyy")}
                                 </div>
