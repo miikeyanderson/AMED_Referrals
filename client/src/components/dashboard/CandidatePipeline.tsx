@@ -27,11 +27,11 @@ interface PipelineStage {
 }
 
 const PIPELINE_STAGES = [
-  { id: "new", title: "New Referral", color: "bg-[hsl(210,30%,20%)] text-[hsl(210,30%,80%)] border-[hsl(210,30%,25%)]" },
-  { id: "contacted", title: "Contacted", color: "bg-[hsl(45,30%,20%)] text-[hsl(45,30%,80%)] border-[hsl(45,30%,25%)]" },
-  { id: "interviewing", title: "Interviewing", color: "bg-[hsl(270,30%,20%)] text-[hsl(270,30%,80%)] border-[hsl(270,30%,25%)]" },
-  { id: "hired", title: "Hired", color: "bg-[hsl(140,30%,20%)] text-[hsl(140,30%,80%)] border-[hsl(140,30%,25%)]" },
-  { id: "rejected", title: "Rejected", color: "bg-[hsl(0,30%,20%)] text-[hsl(0,30%,80%)] border-[hsl(0,30%,25%)]" },
+  { id: "new", title: "New Referral", color: "bg-[hsl(210,40%,20%)] text-[hsl(210,40%,80%)] border-[hsl(210,40%,25%)]" },
+  { id: "contacted", title: "Contacted", color: "bg-[hsl(45,40%,20%)] text-[hsl(45,40%,80%)] border-[hsl(45,40%,25%)]" },
+  { id: "interviewing", title: "Interviewing", color: "bg-[hsl(270,40%,20%)] text-[hsl(270,40%,80%)] border-[hsl(270,40%,25%)]" },
+  { id: "hired", title: "Hired", color: "bg-[hsl(140,40%,20%)] text-[hsl(140,40%,80%)] border-[hsl(140,40%,25%)]" },
+  { id: "rejected", title: "Rejected", color: "bg-[hsl(0,40%,20%)] text-[hsl(0,40%,80%)] border-[hsl(0,40%,25%)]" },
 ];
 
 export function CandidatePipeline() {
