@@ -1,14 +1,11 @@
 
 import { db } from '../db';
-import { achievements, userAchievements, achievementProgress } from '../db/schema';
-import { drizzle } from 'drizzle-orm/neon-http';
-import { migrate } from 'drizzle-orm/neon-http/migrator';
 
 async function createTables() {
   try {
     console.log('Creating achievement tables...');
     
-    // Create the tables in the correct order
+    // Create enums
     await db.execute(`
       DO $$ BEGIN
         CREATE TYPE achievement_type AS ENUM (
@@ -38,6 +35,7 @@ async function createTables() {
       END $$;
     `);
 
+    // Create achievements table
     await db.execute(`
       CREATE TABLE IF NOT EXISTS achievements (
         id SERIAL PRIMARY KEY,
@@ -50,11 +48,17 @@ async function createTables() {
         icon_url TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       );
+    `);
 
+    await db.execute(`
       CREATE INDEX IF NOT EXISTS achievement_type_idx ON achievements(type);
+    `);
+
+    await db.execute(`
       CREATE INDEX IF NOT EXISTS achievement_tier_idx ON achievements(tier);
     `);
 
+    // Create user_achievements table
     await db.execute(`
       CREATE TABLE IF NOT EXISTS user_achievements (
         id SERIAL PRIMARY KEY,
@@ -67,11 +71,17 @@ async function createTables() {
         last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         UNIQUE(user_id, achievement_id)
       );
+    `);
 
+    await db.execute(`
       CREATE INDEX IF NOT EXISTS user_achievement_user_idx ON user_achievements(user_id);
+    `);
+
+    await db.execute(`
       CREATE INDEX IF NOT EXISTS user_achievement_achievement_idx ON user_achievements(achievement_id);
     `);
 
+    // Create achievement_progress table
     await db.execute(`
       CREATE TABLE IF NOT EXISTS achievement_progress (
         id SERIAL PRIMARY KEY,
@@ -80,9 +90,17 @@ async function createTables() {
         progress_snapshot JSONB NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       );
+    `);
 
+    await db.execute(`
       CREATE INDEX IF NOT EXISTS achievement_progress_user_idx ON achievement_progress(user_id);
+    `);
+
+    await db.execute(`
       CREATE INDEX IF NOT EXISTS achievement_progress_achievement_idx ON achievement_progress(achievement_id);
+    `);
+
+    await db.execute(`
       CREATE INDEX IF NOT EXISTS achievement_progress_created_at_idx ON achievement_progress(created_at);
     `);
 
