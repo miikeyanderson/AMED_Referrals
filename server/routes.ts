@@ -11,6 +11,8 @@ import { add, format, startOfWeek, endOfWeek, parseISO, isValid, startOfMonth, e
 import { referralSubmissionSchema } from "@db/schema";
 import { ZodError, z } from "zod";
 import { sanitizeHtml } from "./utils/sanitize";
+import { achievements, userAchievements } from '@db/schema'; // Added import for achievements schema
+
 
 // Type definitions
 interface PipelineQueryParams {
@@ -281,63 +283,73 @@ export function registerRoutes(app: Express): Server {
   );
 
 
+
   /**
    * @swagger
-   * /api/clinician/rewards-snapshot:
+   * /api/clinician/achievements:
    *   get:
-   *     summary: Get clinician rewards snapshot
-   *     description: Retrieve comprehensive rewards data including pending, paid, and total earned amounts
-   *     tags: [Clinician]
+   *     summary: Get clinician achievements
+   *     description: Retrieve all achievements and progress for the clinician
+   *     tags: [Achievements]
    *     security:
    *       - sessionAuth: []
    *     responses:
    *       200:
-   *         description: Rewards snapshot retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 pending:
-   *                   type: object
-   *                   properties:
-   *                     count: 
-   *                       type: integer
-   *                     amount:
-   *                       type: number
-   *                 paid:
-   *                   type: object
-   *                   properties:
-   *                     count:
-   *                       type: integer
-   *                     amount:
-   *                       type: number
-   *                 totalEarned:
-   *                   type: number
-   *                 recentPayments:
-   *                   type: array
-   *                   items:
-   *                     type: object
-   *                     properties:
-   *                       id:
-   *                         type: integer
-   *                       amount:
-   *                         type: number
-   *                       status:
-   *                         type: string
-   *                       createdAt:
-   *                         type: string
-   *                         format: date-time
+   *         description: List of achievements with progress
    *       401:
    *         description: Not authenticated
    *       403:
    *         description: Not authorized (non-clinician users)
-   *       500:
-   *         description: Server error
    */
+  app.get(
+    "/api/clinician/achievements",
+    checkAuth,
+    checkClinicianRole,
+    async (req: Request, res: Response) => {
+      try {
+        // Get all achievements with user progress
+        const userAchievementsList = await db
+          .select({
+            id: achievements.id,
+            name: achievements.name,
+            description: achievements.description,
+            type: achievements.type,
+            tier: achievements.tier,
+            requiredScore: achievements.requiredScore,
+            iconUrl: achievements.iconUrl,
+            progress: userAchievements.progress,
+            isCompleted: userAchievements.isCompleted,
+            completedAt: userAchievements.completedAt
+          })
+          .from(achievements)
+          .leftJoin(
+            userAchievements,
+            and(
+              eq(achievements.id, userAchievements.achievementId),
+              eq(userAchievements.userId, req.user!.id)
+            )
+          )
+          .orderBy(achievements.tier);
+
+        res.json(userAchievementsList);
+      } catch (error) {
+        logServerError(error as Error, {
+          context: 'get-achievements',
+          userId: req.user?.id,
+          role: req.user?.role
+        });
+        res.status(500).json({
+          error: "Failed to fetch achievements",
+          code: "SERVER_ERROR"
+        });
+      }
+    }
+  );
+
+  // Extend the existing /api/clinician/rewards-snapshot endpoint to include achievements
   app.get("/api/clinician/rewards-snapshot", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
     try {
-      // Get pending rewards (rewards with status 'pending')
+      // Get rewards data (existing code)
       const [pendingRewards] = await db
         .select({
           count: sql<number>`cast(count(*) as integer)`,
@@ -346,12 +358,11 @@ export function registerRoutes(app: Express): Server {
         .from(rewards)
         .where(
           and(
-            eq(rewards.userId, req.user.id),
+            eq(rewards.userId, req.user!.id),
             eq(rewards.status, 'pending')
           )
         );
 
-      // Get paid rewards (rewards with status 'paid')
       const [paidRewards] = await db
         .select({
           count: sql<number>`cast(count(*) as integer)`,
@@ -360,7 +371,7 @@ export function registerRoutes(app: Express): Server {
         .from(rewards)
         .where(
           and(
-            eq(rewards.userId, req.user.id),
+            eq(rewards.userId, req.user!.id),
             eq(rewards.status, 'paid')
           )
         );
@@ -374,11 +385,36 @@ export function registerRoutes(app: Express): Server {
           createdAt: rewards.createdAt
         })
         .from(rewards)
-        .where(eq(rewards.userId, req.user.id))
+        .where(eq(rewards.userId, req.user!.id))
         .orderBy(desc(rewards.createdAt))
         .limit(5);
 
+      // Get achievements data
+      const achievementsData = await db
+        .select({
+          id: achievements.id,
+          name: achievements.name,
+          description: achievements.description,
+          type: achievements.type,
+          tier: achievements.tier,
+          requiredScore: achievements.requiredScore,
+          iconUrl: achievements.iconUrl,
+          progress: userAchievements.progress,
+          isCompleted: userAchievements.isCompleted,
+          completedAt: userAchievements.completedAt
+        })
+        .from(achievements)
+        .leftJoin(
+          userAchievements,
+          and(
+            eq(achievements.id, userAchievements.achievementId),
+            eq(userAchievements.userId, req.user!.id)
+          )
+        )
+        .orderBy(achievements.tier);
+
       const totalAmount = (pendingRewards?.amount || 0) + (paidRewards?.amount || 0);
+
       res.json({
         pending: {
           count: pendingRewards?.count || 0,
@@ -389,7 +425,8 @@ export function registerRoutes(app: Express): Server {
           amount: paidRewards?.amount || 0
         },
         totalEarned: totalAmount || 0,
-        recentPayments
+        recentPayments,
+        achievements: achievementsData
       });
     } catch (error) {
       logServerError(error as Error, {
@@ -965,7 +1002,7 @@ export function registerRoutes(app: Express): Server {
    *     parameters:
    *       - in: path
    *         name: id
-   *         required: true
+         required: true
    *         schema:
    *           type: integer
    *         description: ID of the referral
@@ -1006,7 +1043,7 @@ export function registerRoutes(app: Express): Server {
    *             properties:
    *               status:
    *                 type: string
-                    enum: [pending, contacted, interviewing, hired, rejected]
+   *                 enum: [pending, contacted, interviewing, hired, rejected]
    *     responses:
    *       200:
    *         description: Referral updated successfully
@@ -1945,7 +1982,7 @@ export function registerRoutes(app: Express): Server {
         )
         SELECT
           COALESCE(COUNT(hired_referrals.id), 0) as hired_count,
-          COALESCE(AVG(hired_referrals.days_to_hire), 0) as avg_days_to_hire,
+          COALESCE(AVG(hired_referrals.days_to_hire), 0) as avg_daysto_hire,
           (SELECT total FROM total_referrals) as total_referrals
         FROM hired_referrals
       `);
@@ -2286,7 +2323,7 @@ export function registerRoutes(app: Express): Server {
    *         schema:
    *           type: string
    *           enum: [asc, desc]
-   *         default: desc
+   *           default: desc
    *         description: Sort order
    *     responses:
    *         description: Pipeline data retrieved successfully
