@@ -20,6 +20,11 @@ import {
   ChevronRight,
   Moon,
   Sun,
+  UserPlus,
+  Calendar,
+  Clock,
+  ClipboardList,
+  History,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
@@ -64,6 +69,38 @@ export function Sidebar() {
         description: error.message,
       });
     }
+  };
+
+  const QuickAction = ({ 
+    icon: Icon, 
+    label, 
+    onClick,
+  }: { 
+    icon: any;
+    label: string;
+    onClick: () => void;
+  }) => {
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          <Button
+            variant="outline"
+            size="icon"
+            className={cn(
+              "h-9 w-9",
+              isCollapsed ? "mx-auto" : "w-full"
+            )}
+            onClick={onClick}
+          >
+            <Icon className="h-4 w-4" />
+            <span className="sr-only">{label}</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="right">
+          {label}
+        </TooltipContent>
+      </Tooltip>
+    );
   };
 
   const NavItem = ({ 
@@ -141,37 +178,81 @@ export function Sidebar() {
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="p-4 space-y-2">
-          <NavItem
-            icon={LayoutDashboard}
-            label="Dashboard"
-            path="/dashboard"
-            show={user?.role === "recruiter"}
-          />
-          <NavItem
-            icon={Users}
-            label="Candidate Pipeline"
-            path="/pipeline"
-            badge={pendingReferrals?.count}
-            show={user?.role === "recruiter"}
-          />
-          <NavItem
-            icon={BarChart3}
-            label="Performance"
-            path="/performance"
-            show={user?.role === "recruiter"}
-          />
-          <NavItem
-            icon={Bell}
-            label="Notifications"
-            path="/notifications"
-            badge={notifications?.count}
-          />
-          <NavItem
-            icon={Settings}
-            label="Settings"
-            path="/settings"
-          />
+        <div className="p-4 space-y-4">
+          {/* Quick Actions Section */}
+          {user?.role === "recruiter" && (
+            <div className="space-y-2">
+              {!isCollapsed && (
+                <h3 className="text-xs font-medium text-sidebar-foreground/70 px-2">
+                  Quick Actions
+                </h3>
+              )}
+              <div className={cn(
+                "grid gap-2",
+                isCollapsed ? "grid-cols-1" : "grid-cols-2"
+              )}>
+                <QuickAction
+                  icon={UserPlus}
+                  label="New Referral"
+                  onClick={() => setLocation("/referral/new")}
+                />
+                <QuickAction
+                  icon={Calendar}
+                  label="Schedule Interview"
+                  onClick={() => setLocation("/schedule")}
+                />
+                <QuickAction
+                  icon={Clock}
+                  label="Recent Activity"
+                  onClick={() => setLocation("/activity")}
+                />
+                <QuickAction
+                  icon={History}
+                  label="Recent Candidates"
+                  onClick={() => setLocation("/recent")}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Navigation Section */}
+          {!isCollapsed && (
+            <h3 className="text-xs font-medium text-sidebar-foreground/70 px-2">
+              Navigation
+            </h3>
+          )}
+          <div className="space-y-2">
+            <NavItem
+              icon={LayoutDashboard}
+              label="Dashboard"
+              path="/dashboard"
+              show={user?.role === "recruiter"}
+            />
+            <NavItem
+              icon={Users}
+              label="Candidate Pipeline"
+              path="/pipeline"
+              badge={pendingReferrals?.count}
+              show={user?.role === "recruiter"}
+            />
+            <NavItem
+              icon={BarChart3}
+              label="Performance"
+              path="/performance"
+              show={user?.role === "recruiter"}
+            />
+            <NavItem
+              icon={Bell}
+              label="Notifications"
+              path="/notifications"
+              badge={notifications?.count}
+            />
+            <NavItem
+              icon={Settings}
+              label="Settings"
+              path="/settings"
+            />
+          </div>
         </div>
       </ScrollArea>
 
