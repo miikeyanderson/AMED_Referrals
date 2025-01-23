@@ -338,10 +338,9 @@ export function Sidebar() {
 
       <div className="p-4 border-t space-y-2">
         <div className={cn(
-          "flex items-center justify-between",
+          "flex items-center justify-center",
           isCollapsed && "flex-col"
         )}>
-          {!isCollapsed && <span className="text-sm">Theme</span>}
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <Switch
