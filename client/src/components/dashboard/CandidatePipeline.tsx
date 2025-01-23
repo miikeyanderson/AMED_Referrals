@@ -27,12 +27,12 @@ interface PipelineStage {
 }
 
 const PIPELINE_STAGES = [
-    { id: "new", title: "New Referral", color: "border-blue-200 bg-blue-50/10" },
-    { id: "contacted", title: "Contacted", color: "border-yellow-200 bg-yellow-50/10" },
-    { id: "interviewing", title: "Interviewing", color: "border-purple-200 bg-purple-50/10" },
-    { id: "hired", title: "Hired", color: "border-green-200 bg-green-50/10" },
-    { id: "rejected", title: "Rejected", color: "border-red-200 bg-red-50/10" },
-  ];
+  { id: "new", title: "New Referral", color: "bg-[hsl(210,40%,20%)] text-[hsl(210,40%,80%)] border-blue-200" },
+  { id: "contacted", title: "Contacted", color: "bg-[hsl(45,40%,20%)] text-[hsl(45,40%,80%)] border-yellow-200" },
+  { id: "interviewing", title: "Interviewing", color: "bg-[hsl(270,40%,20%)] text-[hsl(270,40%,80%)] border-purple-200" },
+  { id: "hired", title: "Hired", color: "bg-[hsl(140,40%,20%)] text-[hsl(140,40%,80%)] border-green-200" },
+  { id: "rejected", title: "Rejected", color: "bg-[hsl(0,40%,20%)] text-[hsl(0,40%,80%)] border-red-200" },
+];
 
 export function CandidatePipeline() {
   const { toast } = useToast();
