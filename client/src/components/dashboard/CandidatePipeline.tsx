@@ -27,11 +27,11 @@ interface PipelineStage {
 }
 
 const PIPELINE_STAGES = [
-  { id: "new", title: "New Referral" },
-  { id: "contacted", title: "Contacted" },
-  { id: "interviewing", title: "Interviewing" },
-  { id: "hired", title: "Hired" },
-  { id: "rejected", title: "Rejected" },
+  { id: "new", title: "New Referral", color: "bg-blue-50 text-blue-700 border-blue-100" },
+  { id: "contacted", title: "Contacted", color: "bg-yellow-50 text-yellow-700 border-yellow-100" },
+  { id: "interviewing", title: "Interviewing", color: "bg-purple-50 text-purple-700 border-purple-100" },
+  { id: "hired", title: "Hired", color: "bg-green-50 text-green-700 border-green-100" },
+  { id: "rejected", title: "Rejected", color: "bg-red-50 text-red-700 border-red-100" },
 ];
 
 export function CandidatePipeline() {
@@ -157,7 +157,7 @@ export function CandidatePipeline() {
                     {...provided.droppableProps}
                     className="space-y-4 min-w-0"
                   >
-                    <h3 className="font-medium text-sm flex items-center justify-between">
+                    <h3 className={`font-medium text-sm flex items-center justify-between ${stage.color}`}>
                       {stage.title}
                       <span className="text-xs text-muted-foreground">
                         {pipelineData?.pipeline?.[stage.id]?.count || 0}
@@ -179,7 +179,7 @@ export function CandidatePipeline() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className="bg-card hover:bg-accent transition-colors cursor-pointer"
+                              className={`transition-colors cursor-pointer ${PIPELINE_STAGES.find(s => s.id === stage.id)?.color}`}
                               onClick={() => handleCandidateClick(candidate.id)}
                             >
                               <CardContent className="p-4 space-y-3">

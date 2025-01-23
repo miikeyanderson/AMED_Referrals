@@ -14,6 +14,7 @@ import { Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { ThemeProvider } from "@/components/themes/theme-provider";
 import { ThemeToggle } from "@/components/themes/theme-toggle";
+import { TooltipProvider } from "@/components/ui/tooltip"; // Added import
 
 function ProtectedRoute({ 
   component: Component, 
@@ -96,17 +97,19 @@ function Router() {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="system">
-      <QueryClientProvider client={queryClient}>
-        <div className="relative">
-          <div className="fixed top-4 right-4 z-50">
-            <ThemeToggle />
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="system">
+        <TooltipProvider> {/* TooltipProvider added here */}
+          <div className="relative">
+            <div className="fixed top-4 right-4 z-50">
+              <ThemeToggle />
+            </div>
+            <Router />
+            <Toaster />
           </div>
-          <Router />
-          <Toaster />
-        </div>
-      </QueryClientProvider>
-    </ThemeProvider>
+        </TooltipProvider> {/* TooltipProvider closed here */}
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
