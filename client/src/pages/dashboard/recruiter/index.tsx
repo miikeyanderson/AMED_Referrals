@@ -25,11 +25,11 @@ export default function RecruiterDashboard() {
         </CardContent>
       </Card>
 
-      {/* Pipeline Snapshot Widget */}
-      <PipelineSnapshotWidget />
-
-      {/* Referral Inflow Widget */}
-      <ReferralInflowWidget />
+      {/* Pipeline Snapshot and Referral Inflow Widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PipelineSnapshotWidget />
+        <ReferralInflowWidget />
+      </div>
     </div>
   );
 }
