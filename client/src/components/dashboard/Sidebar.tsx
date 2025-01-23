@@ -25,11 +25,16 @@ import {
   Clock,
   ClipboardList,
   History,
+  Gift,
+  HelpCircle,
+  MessageCircle,
+  CalendarClock,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { FeedbackModal } from "./FeedbackModal";
 
 export function Sidebar() {
   const { user, logout } = useUser();
@@ -37,6 +42,7 @@ export function Sidebar() {
   const { theme, setTheme } = useTheme();
   const [location, setLocation] = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
 
   // Fetch pending referrals count
   const { data: pendingReferrals } = useQuery<PendingReferralsResponse>({
@@ -48,6 +54,18 @@ export function Sidebar() {
   const { data: notifications } = useQuery<NotificationsResponse>({
     queryKey: ['/api/notifications/unread/count'],
     enabled: !!user,
+  });
+
+  // Fetch pending rewards count
+  const { data: pendingRewards } = useQuery({
+    queryKey: ['/api/rewards/pending/count'],
+    enabled: user?.role === 'recruiter',
+  });
+
+  // Fetch calendar events count
+  const { data: calendarEvents } = useQuery({
+    queryKey: ['/api/calendar/events/today'],
+    enabled: user?.role === 'recruiter',
   });
 
   const handleLogout = async () => {
@@ -248,6 +266,26 @@ export function Sidebar() {
               show={user?.role === "recruiter"}
             />
             <NavItem
+              icon={Gift}
+              label="Rewards"
+              path="/rewards"
+              badge={pendingRewards?.count}
+              show={user?.role === "recruiter"}
+            />
+            <NavItem
+              icon={CalendarClock}
+              label="Calendar"
+              path="/calendar"
+              badge={calendarEvents?.count}
+              show={user?.role === "recruiter"}
+            />
+            <NavItem
+              icon={HelpCircle}
+              label="Help & Support"
+              path="/help"
+              show={user?.role === "recruiter"}
+            />
+            <NavItem
               icon={Bell}
               label="Notifications"
               path="/notifications"
@@ -259,6 +297,24 @@ export function Sidebar() {
               path="/settings"
             />
           </div>
+
+          {/* Feedback Section */}
+          {user?.role === "recruiter" && (
+            <div className="mt-6">
+              <div className="h-[1px] bg-border/40 mb-4" />
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start",
+                  isCollapsed && "justify-center p-2"
+                )}
+                onClick={() => setIsFeedbackModalOpen(true)}
+              >
+                <MessageCircle className={cn("h-4 w-4", !isCollapsed && "mr-2")} />
+                {!isCollapsed && <span>Have Feedback?</span>}
+              </Button>
+            </div>
+          )}
         </div>
       </ScrollArea>
 
@@ -344,6 +400,10 @@ export function Sidebar() {
           {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         </span>
       </Button>
+      <FeedbackModal
+        open={isFeedbackModalOpen}
+        onOpenChange={setIsFeedbackModalOpen}
+      />
     </motion.div>
   );
 }
