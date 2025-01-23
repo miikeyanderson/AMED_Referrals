@@ -182,6 +182,9 @@ export function Sidebar() {
         width: isCollapsed ? 80 : 256,
       }}
       className="fixed flex h-screen flex-col border-r backdrop-blur-sm bg-sidebar/98"
+      onAnimationComplete={() => {
+        document.documentElement.setAttribute('data-sidebar-expanded', (!isCollapsed).toString());
+      }}
     >
       <div className={cn(
         "flex items-center p-6",
