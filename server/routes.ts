@@ -335,7 +335,10 @@ export function registerRoutes(app: Express): Server {
    *       500:
    *         description: Server error
    */
-  app.get("/api/clinician/rewards-snapshot", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
+  app.get("/api/clinician/rewards-snapshot", checkAuth, async (req: Request, res: Response) => {
+  if (req.user?.role !== 'clinician') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
     try {
       // Get pending rewards (rewards with status 'pending')
       const [pendingRewards] = await db
