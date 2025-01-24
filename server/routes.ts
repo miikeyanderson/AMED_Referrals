@@ -4,13 +4,15 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { setupAuth } from "./auth";
 import { db } from "@db";
 import { alerts, referrals, rewards, users, type Alert, type InsertAlert, type Referral } from "@db/schema";
-import { eq, desc, and, or, like, sql, inArray, asc } from "drizzle-orm";
+import { eq, desc, and, or, like, sql, inArray, asc, gte, lte } from "drizzle-orm";
 import { SQL } from "drizzle-orm";
 import { logUnauthorizedAccess, logServerError } from "./utils/logger";
 import { add, format, startOfWeek, endOfWeek, parseISO, isValid, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter } from "date-fns";
 import { referralSubmissionSchema } from "@db/schema";
 import { ZodError, z } from "zod";
 import { sanitizeHtml } from "./utils/sanitize";
+import { notifications } from "@db/schema";
+
 
 // Type definitions
 interface PipelineQueryParams {
@@ -998,7 +1000,7 @@ export function registerRoutes(app: Express): Server {
    *         description: Server error while fetching referral
    *   patch:
    *     summary: Update a referral
-   *     description: Update the status or details of a referral (recruiters/leadership only)
+   *     description: UpdateUpdate the status or details of a referral (recruiters/leadership only)
    *     tags: [Referrals]
    *     security:
    *       - sessionAuth: []
@@ -2418,6 +2420,198 @@ export function registerRoutes(app: Express): Server {
         });
         res.status(500).json({
           error: "Failed to fetch pipeline data",
+          code: "SERVER_ERROR"
+        });
+      }
+    }
+  );
+
+  // Add validation schema for notification query parameters
+  const notificationQuerySchema = z.object({
+    type: z.enum(['referral_update', 'reward_update', 'system_alert', 'all']).default('all'),
+    status: z.enum(['unread', 'read', 'archived', 'all']).default('all'),
+    fromDate: z.string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format. Use YYYY-MM-DD")
+      .optional(),
+    toDate: z.string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format. Use YYYY-MM-DD")
+      .optional(),
+    sortOrder: z.enum(['asc', 'desc']).default('desc'),
+    page: z.number().int().min(1).default(1),
+    limit: z.number().int().min(1).max(20).default(20),
+  });
+
+  /**
+   * @swagger
+   * /api/clinician/notifications:
+   *   get:
+   *     summary: Get clinician notifications
+   *     description: Retrieve notifications with filtering, sorting, and pagination
+   *     tags: [Notifications]
+   *     security:
+   *       - sessionAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: type
+   *         schema:
+   *           type: string
+   *           enum: [referral_update, reward_update, system_alert, all]
+   *         description: Filter by notification type
+   *       - in: query
+   *         name: status
+   *         schema:
+   *           type: string
+   *           enum: [unread, read, archived, all]
+   *         description: Filter by notification status
+   *       - in: query
+   *         name: fromDate
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: Start date for filtering (YYYY-MM-DD)
+   *       - in: query
+   *         name: toDate
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: End date for filtering (YYYY-MM-DD)
+   *       - in: query
+   *         name: sortOrder
+   *         schema:
+   *           type: string
+   *           enum: [asc, desc]
+   *         description: Sort order by creation date
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           default: 1
+   *         description: Page number
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           maximum: 20
+   *           default: 20
+   *         description: Items per page
+   *     responses:
+   *       200:
+   *         description: List of notifications
+   *       400:
+   *         description: Invalid query parameters
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized (non-clinician users)
+   *       500:
+   *         description: Server error
+   */
+  app.get(
+    "/api/clinician/notifications",
+    checkAuth,
+    checkClinicianRole,
+    async (req: Request, res: Response) => {
+      try {
+        // Parse and validate query parameters
+        const queryParams = notificationQuerySchema.parse({
+          type: req.query.type || 'all',
+          status: req.query.status || 'all',
+          fromDate: req.query.fromDate,
+          toDate: req.query.toDate,
+          sortOrder: req.query.sortOrder || 'desc',
+          page: parseInt(req.query.page as string) || 1,
+          limit: parseInt(req.query.limit as string) || 20
+        });
+
+        // Build the base query
+        let baseQuery = db
+          .select({
+            id: notifications.id,
+            title: notifications.title,
+            description: notifications.description,
+            type: notifications.type,
+            status: notifications.status,
+            createdAt: notifications.createdAt,
+            updatedAt: notifications.updatedAt,
+            metadata: notifications.metadata,
+            relatedReferralId: notifications.relatedReferralId,
+            relatedRewardId: notifications.relatedRewardId
+          })
+          .from(notifications)
+          .where(eq(notifications.userId, req.user!.id));
+
+        // Apply type filter
+        if (queryParams.type !== 'all') {
+          baseQuery = baseQuery.where(eq(notifications.type, queryParams.type));
+        }
+
+        // Apply status filter
+        if (queryParams.status !== 'all') {
+          baseQuery = baseQuery.where(eq(notifications.status, queryParams.status));
+        }
+
+        // Apply date range filter
+        if (queryParams.fromDate) {
+          baseQuery = baseQuery.where(
+            gte(notifications.createdAt, parseISO(queryParams.fromDate))
+          );
+        }
+        if (queryParams.toDate) {
+          baseQuery = baseQuery.where(
+            lte(notifications.createdAt, parseISO(queryParams.toDate))
+          );
+        }
+
+        // Calculate offset for pagination
+        const offset = (queryParams.page - 1) * queryParams.limit;
+
+        // Get total count for pagination
+        const [{ count }] = await db
+          .select({ count: sql<number>`cast(count(*) as integer)` })
+          .from(notifications)
+          .where(eq(notifications.userId, req.user!.id));
+
+        // Execute the final query with sorting and pagination
+        const notificationsList = await baseQuery
+          .orderBy(
+            queryParams.sortOrder === 'desc'
+              ? desc(notifications.createdAt)
+              : asc(notifications.createdAt)
+          )
+          .limit(queryParams.limit)
+          .offset(offset);
+
+        // Return paginated results with metadata
+        res.json({
+          notifications: notificationsList,
+          pagination: {
+            currentPage: queryParams.page,
+            totalPages: Math.ceil(count / queryParams.limit),
+            totalItems: count,
+            itemsPerPage: queryParams.limit
+          }
+        });
+
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return res.status(400).json({
+            error: "Invalid query parameters",
+            code: "VALIDATION_ERROR",
+            details: error.errors
+          });
+        }
+
+        logServerError(error as Error, {
+          context: 'get-notifications',
+          userId: req.user?.id,
+          role: req.user?.role,
+          query: req.query
+        });
+
+        res.status(500).json({
+          error: "Failed to fetch notifications",
           code: "SERVER_ERROR"
         });
       }

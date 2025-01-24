@@ -7,6 +7,34 @@ export const roleEnum = pgEnum('role', ['recruiter', 'clinician', 'leadership'])
 export const referralStatusEnum = pgEnum('referral_status', ['pending', 'contacted', 'interviewing', 'hired', 'rejected']);
 export const alertTypeEnum = pgEnum('alert_type', ['new_referral', 'pipeline_update', 'system_notification']);
 
+// Notification related enums with explicit names
+export const notificationTypeEnum = pgEnum('notification_type_enum', [
+  'referral_update',
+  'reward_update',
+  'system_alert'
+]);
+
+export const notificationStatusEnum = pgEnum('notification_status_enum', [
+  'unread',
+  'read',
+  'archived'
+]);
+
+// Enhanced validation schema for notification
+export const notificationSchema = z.object({
+  title: z.string()
+    .min(1, "Title is required")
+    .max(200, "Title cannot exceed 200 characters"),
+  description: z.string()
+    .min(1, "Description is required")
+    .max(1000, "Description cannot exceed 1000 characters"),
+  type: z.enum(['referral_update', 'reward_update', 'system_alert']),
+  status: z.enum(['unread', 'read', 'archived']).default('unread'),
+  userId: z.number().int().positive(),
+  relatedReferralId: z.number().int().positive().optional(),
+  relatedRewardId: z.number().int().positive().optional()
+});
+
 // Enhanced validation schema for referral submission
 export const referralSubmissionSchema = z.object({
   candidateName: z.string()
@@ -113,6 +141,27 @@ export const alerts = pgTable("alerts", {
   readAt: timestamp("read_at")
 });
 
+// Add notifications table definition
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  type: notificationTypeEnum("type").notNull(),
+  status: notificationStatusEnum("status").default('unread').notNull(),
+  relatedReferralId: integer("related_referral_id").references(() => referrals.id),
+  relatedRewardId: integer("related_reward_id").references(() => rewards.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  metadata: jsonb("metadata"),  // For any additional data specific to notification type
+}, (table) => ({
+  // Add indexes for common query patterns
+  userTypeIdx: index("notification_user_type_idx").on(table.userId, table.type),
+  statusIdx: index("notification_status_idx").on(table.status),
+  createdAtIdx: index("notification_created_at_idx").on(table.createdAt),
+  userStatusIdx: index("notification_user_status_idx").on(table.userId, table.status)
+}));
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -122,6 +171,8 @@ export type Reward = typeof rewards.$inferSelect;
 export type InsertReward = typeof rewards.$inferInsert;
 export type Alert = typeof alerts.$inferSelect;
 export type InsertAlert = typeof alerts.$inferInsert;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
 
 // Schemas
 export const insertUserSchema = createInsertSchema(users);
@@ -130,3 +181,5 @@ export const insertReferralSchema = createInsertSchema(referrals);
 export const selectReferralSchema = createSelectSchema(referrals);
 export const insertAlertSchema = createInsertSchema(alerts);
 export const selectAlertSchema = createSelectSchema(alerts);
+export const insertNotificationSchema = createInsertSchema(notifications);
+export const selectNotificationSchema = createSelectSchema(notifications);
