@@ -35,6 +35,15 @@ interface RewardsSnapshot {
 export function RewardsSnapshotWidget() {
   const { data, error, isLoading } = useQuery<RewardsSnapshot>({
     queryKey: ['/api/clinician/rewards-snapshot'],
+    queryFn: async () => {
+      const response = await fetch('/api/clinician/rewards-snapshot', {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch rewards data');
+      }
+      return response.json();
+    }
   });
 
   if (isLoading) {
