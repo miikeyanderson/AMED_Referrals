@@ -1,0 +1,58 @@
+Let me analyze the potential mismatch between the frontend and backend for the rewards snapshot endpoint:
+
+Frontend Expected Format (from RewardsSnapshotWidget.tsx):
+interface RewardsSnapshot {
+  pending: {
+    count: number;
+    amount: number;
+  };
+  paid: {
+    count: number;
+    amount: number;
+  };
+  totalEarned: number;
+  recentPayments: Array<{
+    id: number;
+    amount: number;
+    status: 'pending' | 'paid';
+    createdAt: string;
+  }>;
+}
+Backend Implementation (from routes.ts):
+Looking at the /api/clinician/rewards-snapshot endpoint, there are several potential issues:
+a) Error Handling:
+
+The backend uses a generic error handler that returns a 500 status with a message
+The error object isn't typed, so the frontend might receive unexpected error formats
+b) Data Type Safety:
+
+The backend uses SQL operations without explicit type casting for some fields
+The amount calculations use coalesce but might still return null in edge cases
+c) Potential Edge Cases:
+
+If the database returns no records, some calculations might result in null/undefined
+The status field in recentPayments isn't explicitly checked against 'pending'|'paid'
+Here's the specific code in routes.ts that could cause issues:
+
+// This could return undefined if no rows exist
+const [pendingRewards] = await db.select({...})
+// This could return null if no paid rewards exist
+const [paidRewards] = await db.select({...})
+// The response might have nullable fields that the frontend doesn't expect
+res.json({
+  pending: {
+    count: pendingRewards?.count || 0,  // Safe
+    amount: pendingRewards?.amount || 0  // Safe
+  },
+  paid: {
+    count: paidRewards?.count || 0,     // Safe
+    amount: paidRewards?.amount || 0     // Safe
+  },
+  totalEarned: (pendingRewards?.amount || 0) + (paidRewards?.amount || 0),
+  recentPayments  // Not validated against the expected interface
+});
+To fix this, we need to:
+
+Add proper type validation
+Ensure consistent error responses
+Validate the status field matches the frontend expectations
