@@ -37,7 +37,9 @@ export function NotificationsFeed() {
       if (!response.ok) {
         throw new Error("Failed to fetch notifications");
       }
-      return response.json();
+      const data = await response.json();
+      // Ensure we always return an array
+      return Array.isArray(data) ? data : (data?.notifications || []);
     },
   });
 
