@@ -3,18 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import {
-  AlertCircle,
-  DollarSign,
-  Clock,
-  CheckCircle,
-  Award,
-  Trophy,
-  Star,
-  Zap,
-  Target,
-  Users
-} from "lucide-react";
+import { AlertCircle, DollarSign, Clock, CheckCircle } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -24,21 +13,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { motion, AnimatePresence } from "framer-motion";
-import React from 'react';
-
-interface Achievement {
-  id: number;
-  name: string;
-  description: string;
-  type: string;
-  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond';
-  progress: number;
-  requiredScore: number;
-  isCompleted: boolean;
-  iconUrl?: string;
-}
 
 interface RewardsSnapshot {
   pending: {
@@ -56,41 +30,11 @@ interface RewardsSnapshot {
     status: 'pending' | 'paid';
     createdAt: string;
   }>;
-  achievements: Achievement[];
 }
-
-const tierColors = {
-  bronze: 'bg-orange-500/90 hover:bg-orange-500',
-  silver: 'bg-slate-400/90 hover:bg-slate-400',
-  gold: 'bg-amber-400/90 hover:bg-amber-400',
-  platinum: 'bg-sky-400/90 hover:bg-sky-400',
-  diamond: 'bg-purple-500/90 hover:bg-purple-500'
-};
-
-const achievementIcons = {
-  referral_streak: Trophy,
-  monthly_target: Target,
-  career_milestone: Star,
-  quality_rating: Award,
-  speed_hero: Zap,
-  team_player: Users,
-  default: Award
-};
-
-const getAchievementIcon = (type: string) => {
-  return achievementIcons[type] || achievementIcons.default;
-};
 
 export function RewardsSnapshotWidget() {
   const { data, error, isLoading } = useQuery<RewardsSnapshot>({
     queryKey: ['/api/clinician/rewards-snapshot'],
-    queryFn: async () => {
-      const response = await fetch('/api/clinician/rewards-snapshot');
-      if (!response.ok) {
-        throw new Error(`Failed to fetch rewards: ${response.statusText}`);
-      }
-      return response.json();
-    }
   });
 
   if (isLoading) {
@@ -116,9 +60,7 @@ export function RewardsSnapshotWidget() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          {error instanceof Error ? error.message : 'Failed to load rewards data'}
-        </AlertDescription>
+        <AlertDescription>Failed to load rewards data. Please try again later.</AlertDescription>
       </Alert>
     );
   }
@@ -130,17 +72,16 @@ export function RewardsSnapshotWidget() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Rewards & Achievements</CardTitle>
+        <CardTitle>Rewards Overview</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="metrics" className="space-y-4">
           <TabsList>
             <TabsTrigger value="metrics">Metrics</TabsTrigger>
-            <TabsTrigger value="achievements">Achievements</TabsTrigger>
             <TabsTrigger value="history">Payment History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="metrics">
+          <TabsContent value="metrics" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
               <Card>
                 <CardContent className="pt-6">
@@ -149,7 +90,7 @@ export function RewardsSnapshotWidget() {
                       <DollarSign className="h-5 w-5 text-green-500" />
                       <div>
                         <p className="text-sm font-medium leading-none">Total Earned</p>
-                        <p className="text-2xl font-bold">${data.totalEarned.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                        <p className="text-2xl font-bold">${data.totalEarned}</p>
                       </div>
                     </div>
                   </div>
@@ -206,6 +147,7 @@ export function RewardsSnapshotWidget() {
                     </div>
                     <Progress value={(data.totalEarned / 5000) * 100} />
                   </div>
+
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-medium">Successful Referrals</p>
@@ -218,77 +160,6 @@ export function RewardsSnapshotWidget() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="achievements">
-            <div className="grid gap-4 md:grid-cols-2">
-              {data.achievements?.map((achievement) => (
-                <motion.div
-                  key={achievement.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Card className={`relative overflow-hidden ${achievement.isCompleted ? 'border-green-500' : ''}`}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center space-x-4">
-                          {achievement.iconUrl ? (
-                            <img
-                              src={achievement.iconUrl}
-                              alt=""
-                              className="w-12 h-12"
-                            />
-                          ) : (
-                            <div className={`p-2 rounded-full ${tierColors[achievement.tier]}`}>
-                              {achievementIcons[achievement.type] &&
-                                React.createElement(achievementIcons[achievement.type], {
-                                  className: "w-8 h-8 text-white"
-                                })
-                              }
-                            </div>
-                          )}
-                          <div>
-                            <h3 className="font-semibold">{achievement.name}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {achievement.description}
-                            </p>
-                          </div>
-                        </div>
-                        <Badge variant={achievement.isCompleted ? "success" : "secondary"}>
-                          {achievement.tier}
-                        </Badge>
-                      </div>
-
-                      <div className="mt-4">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Progress</span>
-                          <span>{achievement.progress}/{achievement.requiredScore}</span>
-                        </div>
-                        <Progress
-                          value={(achievement.progress / achievement.requiredScore) * 100}
-                          className={`h-2 transition-all ${
-                            achievement.isCompleted 
-                              ? 'bg-green-200 shadow-[0_0_10px_rgba(34,197,94,0.3)]' 
-                              : ''
-                          }`}
-                        />
-                      </div>
-
-                      {achievement.isCompleted && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="absolute top-2 right-2"
-                        >
-                          <CheckCircle className="w-6 h-6 text-green-500" />
-                        </motion.div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
           </TabsContent>
 
           <TabsContent value="history">

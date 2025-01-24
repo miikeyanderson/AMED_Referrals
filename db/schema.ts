@@ -6,23 +6,6 @@ import { z } from "zod";
 export const roleEnum = pgEnum('role', ['recruiter', 'clinician', 'leadership']);
 export const referralStatusEnum = pgEnum('referral_status', ['pending', 'contacted', 'interviewing', 'hired', 'rejected']);
 export const alertTypeEnum = pgEnum('alert_type', ['new_referral', 'pipeline_update', 'system_notification']);
-export const achievementTypeEnum = pgEnum('achievement_type', [
-  'referral_streak',    // Consecutive successful referrals
-  'monthly_target',     // Hit monthly referral target
-  'career_milestone',   // Career achievement milestones
-  'quality_rating',     // High-quality referral ratings
-  'speed_hero',        // Quick response time achievements
-  'team_player'        // Collaborative achievements
-]);
-
-// Achievement tiers enum
-export const achievementTierEnum = pgEnum('achievement_tier', [
-  'bronze',
-  'silver',
-  'gold',
-  'platinum',
-  'diamond'
-]);
 
 // Enhanced validation schema for referral submission
 export const referralSubmissionSchema = z.object({
@@ -130,51 +113,6 @@ export const alerts = pgTable("alerts", {
   readAt: timestamp("read_at")
 });
 
-// Achievements table for defining different types of achievements
-export const achievements = pgTable("achievements", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description").notNull(),
-  type: achievementTypeEnum("type").notNull(),
-  tier: achievementTierEnum("tier").notNull(),
-  requiredScore: integer("required_score").notNull(),
-  rewardAmount: integer("reward_amount").notNull(),
-  iconUrl: text("icon_url"),
-  createdAt: timestamp("created_at").defaultNow().notNull()
-}, (table) => ({
-  typeIdx: index("achievement_type_idx").on(table.type),
-  tierIdx: index("achievement_tier_idx").on(table.tier)
-}));
-
-// User achievements for tracking individual progress
-export const userAchievements = pgTable("user_achievements", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  achievementId: integer("achievement_id").references(() => achievements.id).notNull(),
-  progress: integer("progress").notNull().default(0),
-  currentTier: achievementTierEnum("current_tier").notNull().default('bronze'),
-  isCompleted: boolean("is_completed").notNull().default(false),
-  completedAt: timestamp("completed_at"),
-  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
-}, (table) => ({
-  userIdx: index("user_achievement_user_idx").on(table.userId),
-  achievementIdx: index("user_achievement_achievement_idx").on(table.achievementId),
-  userAchievementUnique: index("user_achievement_unique_idx").on(table.userId, table.achievementId).unique()
-}));
-
-// Achievement progress tracking
-export const achievementProgress = pgTable("achievement_progress", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  achievementId: integer("achievement_id").references(() => achievements.id).notNull(),
-  progressSnapshot: jsonb("progress_snapshot").notNull(), // Stores detailed progress data
-  createdAt: timestamp("created_at").defaultNow().notNull()
-}, (table) => ({
-  userProgressIdx: index("achievement_progress_user_idx").on(table.userId),
-  achievementProgressIdx: index("achievement_progress_achievement_idx").on(table.achievementId),
-  createdAtIdx: index("achievement_progress_created_at_idx").on(table.createdAt)
-}));
-
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -184,12 +122,6 @@ export type Reward = typeof rewards.$inferSelect;
 export type InsertReward = typeof rewards.$inferInsert;
 export type Alert = typeof alerts.$inferSelect;
 export type InsertAlert = typeof alerts.$inferInsert;
-export type Achievement = typeof achievements.$inferSelect;
-export type InsertAchievement = typeof achievements.$inferInsert;
-export type UserAchievement = typeof userAchievements.$inferSelect;
-export type InsertUserAchievement = typeof userAchievements.$inferInsert;
-export type AchievementProgress = typeof achievementProgress.$inferSelect;
-export type InsertAchievementProgress = typeof achievementProgress.$inferInsert;
 
 // Schemas
 export const insertUserSchema = createInsertSchema(users);
@@ -198,9 +130,3 @@ export const insertReferralSchema = createInsertSchema(referrals);
 export const selectReferralSchema = createSelectSchema(referrals);
 export const insertAlertSchema = createInsertSchema(alerts);
 export const selectAlertSchema = createSelectSchema(alerts);
-export const insertAchievementSchema = createInsertSchema(achievements);
-export const selectAchievementSchema = createSelectSchema(achievements);
-export const insertUserAchievementSchema = createInsertSchema(userAchievements);
-export const selectUserAchievementSchema = createSelectSchema(userAchievements);
-export const insertAchievementProgressSchema = createInsertSchema(achievementProgress);
-export const selectAchievementProgressSchema = createSelectSchema(achievementProgress);
