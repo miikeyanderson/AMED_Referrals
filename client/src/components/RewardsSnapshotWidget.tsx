@@ -26,7 +26,34 @@ export function RewardsSnapshotWidget() {
       if (!response.ok) {
         throw new Error('Failed to fetch rewards data');
       }
-      return response.json();
+      const rawData = await response.json();
+      
+      // Validate data structure
+      if (!rawData || typeof rawData !== 'object') {
+        throw new Error('Invalid response format');
+      }
+
+      // Ensure all required fields exist with correct types
+      const validated = {
+        pending: {
+          count: Number(rawData.pending?.count || 0),
+          amount: Number(rawData.pending?.amount || 0)
+        },
+        paid: {
+          count: Number(rawData.paid?.count || 0),
+          amount: Number(rawData.paid?.amount || 0)
+        },
+        totalEarned: Number(rawData.totalEarned || 0),
+        recentPayments: (Array.isArray(rawData.recentPayments) ? rawData.recentPayments : [])
+          .map(payment => ({
+            id: Number(payment.id),
+            amount: Number(payment.amount),
+            status: payment.status === 'paid' ? 'paid' : 'pending',
+            createdAt: new Date(payment.createdAt).toISOString()
+          }))
+      };
+
+      return validated;
     }
   });
 
