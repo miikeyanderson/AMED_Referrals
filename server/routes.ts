@@ -280,6 +280,142 @@ export function registerRoutes(app: Express): Server {
     }
   );
 
+
+  /**
+   * @swagger
+   * /api/clinician/rewards-snapshot:
+   *   get:
+   *     summary: Get clinician rewards snapshot
+   *     description: Retrieve comprehensive rewards data including pending, paid, and total earned amounts
+   *     tags: [Clinician]
+   *     security:
+   *       - sessionAuth: []
+   *     responses:
+   *       200:
+   *         description: Rewards snapshot retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 pending:
+   *                   type: object
+   *                   properties:
+   *                     count: 
+   *                       type: integer
+   *                     amount:
+   *                       type: number
+   *                 paid:
+   *                   type: object
+   *                   properties:
+   *                     count:
+   *                       type: integer
+   *                     amount:
+   *                       type: number
+   *                 totalEarned:
+   *                   type: number
+   *                 recentPayments:
+   *                   type: array
+   *                   items:
+   *                     type: object
+   *                     properties:
+   *                       id:
+   *                         type: integer
+   *                       amount:
+   *                         type: number
+   *                       status:
+   *                         type: string
+   *                       createdAt:
+   *                         type: string
+   *                         format: date-time
+   *       401:
+   *         description: Not authenticated
+   *       403:
+   *         description: Not authorized (non-clinician users)
+   *       500:
+   *         description: Server error
+   */
+  app.get("/api/clinician/rewards-snapshot", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
+    try {
+      // Get pending rewards with explicit type casting
+      const [pendingRewards] = await db
+        .select({
+          count: sql<number>`cast(count(*) as integer)`,
+          amount: sql<number>`cast(coalesce(sum(${rewards.amount}), 0) as integer)`
+        })
+        .from(rewards)
+        .where(
+          and(
+            eq(rewards.userId, req.user.id),
+            eq(rewards.status, 'pending')
+          )
+        );
+
+      // Get paid rewards with explicit type casting
+      const [paidRewards] = await db
+        .select({
+          count: sql<number>`cast(count(*) as integer)`,
+          amount: sql<number>`cast(coalesce(sum(${rewards.amount}), 0) as integer)`
+        })
+        .from(rewards)
+        .where(
+          and(
+            eq(rewards.userId, req.user.id),
+            eq(rewards.status, 'paid')
+          )
+        );
+
+      // Get recent payments with status validation
+      const recentPayments = await db
+        .select({
+          id: rewards.id,
+          amount: rewards.amount,
+          status: rewards.status,
+          createdAt: rewards.createdAt
+        })
+        .from(rewards)
+        .where(
+          and(
+            eq(rewards.userId, req.user.id),
+            inArray(rewards.status, ['pending', 'paid'])
+          )
+        )
+        .orderBy(desc(rewards.createdAt))
+        .limit(5);
+
+      // Validate and transform the response
+      const response = {
+        pending: {
+          count: Number(pendingRewards?.count || 0),
+          amount: Number(pendingRewards?.amount || 0)
+        },
+        paid: {
+          count: Number(paidRewards?.count || 0),
+          amount: Number(paidRewards?.amount || 0)
+        },
+        totalEarned: Number((pendingRewards?.amount || 0) + (paidRewards?.amount || 0)),
+        recentPayments: recentPayments.map(payment => ({
+          id: Number(payment.id),
+          amount: Number(payment.amount),
+          status: payment.status as 'pending' | 'paid',
+          createdAt: payment.createdAt.toISOString()
+        }))
+      };
+
+      res.json(response);
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'rewards-snapshot',
+        userId: req.user?.id,
+        role: req.user?.role
+      });
+      res.status(500).json({
+        error: "Failed to fetch rewards snapshot",
+        code: "SERVER_ERROR"
+      });
+    }
+  });
+
   /**
    * @swagger
    * /api/recruiter/alerts:
@@ -992,19 +1128,19 @@ export function registerRoutes(app: Express): Server {
    *                 type: object
    *                 properties:
    *                   id:
-                    *                     type: integer
-                    *                   userId:
-                    *                     type: integer
-                    *                   amount:
-                    *                     type: number
-                    *                   createdAt:
-                    *                     type: string
-                    *                     format: date-time
-                    *       401:
-                    *         description: Not authenticated
-                    *       500:
-                    *         description: Server error while fetching rewards
-                    */
+   *                     type: integer
+   *                   userId:
+   *                     type: integer
+   *                   amount:
+   *                     type: number
+   *                   createdAt:
+   *                     type: string
+   *                     format: date-time
+   *       401:
+   *         description: Not authenticated
+   *       500:
+   *         description: Server error while fetching rewards
+   */
   app.get("/api/rewards", checkAuth, async (req: Request, res: Response) => {
     try {
       const userRewards = await db
@@ -1796,11 +1932,12 @@ export function registerRoutes(app: Express): Server {
    */
   app.get("/api/recruiter/kpis", checkAuth, checkRecruiterRole, async (req: Request, res: Response) => {
     try {
-      const now = new Date();
-      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const currentDate = new Date();
+      const currentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const lastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+      const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
 
-      // Get current month metrics
-      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      // Get current month metrics with proper null handling
       const currentMetrics = await db.execute(sql`
         WITH hired_referrals AS (
           SELECT
@@ -1812,17 +1949,18 @@ export function registerRoutes(app: Express): Server {
           WHERE
             status = 'hired'
             AND updated_at >= ${currentMonth.toISOString()}
-            AND updated_at < ${now.toISOString()}
+            AND updated_at < ${nextMonth.toISOString()}
         ),
         total_referrals AS (
-          SELECT COUNT(*) as total
+          SELECT COALESCE(COUNT(*), 0) as total
           FROM ${referrals}
           WHERE created_at >= ${currentMonth.toISOString()}
+            AND created_at < ${nextMonth.toISOString()}
         )
         SELECT
           COALESCE(COUNT(hired_referrals.id), 0) as hired_count,
-          COALESCE(AVG(hired_referrals.days_to_hire), 0) as avg_days_to_hire,
-          (SELECT total FROM total_referrals) as total_referrals
+          COALESCE(AVG(NULLIF(hired_referrals.days_to_hire, 0)), 0) as avg_days_to_hire,
+          COALESCE((SELECT total FROM total_referrals), 0) as total_referrals
         FROM hired_referrals
       `);
 
