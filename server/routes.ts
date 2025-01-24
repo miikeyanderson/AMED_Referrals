@@ -1922,11 +1922,12 @@ export function registerRoutes(app: Express): Server {
    */
   app.get("/api/recruiter/kpis", checkAuth, checkRecruiterRole, async (req: Request, res: Response) => {
     try {
-      const now = new Date();
-      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const currentDate = new Date();
+      const currentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const lastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+      const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
 
-      // Get current month metrics
-      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      // Get current month metrics with proper null handling
       const currentMetrics = await db.execute(sql`
         WITH hired_referrals AS (
           SELECT
@@ -1938,17 +1939,18 @@ export function registerRoutes(app: Express): Server {
           WHERE
             status = 'hired'
             AND updated_at >= ${currentMonth.toISOString()}
-            AND updated_at < ${now.toISOString()}
+            AND updated_at < ${nextMonth.toISOString()}
         ),
         total_referrals AS (
-          SELECT COUNT(*) as total
+          SELECT COALESCE(COUNT(*), 0) as total
           FROM ${referrals}
           WHERE created_at >= ${currentMonth.toISOString()}
+            AND created_at < ${nextMonth.toISOString()}
         )
         SELECT
           COALESCE(COUNT(hired_referrals.id), 0) as hired_count,
-          COALESCE(AVG(hired_referrals.days_to_hire), 0) as avg_days_to_hire,
-          (SELECT total FROM total_referrals) as total_referrals
+          COALESCE(AVG(NULLIF(hired_referrals.days_to_hire, 0)), 0) as avg_days_to_hire,
+          COALESCE((SELECT total FROM total_referrals), 0) as total_referrals
         FROM hired_referrals
       `);
 
