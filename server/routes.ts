@@ -337,11 +337,11 @@ export function registerRoutes(app: Express): Server {
    */
   app.get("/api/clinician/rewards-snapshot", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
     try {
-      // Get pending rewards (rewards with status 'pending')
+      // Get pending rewards with explicit type casting
       const [pendingRewards] = await db
         .select({
           count: sql<number>`cast(count(*) as integer)`,
-          amount: sql<number>`coalesce(sum(${rewards.amount}), 0)`
+          amount: sql<number>`cast(coalesce(sum(${rewards.amount}), 0) as integer)`
         })
         .from(rewards)
         .where(
@@ -351,11 +351,11 @@ export function registerRoutes(app: Express): Server {
           )
         );
 
-      // Get paid rewards (rewards with status 'paid')
+      // Get paid rewards with explicit type casting
       const [paidRewards] = await db
         .select({
           count: sql<number>`cast(count(*) as integer)`,
-          amount: sql<number>`coalesce(sum(${rewards.amount}), 0)`
+          amount: sql<number>`cast(coalesce(sum(${rewards.amount}), 0) as integer)`
         })
         .from(rewards)
         .where(
@@ -365,7 +365,7 @@ export function registerRoutes(app: Express): Server {
           )
         );
 
-      // Get recent payments (last 5 rewards, ordered by creation date)
+      // Get recent payments with status validation
       const recentPayments = await db
         .select({
           id: rewards.id,
@@ -374,22 +374,35 @@ export function registerRoutes(app: Express): Server {
           createdAt: rewards.createdAt
         })
         .from(rewards)
-        .where(eq(rewards.userId, req.user.id))
+        .where(
+          and(
+            eq(rewards.userId, req.user.id),
+            inArray(rewards.status, ['pending', 'paid'])
+          )
+        )
         .orderBy(desc(rewards.createdAt))
         .limit(5);
 
-      res.json({
+      // Validate and transform the response
+      const response = {
         pending: {
-          count: pendingRewards?.count || 0,
-          amount: pendingRewards?.amount || 0
+          count: Number(pendingRewards?.count || 0),
+          amount: Number(pendingRewards?.amount || 0)
         },
         paid: {
-          count: paidRewards?.count || 0,
-          amount: paidRewards?.amount || 0
+          count: Number(paidRewards?.count || 0),
+          amount: Number(paidRewards?.amount || 0)
         },
-        totalEarned: (pendingRewards?.amount || 0) + (paidRewards?.amount || 0),
-        recentPayments
-      });
+        totalEarned: Number((pendingRewards?.amount || 0) + (paidRewards?.amount || 0)),
+        recentPayments: recentPayments.map(payment => ({
+          id: Number(payment.id),
+          amount: Number(payment.amount),
+          status: payment.status as 'pending' | 'paid',
+          createdAt: payment.createdAt.toISOString()
+        }))
+      };
+
+      res.json(response);
     } catch (error) {
       logServerError(error as Error, {
         context: 'rewards-snapshot',

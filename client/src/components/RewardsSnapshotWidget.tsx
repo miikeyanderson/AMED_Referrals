@@ -14,23 +14,7 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 
-interface RewardsSnapshot {
-  pending: {
-    count: number;
-    amount: number;
-  };
-  paid: {
-    count: number;
-    amount: number;
-  };
-  totalEarned: number;
-  recentPayments: Array<{
-    id: number;
-    amount: number;
-    status: 'pending' | 'paid';
-    createdAt: string;
-  }>;
-}
+import { RewardsSnapshot } from "@/types/api";
 
 export function RewardsSnapshotWidget() {
   const { data, error, isLoading } = useQuery<RewardsSnapshot>({

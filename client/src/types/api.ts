@@ -16,3 +16,22 @@ export interface User {
   avatar?: string;
   createdAt: Date;
 }
+export interface RewardsSnapshot {
+  pending: {
+    count: number;
+    amount: number;
+  };
+  paid: {
+    count: number; 
+    amount: number;
+  };
+  totalEarned: number;
+  recentPayments: Array<{
+    id: number;
+    amount: number;
+    status: 'pending' | 'paid';
+    createdAt: string;
+  }>;
+}
+
+export type RewardsStatus = 'pending' | 'paid';
