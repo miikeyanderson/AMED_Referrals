@@ -1,10 +1,8 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClipboardList } from "lucide-react";
 import { ReferralStatsWidget } from "@/components/dashboard/ReferralStatsWidget";
 import { ClinicianBadges } from "@/components/dashboard/ClinicianBadges";
 import { RewardsSnapshotWidget } from "@/components/RewardsSnapshotWidget";
-import { ReferralForm } from "@/components/dashboard/ReferralForm";
 import { useQuery } from "@tanstack/react-query";
 
 export default function ClinicianDashboard() {
@@ -31,10 +29,6 @@ export default function ClinicianDashboard() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">My Dashboard</h1>
 
-      <div className="flex justify-end">
-        <ReferralForm />
-      </div>
-
       <RewardsSnapshotWidget />
 
       <ReferralStatsWidget />
@@ -53,6 +47,7 @@ export default function ClinicianDashboard() {
           <CardTitle>Recent Referrals</CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Add referral list component here */}
           <p className="text-muted-foreground">No referrals yet. Start by submitting a new referral!</p>
         </CardContent>
       </Card>
