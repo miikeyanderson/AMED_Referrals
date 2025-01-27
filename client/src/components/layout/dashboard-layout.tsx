@@ -1,11 +1,7 @@
-import { Settings, Users, ChartBar, ClipboardList, AlertCircle } from "lucide-react";
+import { Settings, Users, ChartBar, ClipboardList } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { useUser } from "@/hooks/use-user";
 import { useLocation } from "wouter";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
-import { useState } from "react";
 
 const roleRoutes = {
   clinician: [
@@ -26,7 +22,6 @@ const commonRoutes = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useUser();
   const [location] = useLocation();
-  const [showOnboarding, setShowOnboarding] = useState(false);
 
   if (!user) {
     return null;
@@ -34,7 +29,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const userRoutes = roleRoutes[user.role as keyof typeof roleRoutes] || [];
   const routes = [...userRoutes, ...commonRoutes];
-  const isOnboardingIncomplete = user.currentOnboardingStep !== "completed";
 
   const handleLogout = async () => {
     await logout();
@@ -45,7 +39,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="fixed inset-y-0 left-0 z-[100]">
         <Sidebar />
       </div>
-
+      
       {/* Main content */}
       <div className="flex-1 pl-[80px] transition-all duration-300">
         <div className="h-16 border-b flex items-center px-6">
@@ -55,29 +49,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </span>
           </div>
         </div>
-
-        {isOnboardingIncomplete && (
-          <Alert className="m-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Complete Your Profile</AlertTitle>
-            <AlertDescription className="flex items-center justify-between">
-              <span>
-                Please complete your onboarding process to access all platform features.
-              </span>
-              <Button variant="outline" onClick={() => setShowOnboarding(true)}>
-                Continue Setup
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
         <main className="p-6">{children}</main>
       </div>
-
-      <OnboardingModal 
-        open={showOnboarding || isOnboardingIncomplete} 
-        onOpenChange={setShowOnboarding} 
-      />
     </div>
   );
 }
