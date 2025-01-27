@@ -62,7 +62,7 @@ interface ReferralFormContentProps {
   onSubmitSuccess?: () => void;
 }
 
-function ReferralFormContent({ isEmbedded, onSubmitSuccess }: ReferralFormContentProps) {
+export function ReferralFormContent({ isEmbedded, onSubmitSuccess }: ReferralFormContentProps) {
   const [step, setStep] = useState(1);
   const queryClient = useQueryClient();
   const { toast } = useToast();

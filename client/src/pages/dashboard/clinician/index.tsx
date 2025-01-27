@@ -3,7 +3,7 @@ import { ClipboardList } from "lucide-react";
 import { ReferralStatsWidget } from "@/components/dashboard/ReferralStatsWidget";
 import { ClinicianBadges } from "@/components/dashboard/ClinicianBadges";
 import { RewardsSnapshotWidget } from "@/components/RewardsSnapshotWidget";
-import { ReferralForm } from "@/components/dashboard/ReferralForm";
+import { ReferralForm, ReferralFormContent } from "@/components/dashboard/ReferralForm";
 import { useQuery } from "@tanstack/react-query";
 
 export default function ClinicianDashboard() {
