@@ -1874,3 +1874,6 @@
 {"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:3001/","port":3001,"service":"arm-platform","timestamp":"2025-01-27T23:43:19.081Z"}
 {"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:3001/","port":3001,"service":"arm-platform","timestamp":"2025-01-27T23:47:05.327Z"}
 {"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:3001/","port":3001,"service":"arm-platform","timestamp":"2025-01-27T23:47:54.336Z"}
+{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:3001/","port":3001,"service":"arm-platform","timestamp":"2025-01-27T23:48:40.227Z"}
+{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-27T23:50:28.404Z"}
+{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-27T23:52:43.273Z"}

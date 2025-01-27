@@ -23,30 +23,25 @@ declare global {
 }
 
 const app = express();
-// Trust proxy disabled for security
-// Then add other middleware
+
+// Basic middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(correlationMiddleware);
+
+// Rate limiting and monitoring for API routes only
 app.use('/api', apiLimiter);
-// Apply request monitoring middleware for dashboard
 app.use('/api', requestMonitor.middleware);
 
-// Serve Swagger documentation
+// Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
   explorer: true,
   customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: "ARM Platform API Documentation",
-  customfavIcon: "/favicon.ico",
-  swaggerOptions: {
-    docExpansion: 'list',
-    filter: true,
-    defaultModelsExpandDepth: 1,
-    defaultModelExpandDepth: 1
-  }
+  customfavIcon: "/favicon.ico"
 }));
 
-// Request logging middleware with correlation ID
+// Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -78,7 +73,7 @@ app.use((req, res, next) => {
         statusCode: res.statusCode,
         duration,
         response: capturedJsonResponse,
-        rateLimit: req.rateLimit // Now TypeScript knows about rateLimit
+        rateLimit: req.rateLimit
       });
     }
   });
@@ -86,57 +81,96 @@ app.use((req, res, next) => {
   next();
 });
 
-(async () => {
-  const server = registerRoutes(app);
+const startServer = async () => {
+  try {
+    const server = registerRoutes(app);
 
-  // Error handling middleware with correlation ID logging
-  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    // Error handling middleware
+    app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
 
-    logger.error({
-      message: `Error handling request: ${message}`,
-      correlationId: req.correlationId,
-      error: err,
-      status,
-    });
-
-    res.status(status).json({ 
-      message,
-      requestId: req.correlationId 
-    });
-  });
-
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
-
-  // Set server hostname to 0.0.0.0 to allow external connections
-  const hostname = '0.0.0.0';
-  const port = parseInt(process.env.PORT || '3001', 10);
-  const fallbackPort = 3002;
-
-  server.listen(port, hostname, () => {
-    logger.info({
-      message: `Server running at http://${hostname}:${port}/`,
-      port,
-      hostname
-    });
-  }).on('error', (err: any) => {
-    if (err.code === 'EADDRINUSE') {
-      logger.warn({
-        message: `Port ${port} is busy, trying ${fallbackPort}...`,
-        error: err
+      logger.error({
+        message: `Error handling request: ${message}`,
+        correlationId: req.correlationId,
+        error: err,
+        status,
       });
-      server.listen(fallbackPort, hostname, () => {
+
+      res.status(status).json({ 
+        message,
+        requestId: req.correlationId 
+      });
+    });
+
+    // Development setup with Vite
+    if (app.get("env") === "development") {
+      await setupVite(app, server);
+    } else {
+      serveStatic(app);
+    }
+
+    const PORT = 5000;
+    const hostname = '0.0.0.0';
+
+    server.on('error', (error: NodeJS.ErrnoException) => {
+      if (error.code === 'EADDRINUSE') {
+        logger.error({
+          message: `Port ${PORT} is already in use. Please ensure no other service is running on this port.`,
+          error
+        });
+        process.exit(1);
+      } else {
+        logger.error({
+          message: `Failed to start server: ${error.message}`,
+          error
+        });
+        process.exit(1);
+      }
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      server.listen(PORT, hostname, () => {
         logger.info({
-          message: `Server running at http://${hostname}:${fallbackPort}/`,
-          port: fallbackPort,
+          message: `Server running at http://${hostname}:${PORT}/`,
+          port: PORT,
           hostname
         });
-      });
-    }
+        resolve();
+      }).on('error', reject);
+    });
+
+  } catch (error) {
+    logger.error({
+      message: 'Failed to start server',
+      error
+    });
+    process.exit(1);
+  }
+};
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  logger.error({
+    message: 'Uncaught exception',
+    error
   });
-})();
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error({
+    message: 'Unhandled rejection',
+    reason,
+    promise
+  });
+  process.exit(1);
+});
+
+startServer().catch((error) => {
+  logger.error({
+    message: 'Failed to start application',
+    error
+  });
+  process.exit(1);
+});
