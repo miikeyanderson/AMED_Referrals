@@ -55,6 +55,8 @@ interface FormData {
   startDate: Date | null;
   experience: string;
   notes: string;
+  resume?: File;
+  resumeUrl?: string;
 }
 
 export function ReferralForm() {
@@ -73,7 +75,35 @@ export function ReferralForm() {
     startDate: null,
     experience: "",
     notes: "",
+    resumeUrl: "",
   });
+const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+
+const handleFileUpload = async (file: File) => {
+  try {
+    setUploadStatus('uploading');
+    const filename = `${Date.now()}-${file.name}`;
+    const response = await fetch('/api/upload-url?filename=' + encodeURIComponent(filename));
+    const { url } = await response.json();
+    
+    await fetch(url, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type,
+      },
+    });
+
+    setFormData(prev => ({
+      ...prev,
+      resumeUrl: filename
+    }));
+    setUploadStatus('success');
+  } catch (error) {
+    console.error('Upload error:', error);
+    setUploadStatus('error');
+  }
+};
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validateField = (name: string, value: string | string[] | Date | null) => {
@@ -331,6 +361,30 @@ export function ReferralForm() {
                   onChange={(e) => handleChange("notes", e.target.value)}
                   className="h-20"
                 />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Resume</label>
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleFileUpload(file);
+                    }
+                  }}
+                  disabled={uploadStatus === 'uploading'}
+                  className="cursor-pointer"
+                />
+                {uploadStatus === 'uploading' && (
+                  <p className="text-sm text-muted-foreground">Uploading...</p>
+                )}
+                {uploadStatus === 'success' && (
+                  <p className="text-sm text-green-600">Upload successful</p>
+                )}
+                {uploadStatus === 'error' && (
+                  <p className="text-sm text-red-600">Upload failed</p>
+                )}
               </div>
             </div>
           </div>
