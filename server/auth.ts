@@ -5,7 +5,7 @@ import session from "express-session";
 import createMemoryStore from "memorystore";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import { users, insertUserSchema, type InsertUser, type User } from "@db/schema";
+import { users, insertUserSchema, type User } from "@db/schema";
 import { db } from "@db";
 import { eq } from "drizzle-orm";
 import { logAuthFailure, logUnauthorizedAccess, logServerError } from "./utils/logger";
@@ -31,7 +31,10 @@ const crypto = {
 
 declare global {
   namespace Express {
-    interface User extends Omit<User, 'password'> {}
+    interface User extends Omit<User, 'password'> {
+      currentOnboardingStep?: string;
+      hasCompletedOnboarding?: boolean;
+    }
   }
 }
 
@@ -96,33 +99,22 @@ export function setupAuth(app: Express) {
   passport.deserializeUser(async (id: number, done) => {
     try {
       const [user] = await db
-        .select({
-          id: users.id,
-          username: users.username,
-          role: users.role,
-          name: users.name,
-          email: users.email
-        })
+        .select()
         .from(users)
         .where(eq(users.id, id))
         .limit(1);
 
-      done(null, user);
+      if (!user) {
+        return done(null, false);
+      }
+
+      const { password: _, ...userWithoutPassword } = user;
+      done(null, userWithoutPassword);
     } catch (err) {
       logServerError(err as Error, { context: 'passport-deserialize' });
       done(err);
     }
   });
-
-  // Middleware to handle authentication errors
-  const handleAuthError = (err: Error, req: Request, res: Response, next: NextFunction) => {
-    logServerError(err, {
-      context: 'auth-middleware',
-      url: req.url,
-      method: req.method,
-    });
-    next(err);
-  };
 
   app.post("/api/register", async (req, res, next) => {
     try {
@@ -155,11 +147,14 @@ export function setupAuth(app: Express) {
 
       const hashedPassword = await crypto.hash(password);
 
+      // Initialize onboarding status for new users
       const [newUser] = await db
         .insert(users)
         .values({
           ...result.data,
           password: hashedPassword,
+          hasCompletedOnboarding: false,
+          currentOnboardingStep: 'profile_creation',
         })
         .returning();
 
@@ -170,7 +165,10 @@ export function setupAuth(app: Express) {
           logServerError(err, { context: 'register-login' });
           return next(err);
         }
-        return res.json({ message: "Registration successful" });
+        return res.json({ 
+          message: "Registration successful",
+          user: userWithoutPassword
+        });
       });
     } catch (error) {
       logServerError(error as Error, { context: 'register' });
@@ -200,7 +198,16 @@ export function setupAuth(app: Express) {
           logServerError(err, { context: 'login-session' });
           return next(err);
         }
-        return res.json({ message: "Login successful" });
+        return res.json({ 
+          message: "Login successful",
+          user: {
+            id: user.id,
+            username: user.username,
+            role: user.role,
+            hasCompletedOnboarding: user.hasCompletedOnboarding,
+            currentOnboardingStep: user.currentOnboardingStep
+          }
+        });
       });
     })(req, res, next);
   });
@@ -217,18 +224,20 @@ export function setupAuth(app: Express) {
 
   app.get("/api/user", (req, res) => {
     if (req.isAuthenticated()) {
-      return res.json(req.user);
+      // Include onboarding status in user response
+      return res.json({
+        ...req.user,
+        hasCompletedOnboarding: req.user.hasCompletedOnboarding,
+        currentOnboardingStep: req.user.currentOnboardingStep
+      });
     }
 
     const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
     logUnauthorizedAccess(
-      -1, // No user ID for unauthenticated requests
+      -1,
       ip,
       '/api/user'
     );
     res.status(401).send("Not logged in");
   });
-
-  // Add error handling middleware
-  app.use(handleAuthError);
 }
