@@ -6,10 +6,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SPECIALTIES = [
@@ -46,15 +47,12 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
     mutationFn: async (data: ProfileSetupData) => {
       const response = await fetch("/api/clinician/profile", {
         method: "PUT",
-        headers: { 
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to update profile");
+        throw new Error(await response.text());
       }
 
       return response.json();
@@ -70,17 +68,20 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update profile",
+        description: error.message || "Failed to update profile",
       });
     },
   });
 
   const toggleSpecialty = (specialty: string) => {
-    const updatedSpecialties = selectedSpecialties.includes(specialty)
-      ? selectedSpecialties.filter((s) => s !== specialty)
-      : [...selectedSpecialties, specialty];
-    form.setValue("specialties", updatedSpecialties);
-    setSelectedSpecialties(updatedSpecialties);
+    setSelectedSpecialties((prev) => {
+      const isSelected = prev.includes(specialty);
+      const updated = isSelected
+        ? prev.filter((s) => s !== specialty)
+        : [...prev, specialty];
+      form.setValue("specialties", updated);
+      return updated;
+    });
   };
 
   const onSubmit = (data: ProfileSetupData) => {
@@ -90,6 +91,18 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="flex items-center gap-6">
+          <Avatar className="h-20 w-20">
+            <AvatarImage src={form.watch("avatar")} />
+            <AvatarFallback>
+              <Upload className="h-8 w-8 text-muted-foreground" />
+            </AvatarFallback>
+          </Avatar>
+          <Button type="button" variant="outline">
+            Upload Photo
+          </Button>
+        </div>
+
         <FormField
           control={form.control}
           name="bio"
@@ -99,7 +112,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
               <FormControl>
                 <Textarea
                   placeholder="Tell us about your professional background and expertise..."
-                  className="resize-none min-h-[100px]"
+                  className="resize-none"
                   {...field}
                 />
               </FormControl>
@@ -119,7 +132,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
                   type="number"
                   min={0}
                   {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  onChange={(e) => field.onChange(parseInt(e.target.value))}
                 />
               </FormControl>
               <FormMessage />
