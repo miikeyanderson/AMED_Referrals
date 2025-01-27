@@ -2447,35 +2447,7 @@ FROM hired_referrals;
   );
 
   // Add these new endpoints inside the registerRoutes function
-  app.get("/api/clinician/onboarding/status", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
-    try {
-      const [profile] = await db
-        .select()
-        .from(clinicianProfiles)
-        .where(eq(clinicianProfiles.userId, req.user!.id))
-        .limit(1);
-
-      res.json({
-        currentStep: req.user!.currentOnboardingStep,
-        isCompleted: req.user!.hasCompletedOnboarding,
-        profile: profile || null
-      });
-    } catch (error) {
-      logServerError(error as Error, {
-        context: 'get-onboarding-status',
-        userId: req.user?.id,
-        role: req.user?.role
-      });
-      res.status(500).json({
-        error: "Failed to fetch onboarding status",
-        code: "SERVER_ERROR"
-      });
-    }
-  });
-
-  app.post("/api/clinician/onboarding/profile", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
-    try {
-      const validatedData = clinicianOnboardingSchema.parse(req.body);
+  
 
       // Check if profile already exists
       const [existingProfile] = await db

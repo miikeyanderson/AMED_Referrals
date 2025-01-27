@@ -56,28 +56,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
 
-        {isOnboardingIncomplete && (
-          <Alert className="m-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Complete Your Profile</AlertTitle>
-            <AlertDescription className="flex items-center justify-between">
-              <span>
-                Please complete your onboarding process to access all platform features.
-              </span>
-              <Button variant="outline" onClick={() => setShowOnboarding(true)}>
-                Continue Setup
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
         <main className="p-6">{children}</main>
       </div>
-
-      <OnboardingModal 
-        open={showOnboarding || isOnboardingIncomplete} 
-        onOpenChange={setShowOnboarding} 
-      />
     </div>
   );
 }

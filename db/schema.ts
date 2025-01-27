@@ -64,8 +64,7 @@ export const users = pgTable("users", {
   role: roleEnum("role").notNull().default('clinician'),
   name: text("name").notNull(),
   email: text("email").unique().notNull(),
-  hasCompletedOnboarding: boolean("has_completed_onboarding").default(false).notNull(),
-  currentOnboardingStep: onboardingStepEnum("current_onboarding_step").default('profile_creation'),
+  
   createdAt: timestamp("created_at").defaultNow().notNull()
 }, (table) => ({
   usernameIdx: index("username_idx").on(table.username),
@@ -165,15 +164,3 @@ export const selectAlertSchema = createSelectSchema(alerts);
 export const insertClinicianProfileSchema = createInsertSchema(clinicianProfiles);
 export const selectClinicianProfileSchema = createSelectSchema(clinicianProfiles);
 
-// Onboarding validation schema
-export const clinicianOnboardingSchema = z.object({
-  specialty: z.string().min(2, "Specialty must be at least 2 characters long"),
-  licenseNumber: z.string().min(5, "License number must be at least 5 characters"),
-  licenseState: z.string().length(2, "State must be a 2-letter code"),
-  licenseExpiryDate: z.string().datetime(),
-  yearsOfExperience: z.number().min(0),
-  certifications: z.array(z.string()),
-  preferredShiftType: z.string(),
-  availabilityStart: z.string().datetime().optional(),
-  availabilityEnd: z.string().datetime().optional(),
-});
