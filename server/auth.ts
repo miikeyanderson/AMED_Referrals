@@ -44,18 +44,17 @@ export function setupAuth(app: Express) {
     secret: process.env.REPL_ID || "arm-platform-secret",
     resave: false,
     saveUninitialized: false,
-    cookie: {},
+    cookie: {
+      secure: true,
+      sameSite: 'none',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    },
     store: new MemoryStore({
       checkPeriod: 86400000,
     }),
   };
 
-  if (app.get("env") === "production") {
-    app.set("trust proxy", 1);
-    sessionSettings.cookie = {
-      secure: true,
-    };
-  }
+  app.set("trust proxy", 1);
 
   app.use(session(sessionSettings));
   app.use(passport.initialize());
