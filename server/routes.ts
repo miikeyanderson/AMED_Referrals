@@ -697,7 +697,71 @@ export function registerRoutes(app: Express): Server {
    *       500:
    *         description: Server error while fetching analytics
    */
-  app.get("/api/analytics", checkAuth, async (req: Request, res: Response) => {
+  /**
+ * @swagger
+ * /api/clinician/profile:
+ *   post:
+ *     summary: Submit a clinician profile
+ *     description: Create a detailed clinician profile with resume upload
+ *     tags: [Clinician]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             $ref: '#/components/schemas/ReferredClinician'
+ *     responses:
+ *       201:
+ *         description: Profile created successfully
+ *       400:
+ *         description: Invalid input data
+ *       401:
+ *         description: Not authenticated
+ *       500:
+ *         description: Server error
+ */
+app.post("/api/clinician/profile", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
+  try {
+    // Validate input data
+    const result = referredClinicianSubmissionSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        error: "Validation failed",
+        details: result.error.issues
+      });
+    }
+
+    // Create profile record
+    const [createdProfile] = await db
+      .insert(referredClinicians)
+      .values({
+        ...result.data,
+        status: 'pending',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+
+    res.status(201).json({
+      success: true,
+      data: createdProfile
+    });
+  } catch (error) {
+    logServerError(error as Error, {
+      context: 'create-clinician-profile',
+      userId: req.user?.id,
+      role: req.user?.role
+    });
+    res.status(500).json({
+      error: "Failed to create clinician profile",
+      code: "SERVER_ERROR"
+    });
+  }
+});
+
+app.get("/api/analytics", checkAuth, async (req: Request, res: Response) => {
     try {
       // Get total referrals count
       const [totalReferrals] = await db
