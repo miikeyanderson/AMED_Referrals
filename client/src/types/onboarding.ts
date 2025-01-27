@@ -1,10 +1,11 @@
 import { z } from "zod";
 
 export const OnboardingStep = z.enum([
+  "welcome",
   "profile_creation",
-  "document_verification",
-  "compliance_training",
-  "orientation",
+  "walkthrough",
+  "feature_tour",
+  "call_to_action",
   "completed"
 ]);
 
@@ -31,8 +32,29 @@ export type PreferencesData = z.infer<typeof PreferencesSchema>;
 export interface OnboardingState {
   currentStep: OnboardingStepType;
   progress: {
+    welcome: boolean;
     profile: boolean;
-    preferences: boolean;
-    platformTour: boolean;
+    walkthrough: boolean;
+    featureTour: boolean;
+    callToAction: boolean;
   };
+}
+
+export interface BenefitItem {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface WalkthroughStep {
+  title: string;
+  description: string;
+  icon: string;
+}
+
+export interface FeatureTourStep {
+  element: string;
+  title: string;
+  content: string;
+  placement?: 'top' | 'bottom' | 'left' | 'right';
 }

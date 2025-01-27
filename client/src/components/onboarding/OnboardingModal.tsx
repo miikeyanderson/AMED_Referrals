@@ -5,12 +5,15 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/hooks/use-user";
 import { AnimatePresence, motion } from "framer-motion";
-import { ProfileSetup } from "./steps/ProfileSetup";
-import { Preferences } from "./steps/Preferences";
-import { PlatformTour } from "./steps/PlatformTour";
 import type { OnboardingStepType } from "@/types/onboarding";
-import { CheckCircle2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { ClipboardList, Users, BadgeDollarSign, ArrowRight, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { WelcomeStep } from "./steps/WelcomeStep";
+import { ProfileSetup } from "./steps/ProfileSetup";
+import { WalkthroughStep } from "./steps/WalkthroughStep";
+import { FeatureTourStep } from "./steps/FeatureTourStep";
+import { CallToActionStep } from "./steps/CallToActionStep";
 
 interface OnboardingModalProps {
   open: boolean;
@@ -19,19 +22,29 @@ interface OnboardingModalProps {
 
 const steps = [
   {
+    id: "welcome",
+    title: "Welcome to ARM Platform",
+    description: "Get started with healthcare referrals",
+  },
+  {
     id: "profile_creation",
     title: "Profile Setup",
-    description: "Let's set up your professional profile",
+    description: "Tell us about your expertise",
   },
   {
-    id: "document_verification",
-    title: "Preferences",
-    description: "Customize your notification settings",
+    id: "walkthrough",
+    title: "How It Works",
+    description: "Learn the referral process",
   },
   {
-    id: "compliance_training",
+    id: "feature_tour",
     title: "Platform Tour",
-    description: "Learn how to use the platform",
+    description: "Discover key features",
+  },
+  {
+    id: "call_to_action",
+    title: "Start Earning",
+    description: "Make your first referral",
   },
 ] as const;
 
@@ -40,7 +53,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState<OnboardingStepType>(
-    user?.currentOnboardingStep || "profile_creation"
+    user?.currentOnboardingStep || "welcome"
   );
 
   const currentStepIndex = steps.findIndex((step) => step.id === currentStep);
@@ -49,13 +62,12 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
   const handleNext = async () => {
     const nextStep = steps[currentStepIndex + 1];
     if (!nextStep) {
-      // Complete onboarding
       try {
         await updateOnboardingStep("completed");
         await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
         toast({
-          title: "Onboarding Complete",
-          description: "Welcome to the ARM Platform!",
+          title: "Welcome aboard!",
+          description: "You're all set to start referring healthcare professionals.",
         });
         onOpenChange(false);
       } catch (error) {
@@ -107,54 +119,68 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
-        <div className="flex flex-col gap-6">
-          <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight">
-              {steps[currentStepIndex].title}
-            </h2>
-            <p className="text-muted-foreground">
-              {steps[currentStepIndex].description}
-            </p>
-          </div>
+      <DialogContent className="sm:max-w-[600px] p-0">
+        <div className="flex flex-col">
+          <div className="p-6 space-y-4">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold tracking-tight">
+                {steps[currentStepIndex].title}
+              </h2>
+              <p className="text-muted-foreground">
+                {steps[currentStepIndex].description}
+              </p>
+            </div>
 
-          <div className="relative">
-            <Progress value={progress} className="h-2" />
-            <span className="absolute right-0 top-4 text-sm text-muted-foreground">
-              Step {currentStepIndex + 1} of {steps.length}
-            </span>
+            <div className="relative">
+              <Progress value={progress} className="h-2" />
+              <span className="absolute right-0 top-4 text-sm text-muted-foreground">
+                Step {currentStepIndex + 1} of {steps.length}
+              </span>
+            </div>
           </div>
 
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
+              className="px-6 pb-6"
             >
+              {currentStep === "welcome" && <WelcomeStep onNext={handleNext} />}
               {currentStep === "profile_creation" && (
                 <ProfileSetup onComplete={handleNext} />
               )}
-              {currentStep === "document_verification" && (
-                <Preferences onComplete={handleNext} />
+              {currentStep === "walkthrough" && (
+                <WalkthroughStep onComplete={handleNext} />
               )}
-              {currentStep === "compliance_training" && (
-                <PlatformTour onComplete={handleNext} />
+              {currentStep === "feature_tour" && (
+                <FeatureTourStep onComplete={handleNext} />
+              )}
+              {currentStep === "call_to_action" && (
+                <CallToActionStep onComplete={handleNext} />
               )}
             </motion.div>
           </AnimatePresence>
 
-          <div className="flex justify-between mt-6">
-            <Button variant="ghost" onClick={handleSkip}>
+          <div className="border-t p-6 flex justify-between items-center bg-muted/40">
+            <Button variant="ghost" onClick={handleSkip} size="sm">
               Skip for now
             </Button>
-            {currentStep === "compliance_training" && (
-              <Button onClick={handleNext} className="gap-2">
-                <CheckCircle2 className="h-4 w-4" />
-                Complete Onboarding
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {currentStepIndex < steps.length - 1 ? (
+                <Button onClick={handleNext} className="gap-2">
+                  Next Step
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button onClick={handleNext} className="gap-2">
+                  Complete Setup
+                  <CheckCircle2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </DialogContent>
