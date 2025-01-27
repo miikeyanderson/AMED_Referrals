@@ -29,6 +29,15 @@ export default function ClinicianDashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">My Dashboard</h1>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Referral</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ReferralFormContent isEmbedded={true} />
+        </CardContent>
+      </Card>
       
       <div className="flex justify-end mb-4">
         <ReferralForm />

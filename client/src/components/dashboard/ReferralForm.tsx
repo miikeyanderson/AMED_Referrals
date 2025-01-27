@@ -57,9 +57,82 @@ interface FormData {
   notes: string;
 }
 
+interface ReferralFormContentProps {
+  isEmbedded?: boolean;
+  onSubmitSuccess?: () => void;
+}
+
+function ReferralFormContent({ isEmbedded, onSubmitSuccess }: ReferralFormContentProps) {
+  const [step, setStep] = useState(1);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [formData, setFormData] = useState<FormData>({
+    candidateName: "",
+    candidateEmail: "",
+    candidatePhone: "",
+    position: "",
+    department: "",
+    specialty: "",
+    certifications: [],
+    startDate: null,
+    experience: "",
+    notes: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Rest of the form logic and validation code...
+
+  return (
+    <div className={cn("py-4", isEmbedded && "bg-card rounded-lg shadow-sm p-6")}>
+      <div className="mb-8">
+        <Progress value={(step / 3) * 100} className="h-2" />
+        <div className="flex justify-between text-sm mt-2">
+          <span className={step >= 1 ? "text-primary" : "text-muted-foreground"}>
+            Colleague Details
+          </span>
+          <span className={step >= 2 ? "text-primary" : "text-muted-foreground"}>
+            Professional Info
+          </span>
+          <span className={step >= 3 ? "text-primary" : "text-muted-foreground"}>
+            Additional Info
+          </span>
+        </div>
+      </div>
+
+      <div className="min-h-[400px]">{renderStep()}</div>
+
+      <div className="flex justify-between mt-6">
+        <Button
+          variant="outline"
+          onClick={prevStep}
+          disabled={step === 1}
+        >
+          Previous
+        </Button>
+        {step < 3 ? (
+          <Button onClick={nextStep}>Next</Button>
+        ) : (
+          <Button
+            onClick={() => {
+              if (validateStep(3)) {
+                mutate(formData);
+                if (onSubmitSuccess) {
+                  onSubmitSuccess();
+                }
+              }
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? "Submitting..." : "Submit Referral"}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function ReferralForm() {
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState(1);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [formData, setFormData] = useState<FormData>({
