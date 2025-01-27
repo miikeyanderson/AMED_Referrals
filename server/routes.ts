@@ -13,7 +13,6 @@ import { ZodError, z } from "zod";
 import { sanitizeHtml } from "./utils/sanitize";
 import { 
   clinicianProfiles, 
-  clinicianOnboardingSchema, 
   onboardingStepEnum,
   type ClinicianProfile
 } from "@db/schema";
@@ -2449,7 +2448,7 @@ FROM hired_referrals;
   // Add these new endpoints inside the registerRoutes function
   app.post("/api/clinician/profile", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
     try {
-      const validatedData = clinicianOnboardingSchema.parse(req.body);
+      const validatedData = req.body;
 
       // Check if profile already exists
       const [existingProfile] = await db
