@@ -2,10 +2,10 @@ import { Settings, Users, ChartBar, ClipboardList, AlertCircle } from "lucide-re
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { useUser } from "@/hooks/use-user";
 import { useLocation } from "wouter";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
-import { useState } from "react";
+// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+// import { Button } from "@/components/ui/button";
+// import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
+// import { useState } from "react";
 
 const roleRoutes = {
   clinician: [
@@ -26,7 +26,7 @@ const commonRoutes = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useUser();
   const [location] = useLocation();
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  // const [showOnboarding, setShowOnboarding] = useState(false);
 
   if (!user) {
     return null;
@@ -34,7 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const userRoutes = roleRoutes[user.role as keyof typeof roleRoutes] || [];
   const routes = [...userRoutes, ...commonRoutes];
-  const isOnboardingIncomplete = user.currentOnboardingStep !== "completed";
+  // const isOnboardingIncomplete = user.currentOnboardingStep !== "completed";
 
   const handleLogout = async () => {
     await logout();

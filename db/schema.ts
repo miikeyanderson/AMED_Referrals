@@ -7,14 +7,6 @@ export const roleEnum = pgEnum('role', ['recruiter', 'clinician', 'leadership'])
 export const referralStatusEnum = pgEnum('referral_status', ['pending', 'contacted', 'interviewing', 'hired', 'rejected']);
 export const alertTypeEnum = pgEnum('alert_type', ['new_referral', 'pipeline_update', 'system_notification']);
 
-// New enum for onboarding steps
-export const onboardingStepEnum = pgEnum('onboarding_step', [
-  'profile_creation',
-  'document_verification',
-  'compliance_training',
-  'orientation',
-  'completed'
-]);
 
 // Enhanced validation schema for referral submission
 export const referralSubmissionSchema = z.object({
@@ -61,10 +53,10 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").unique().notNull(),
   password: text("password").notNull(),
-  role: roleEnum("role").notNull().default('clinician'),
+  role: roleEnum("role").notNull().default('recruiter'),
   name: text("name").notNull(),
   email: text("email").unique().notNull(),
-  
+
   createdAt: timestamp("created_at").defaultNow().notNull()
 }, (table) => ({
   usernameIdx: index("username_idx").on(table.username),
@@ -72,24 +64,6 @@ export const users = pgTable("users", {
   roleIdx: index("role_idx").on(table.role)
 }));
 
-export const clinicianProfiles = pgTable("clinician_profiles", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  specialty: text("specialty"),
-  licenseNumber: text("license_number"),
-  licenseState: text("license_state"),
-  licenseExpiryDate: timestamp("license_expiry_date"),
-  yearsOfExperience: integer("years_of_experience"),
-  certifications: text("certifications").array(),
-  preferredShiftType: text("preferred_shift_type"),
-  availabilityStart: timestamp("availability_start"),
-  availabilityEnd: timestamp("availability_end"),
-  documentationStatus: jsonb("documentation_status"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()
-}, (table) => ({
-  userIdIdx: index("user_id_idx").on(table.userId)
-}));
 
 export const referrals = pgTable("referrals", {
   id: serial("id").primaryKey(),
@@ -151,8 +125,7 @@ export type Reward = typeof rewards.$inferSelect;
 export type InsertReward = typeof rewards.$inferInsert;
 export type Alert = typeof alerts.$inferSelect;
 export type InsertAlert = typeof alerts.$inferInsert;
-export type ClinicianProfile = typeof clinicianProfiles.$inferSelect;
-export type InsertClinicianProfile = typeof clinicianProfiles.$inferInsert;
+
 
 // Schemas
 export const insertUserSchema = createInsertSchema(users);
@@ -161,6 +134,3 @@ export const insertReferralSchema = createInsertSchema(referrals);
 export const selectReferralSchema = createSelectSchema(referrals);
 export const insertAlertSchema = createInsertSchema(alerts);
 export const selectAlertSchema = createSelectSchema(alerts);
-export const insertClinicianProfileSchema = createInsertSchema(clinicianProfiles);
-export const selectClinicianProfileSchema = createSelectSchema(clinicianProfiles);
-
