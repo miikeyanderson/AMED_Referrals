@@ -12,8 +12,6 @@ import { referralSubmissionSchema } from "@db/schema";
 import { ZodError, z } from "zod";
 import { sanitizeHtml } from "./utils/sanitize";
 import { 
-  clinicianProfiles, 
-  onboardingStepEnum,
   type ClinicianProfile
 } from "@db/schema";
 
@@ -2445,116 +2443,7 @@ FROM hired_referrals;
     }
   );
 
-  // Add these new endpoints inside the registerRoutes function
-  app.post("/api/clinician/profile", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
-    try {
-      const validatedData = req.body;
-
-      // Check if profile already exists
-      const [existingProfile] = await db
-        .select()
-        .from(clinicianProfiles)
-        .where(eq(clinicianProfiles.userId, req.user!.id))
-        .limit(1);
-
-      let profile: ClinicianProfile;
-
-      if (existingProfile) {
-        [profile] = await db
-          .update(clinicianProfiles)
-          .set({
-            ...validatedData,
-            updatedAt: new Date()
-          })
-          .where(eq(clinicianProfiles.userId, req.user!.id))
-          .returning();
-      } else {
-        [profile] = await db
-          .insert(clinicianProfiles)
-          .values({
-            ...validatedData,
-            userId: req.user!.id,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          })
-          .returning();
-      }
-
-      // Update the user's current onboarding step
-      await db
-        .update(users)
-        .set({
-          currentOnboardingStep: 'document_verification'
-        })
-        .where(eq(users.id, req.user!.id));
-
-      res.json({
-        message: "Profile updated successfully",
-        profile
-      });
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({
-          error: "Validation failed",
-          code: "VALIDATION_ERROR",
-          details: error.errors
-        });
-      }
-
-      logServerError(error as Error, {
-        context: 'update-clinician-profile',
-        userId: req.user?.id,
-        role: req.user?.role,
-        body: req.body
-      });
-
-      res.status(500).json({
-        error: "Failed to update profile",
-        code: "SERVER_ERROR"
-      });
-    }
-  });
-
-  app.put("/api/clinician/onboarding/step", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
-    try {
-      const { step } = req.body;
-
-      if (!Object.values(onboardingStepEnum.enumValues).includes(step)) {
-        return res.status(400).json({
-          error: "Invalid onboarding step",
-          code: "INVALID_STEP",
-          validSteps: Object.values(onboardingStepEnum.enumValues)
-        });
-      }
-
-      const [updatedUser] = await db
-        .update(users)
-        .set({
-          currentOnboardingStep: step as typeof onboardingStepEnum.enumValues,
-          hasCompletedOnboarding: step === 'completed'
-        })
-        .where(eq(users.id, req.user!.id))
-        .returning();
-
-      res.json({
-        message: "Onboarding step updated successfully",
-        currentStep: updatedUser.currentOnboardingStep,
-        isCompleted: updatedUser.hasCompletedOnboarding
-      });
-    } catch (error) {
-      logServerError(error as Error, {
-        context: 'update-onboarding-step',
-        userId: req.user?.id,
-        role: req.user?.role,
-        body: req.body
-      });
-
-      res.status(500).json({
-        error: "Failed to update onboarding step",
-        code: "SERVER_ERROR"
-      });
-    }
-  });
+  // Routes will be added here
 
   return httpServer;
 }
