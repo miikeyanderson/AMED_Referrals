@@ -13,8 +13,8 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     hmr: {
-      clientPort: 443,
-      protocol: "wss",
+      clientPort: 5173,
+      protocol: "ws",
       host: "0.0.0.0",
     },
     allowedHosts: [".replit.dev", ".picard.replit.dev"],
