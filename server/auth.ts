@@ -44,17 +44,18 @@ export function setupAuth(app: Express) {
     secret: process.env.REPL_ID || "arm-platform-secret",
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      secure: true,
-      sameSite: 'none',
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    },
+    cookie: {},
     store: new MemoryStore({
       checkPeriod: 86400000,
     }),
   };
 
-  app.set("trust proxy", 1);
+  if (app.get("env") === "production") {
+    app.set("trust proxy", 1);
+    sessionSettings.cookie = {
+      secure: true,
+    };
+  }
 
   app.use(session(sessionSettings));
   app.use(passport.initialize());
@@ -239,40 +240,4 @@ export function setupAuth(app: Express) {
     );
     res.status(401).send("Not logged in");
   });
-
-  const checkAuth = (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (!req.isAuthenticated() || !req.user) {
-        const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
-        logUnauthorizedAccess(-1, ip, req.path);
-        return res.status(401).json({
-          error: "Authentication required",
-          code: "AUTH_REQUIRED"
-        });
-      }
-
-      // Verify session is valid
-      if (!req.session?.passport?.user) {
-        logAuthFailure('unknown', req.ip, 'Invalid session');
-        req.logout((err) => {
-          if (err) logServerError(err, { context: 'session-cleanup' });
-        });
-        return res.status(401).json({
-          error: "Session expired",
-          code: "SESSION_EXPIRED"
-        });
-      }
-
-      next();
-    } catch (error) {
-      logServerError(error as Error, { context: 'auth-middleware' });
-      return res.status(500).json({
-        error: "Authentication error",
-        code: "AUTH_ERROR"
-      });
-    }
-  };
-
-  app.use(checkAuth); // Apply the authentication middleware
-
 }
