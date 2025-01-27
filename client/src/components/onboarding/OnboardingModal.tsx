@@ -121,6 +121,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] p-0">
         <div className="flex flex-col">
+          <DialogTitle className="sr-only">Onboarding</DialogTitle>
           <div className="p-6 space-y-4">
             <div className="space-y-2">
               <h2 className="text-2xl font-semibold tracking-tight">

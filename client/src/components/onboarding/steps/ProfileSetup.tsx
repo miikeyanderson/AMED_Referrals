@@ -39,7 +39,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
     defaultValues: {
       bio: "",
       specialties: [],
-      yearsOfExperience: 0,
+      yearsOfExperience: "",
     },
   });
 
@@ -74,14 +74,12 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
   });
 
   const toggleSpecialty = (specialty: string) => {
-    setSelectedSpecialties((prev) => {
-      const isSelected = prev.includes(specialty);
-      const updated = isSelected
-        ? prev.filter((s) => s !== specialty)
-        : [...prev, specialty];
-      form.setValue("specialties", updated);
-      return updated;
-    });
+    const isSelected = selectedSpecialties.includes(specialty);
+    const updated = isSelected
+      ? selectedSpecialties.filter((s) => s !== specialty)
+      : [...selectedSpecialties, specialty];
+    setSelectedSpecialties(updated);
+    form.setValue("specialties", updated);
   };
 
   const onSubmit = (data: ProfileSetupData) => {
