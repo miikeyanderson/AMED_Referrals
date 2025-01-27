@@ -19,7 +19,7 @@ export default defineConfig({
       protocol: "wss",
       host: "0.0.0.0",
     },
-    allowedHosts: [".replit.dev", ".picard.replit.dev"],
+    allowedHosts: 'all',
   },
   resolve: {
     alias: {
