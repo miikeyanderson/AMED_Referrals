@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +26,10 @@ import { referredClinicianSubmissionSchema } from "@db/schema";
 import type { z } from "zod";
 import { format } from "date-fns";
 
-type FormData = z.infer<typeof referredClinicianSubmissionSchema>;
+// Extend the schema type to include resumeFile for form handling
+type FormData = z.infer<typeof referredClinicianSubmissionSchema> & {
+  resumeFile?: File;
+};
 
 interface ProfileFormProps {
   referralToken: string;
@@ -35,7 +38,7 @@ interface ProfileFormProps {
 
 export function ProfileForm({ referralToken, defaultEmail }: ProfileFormProps) {
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const form = useForm<FormData>({
     resolver: zodResolver(referredClinicianSubmissionSchema),
@@ -47,33 +50,36 @@ export function ProfileForm({ referralToken, defaultEmail }: ProfileFormProps) {
     },
   });
 
-  const { mutate, isLoading } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async (data: FormData) => {
       // Handle file upload first if a file is selected
       if (data.resumeFile) {
         const formData = new FormData();
         formData.append("file", data.resumeFile);
-        
+
         const uploadResponse = await fetch("/api/upload-resume", {
           method: "POST",
           body: formData,
         });
-        
+
         if (!uploadResponse.ok) {
           throw new Error("Failed to upload resume");
         }
-        
+
         const { url } = await uploadResponse.json();
         data.resumeUrl = url;
       }
-      
+
+      // Remove resumeFile from data before sending to API
+      const { resumeFile, ...submissionData } = data;
+
       // Submit the form data
       const response = await fetch(`/api/clinician/profile?token=${referralToken}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(submissionData),
       });
 
       if (!response.ok) {
@@ -84,7 +90,7 @@ export function ProfileForm({ referralToken, defaultEmail }: ProfileFormProps) {
       return response.json();
     },
     onSuccess: () => {
-      navigate("/referred-clinician/thank-you");
+      setLocation("/referred-clinician/thank-you");
     },
     onError: (error) => {
       toast({
@@ -198,6 +204,7 @@ export function ProfileForm({ referralToken, defaultEmail }: ProfileFormProps) {
                 <Input 
                   placeholder="Enter certifications separated by commas" 
                   onChange={(e) => field.onChange(e.target.value.split(',').map(c => c.trim()))}
+                  value={field.value?.join(', ') || ''}
                 />
               </FormControl>
               <FormDescription>
@@ -232,6 +239,7 @@ export function ProfileForm({ referralToken, defaultEmail }: ProfileFormProps) {
                 <Input 
                   placeholder="Enter locations separated by commas" 
                   onChange={(e) => field.onChange(e.target.value.split(',').map(l => l.trim()))}
+                  value={field.value?.join(', ') || ''}
                 />
               </FormControl>
               <FormDescription>
@@ -301,8 +309,8 @@ export function ProfileForm({ referralToken, defaultEmail }: ProfileFormProps) {
           )}
         />
 
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Submitting..." : "Submit Profile"}
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Submitting..." : "Submit Profile"}
         </Button>
       </form>
     </Form>
