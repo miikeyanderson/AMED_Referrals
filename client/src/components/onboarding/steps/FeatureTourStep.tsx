@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText, ChartBar, Trophy } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FeatureTourStepProps {
   onComplete: () => void;
@@ -19,19 +20,19 @@ const features = [
     Icon: FileText,
     title: "Submit Referral",
     description: "Click here to refer your colleagues. Fill out their information and we'll take it from there!",
-    highlight: "primary",
+    colorClass: "bg-primary/10 text-primary",
   },
   {
     Icon: ChartBar,
     title: "Track Progress",
     description: "Monitor your referrals' journey through our recruitment pipeline in real-time.",
-    highlight: "secondary",
+    colorClass: "bg-blue-500/10 text-blue-500",
   },
   {
     Icon: Trophy,
     title: "Rewards Center",
     description: "View and redeem your rewards after successful placements.",
-    highlight: "accent",
+    colorClass: "bg-amber-500/10 text-amber-500",
   },
 ];
 
@@ -61,8 +62,8 @@ export function FeatureTourStep({ onComplete }: FeatureTourStepProps) {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className={`rounded-full p-2 bg-${features[currentFeature].highlight}/10`}>
-                  <CurrentIcon className={`h-6 w-6 text-${features[currentFeature].highlight}`} />
+                <div className={cn("rounded-full p-2", features[currentFeature].colorClass)}>
+                  <CurrentIcon className="h-6 w-6" />
                 </div>
                 <div>
                   <CardTitle>{features[currentFeature].title}</CardTitle>
@@ -93,9 +94,10 @@ export function FeatureTourStep({ onComplete }: FeatureTourStepProps) {
           {features.map((_, index) => (
             <div
               key={index}
-              className={`h-1.5 w-8 rounded-full transition-colors ${
+              className={cn(
+                "h-1.5 w-8 rounded-full transition-colors",
                 index === currentFeature ? "bg-primary" : "bg-muted"
-              }`}
+              )}
             />
           ))}
         </div>

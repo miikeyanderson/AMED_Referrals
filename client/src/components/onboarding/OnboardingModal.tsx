@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
@@ -7,7 +7,7 @@ import { useUser } from "@/hooks/use-user";
 import { AnimatePresence, motion } from "framer-motion";
 import type { OnboardingStepType } from "@/types/onboarding";
 import { useQueryClient } from "@tanstack/react-query";
-import { ClipboardList, Users, BadgeDollarSign, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { ProfileSetup } from "./steps/ProfileSetup";
@@ -49,7 +49,7 @@ const steps = [
 ] as const;
 
 export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
-  const { user, updateOnboardingStep } = useUser();
+  const { user, updateProfile } = useUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState<OnboardingStepType>(
@@ -63,7 +63,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     const nextStep = steps[currentStepIndex + 1];
     if (!nextStep) {
       try {
-        await updateOnboardingStep("completed");
+        await updateProfile({ hasCompletedOnboarding: true, currentOnboardingStep: "completed" });
         await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
         toast({
           title: "Welcome aboard!",
@@ -81,7 +81,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     }
 
     try {
-      await updateOnboardingStep(nextStep.id as OnboardingStepType);
+      await updateProfile({ currentOnboardingStep: nextStep.id as OnboardingStepType });
       await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setCurrentStep(nextStep.id as OnboardingStepType);
     } catch (error) {
@@ -95,7 +95,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
 
   const handleSkip = async () => {
     try {
-      await updateOnboardingStep("completed");
+      await updateProfile({ hasCompletedOnboarding: true, currentOnboardingStep: "completed" });
       await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
         title: "Onboarding Skipped",
@@ -121,7 +121,6 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] p-0">
         <div className="flex flex-col">
-          <DialogTitle className="sr-only">Onboarding</DialogTitle>
           <div className="p-6 space-y-4">
             <div className="space-y-2">
               <h2 className="text-2xl font-semibold tracking-tight">
