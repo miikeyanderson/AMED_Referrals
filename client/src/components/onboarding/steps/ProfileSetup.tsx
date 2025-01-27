@@ -45,28 +45,29 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileSetupData) => {
-      const response = await fetch("/api/clinician/profile", {
-        method: "PUT",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify(data),
-      });
-
-      const text = await response.text();
-      let json;
       try {
-        json = JSON.parse(text);
-      } catch (e) {
-        throw new Error("Invalid response from server");
-      }
+        const response = await fetch("/api/clinician/profile", {
+          method: "PUT",
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(data),
+        });
 
-      if (!response.ok) {
-        throw new Error(json.error || "Failed to update profile");
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const json = await response.json();
+          if (!response.ok) {
+            throw new Error(json.error || "Failed to update profile");
+          }
+          return json;
+        } else {
+          throw new Error("Invalid response format from server");
+        }
+      } catch (error) {
+        throw new Error(error instanceof Error ? error.message : "Failed to communicate with server");
       }
-
-      return json;
     },
     onSuccess: () => {
       toast({
