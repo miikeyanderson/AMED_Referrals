@@ -47,15 +47,26 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
     mutationFn: async (data: ProfileSetupData) => {
       const response = await fetch("/api/clinician/profile", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) {
-        throw new Error(await response.text());
+      const text = await response.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        throw new Error("Invalid response from server");
       }
 
-      return response.json();
+      if (!response.ok) {
+        throw new Error(json.error || "Failed to update profile");
+      }
+
+      return json;
     },
     onSuccess: () => {
       toast({
