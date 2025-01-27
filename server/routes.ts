@@ -2447,7 +2447,7 @@ FROM hired_referrals;
   );
 
   // Add these new endpoints inside the registerRoutes function
-  
+
 
       // Check if profile already exists
       const [existingProfile] = await db
