@@ -2447,7 +2447,9 @@ FROM hired_referrals;
   );
 
   // Add these new endpoints inside the registerRoutes function
-
+  app.post("/api/clinician/profile", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
+    try {
+      const validatedData = clinicianOnboardingSchema.parse(req.body);
 
       // Check if profile already exists
       const [existingProfile] = await db
