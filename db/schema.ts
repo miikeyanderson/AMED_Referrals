@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, index, jsonb, date } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -45,6 +45,61 @@ export const referralSubmissionSchema = z.object({
     .max(2000, "Notes cannot exceed 2000 characters")
     .optional()
     .transform(val => val ? val.trim() : undefined),
+});
+
+// Schema for referred clinician profile submission
+export const referredClinicianSubmissionSchema = z.object({
+  firstName: z.string()
+    .min(2, "First name must be at least 2 characters long")
+    .max(50, "First name cannot exceed 50 characters")
+    .regex(/^[a-zA-Z\s\-']+$/, "Name can only contain letters, spaces, hyphens, and apostrophes")
+    .transform(val => val.trim()),
+
+  lastName: z.string()
+    .min(2, "Last name must be at least 2 characters long")
+    .max(50, "Last name cannot exceed 50 characters")
+    .regex(/^[a-zA-Z\s\-']+$/, "Name can only contain letters, spaces, hyphens, and apostrophes")
+    .transform(val => val.trim()),
+
+  email: z.string()
+    .email("Invalid email address")
+    .max(255, "Email cannot exceed 255 characters")
+    .transform(val => val.toLowerCase().trim()),
+
+  phone: z.string()
+    .regex(/^\+?[\d\-\(\)\s]{10,20}$/, "Invalid phone number format")
+    .transform(val => val.replace(/\s+/g, '')),
+
+  specialty: z.string()
+    .min(2, "Specialty must be at least 2 characters long")
+    .max(100, "Specialty cannot exceed 100 characters"),
+
+  yearsOfExperience: z.number()
+    .min(0, "Years of experience cannot be negative")
+    .max(50, "Years of experience seems too high"),
+
+  certifications: z.array(z.string())
+    .min(1, "At least one certification is required")
+    .max(10, "Cannot have more than 10 certifications"),
+
+  currentEmployer: z.string()
+    .max(100, "Current employer name cannot exceed 100 characters")
+    .optional(),
+
+  preferredLocations: z.array(z.string())
+    .min(1, "At least one preferred location is required")
+    .max(5, "Cannot have more than 5 preferred locations"),
+
+  availabilityDate: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format"),
+
+  resumeUrl: z.string()
+    .url("Invalid resume URL")
+    .optional(),
+
+  additionalNotes: z.string()
+    .max(1000, "Additional notes cannot exceed 1000 characters")
+    .optional(),
 });
 
 // Database tables
@@ -113,6 +168,31 @@ export const alerts = pgTable("alerts", {
   readAt: timestamp("read_at")
 });
 
+// Add referred clinicians table
+export const referredClinicians = pgTable("referred_clinicians", {
+  id: serial("id").primaryKey(),
+  referralId: integer("referral_id").references(() => referrals.id).notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  specialty: text("specialty").notNull(),
+  yearsOfExperience: integer("years_of_experience").notNull(),
+  certifications: text("certifications").array().notNull(),
+  currentEmployer: text("current_employer"),
+  preferredLocations: text("preferred_locations").array().notNull(),
+  availabilityDate: date("availability_date").notNull(),
+  resumeUrl: text("resume_url"),
+  additionalNotes: text("additional_notes"),
+  status: text("status").notNull().default('pending'),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+}, (table) => ({
+  emailIdx: index("referred_clinician_email_idx").on(table.email),
+  referralIdx: index("referred_clinician_referral_idx").on(table.referralId),
+  specialtyIdx: index("referred_clinician_specialty_idx").on(table.specialty)
+}));
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -122,6 +202,8 @@ export type Reward = typeof rewards.$inferSelect;
 export type InsertReward = typeof rewards.$inferInsert;
 export type Alert = typeof alerts.$inferSelect;
 export type InsertAlert = typeof alerts.$inferInsert;
+export type ReferredClinician = typeof referredClinicians.$inferSelect;
+export type InsertReferredClinician = typeof referredClinicians.$inferInsert;
 
 // Schemas
 export const insertUserSchema = createInsertSchema(users);
@@ -130,3 +212,5 @@ export const insertReferralSchema = createInsertSchema(referrals);
 export const selectReferralSchema = createSelectSchema(referrals);
 export const insertAlertSchema = createInsertSchema(alerts);
 export const selectAlertSchema = createSelectSchema(alerts);
+export const insertReferredClinicianSchema = createInsertSchema(referredClinicians);
+export const selectReferredClinicianSchema = createSelectSchema(referredClinicians);
