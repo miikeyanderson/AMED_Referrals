@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from 'ws';
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { alerts, referrals, rewards, users, type Alert, type InsertAlert, type Referral } from "@db/schema";
+import { alerts, referrals, rewards, users, referredClinicians, type Alert, type InsertAlert, type Referral, referredClinicianSubmissionSchema } from "@db/schema";
 import { eq, desc, and, or, like, sql, inArray, asc } from "drizzle-orm";
 import { SQL } from "drizzle-orm";
 import { logUnauthorizedAccess, logServerError } from "./utils/logger";
@@ -698,70 +698,78 @@ export function registerRoutes(app: Express): Server {
    *         description: Server error while fetching analytics
    */
   /**
- * @swagger
- * /api/clinician/profile:
- *   post:
- *     summary: Submit a clinician profile
- *     description: Create a detailed clinician profile with resume upload
- *     tags: [Clinician]
- *     security:
- *       - sessionAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             $ref: '#/components/schemas/ReferredClinician'
- *     responses:
- *       201:
- *         description: Profile created successfully
- *       400:
- *         description: Invalid input data
- *       401:
- *         description: Not authenticated
- *       500:
- *         description: Server error
- */
-app.post("/api/clinician/profile", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
-  try {
-    // Validate input data
-    const result = referredClinicianSubmissionSchema.safeParse(req.body);
-    if (!result.success) {
-      return res.status(400).json({
-        error: "Validation failed",
-        details: result.error.issues
+  * @swagger
+  * /api/clinician/profile:
+  *   post:
+  *     summary: Submit a clinician profile
+  *     description: Create a detailed clinician profile with resume upload
+  *     tags: [Clinician]
+  *     security:
+  *       - sessionAuth: []
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         multipart/form-data:
+  *           schema:
+  *             $ref: '#/components/schemas/ReferredClinician'
+  *     responses:
+  *       201:
+  *         description: Profile created successfully
+  *       400:
+  *         description: Invalid input data
+  *       401:
+  *         description: Not authenticated
+  *       500:
+  *         description: Server error
+  */
+  app.post("/api/clinician/profile", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
+    try {
+      // Validate input data
+      const result = referredClinicianSubmissionSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({
+          error: "Validation failed",
+          details: result.error.issues
+        });
+      }
+
+      if (!req.user?.id) {
+        return res.status(401).json({
+          error: "User not authenticated",
+          code: "UNAUTHORIZED"
+        });
+      }
+
+      // Create profile record
+      const [createdProfile] = await db
+        .insert(referredClinicians)
+        .values({
+          ...result.data,
+          referralId: req.body.referralId, // This should be provided in the request
+          status: 'pending',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      res.status(201).json({
+        success: true,
+        data: createdProfile
+      });
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'create-clinician-profile',
+        userId: req.user?.id,
+        role: req.user?.role
+      });
+      res.status(500).json({
+        error: "Failed to create clinician profile",
+        code: "SERVER_ERROR"
       });
     }
+  });
 
-    // Create profile record
-    const [createdProfile] = await db
-      .insert(referredClinicians)
-      .values({
-        ...result.data,
-        status: 'pending',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-      .returning();
-
-    res.status(201).json({
-      success: true,
-      data: createdProfile
-    });
-  } catch (error) {
-    logServerError(error as Error, {
-      context: 'create-clinician-profile',
-      userId: req.user?.id,
-      role: req.user?.role
-    });
-    res.status(500).json({
-      error: "Failed to create clinician profile",
-      code: "SERVER_ERROR"
-    });
-  }
-});
-
-app.get("/api/analytics", checkAuth, async (req: Request, res: Response) => {
+  app.get("/api/analytics", checkAuth, async (req: Request, res: Response) => {
     try {
       // Get total referrals count
       const [totalReferrals] = await db
@@ -975,7 +983,7 @@ app.get("/api/analytics", checkAuth, async (req: Request, res: Response) => {
         position: sanitizeHtml(req.body.position),
         department: req.body.department ? sanitizeHtml(req.body.department) : undefined,
         experience: req.body.experience ? sanitizeHtml(req.body.experience) : undefined,
-        notes: req.body.notes ? sanitizeHtml(req.body.notes) : undefined,
+        notes: req.body.notes ?sanitizeHtml(req.body.notes) : undefined,
       };
 
       // Validate the sanitized data
