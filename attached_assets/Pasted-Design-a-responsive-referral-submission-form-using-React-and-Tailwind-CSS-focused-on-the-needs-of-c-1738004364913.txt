@@ -1,0 +1,49 @@
+Design a responsive referral submission form using React and Tailwind CSS, focused on the needs of clinicians. The form must include:
+
+1. **Form Fields:**
+   - Colleague Name: Text input with character limit (100) and error handling for empty fields.
+   - Colleague Email: Email input with real-time validation for proper format.
+   - Colleague Phone Number: Number input with formatting for US phone numbers and a validation message for incorrect formats.
+   - Certifications: Multi-select dropdown or checkbox group for certifications like BLS, ACLS, etc., fetched dynamically from the `/api/certifications` endpoint.
+   - Preferred Start Date: Date picker with constraints (no past dates).
+   - Notes (Optional): Text area for additional comments about the referral.
+
+2. **Document Upload Section:**
+   - Allow up to three files to be uploaded (e.g., resume, certifications, COVID card).
+   - Display uploaded files with:
+     - File name and size.
+     - Option to delete or replace files.
+     - Validation for file types (PDF, JPEG, PNG) and size (max 5MB per file).
+   - Use a drag-and-drop interface with a fallback file input for accessibility.
+
+3. **Progress Tracker:**
+   - Use a horizontal step progress bar to indicate steps:
+     - **Referral Details** → **Document Upload** → **Review & Submit.**
+   - Update progress dynamically as each step is completed.
+
+4. **Submit Button:**
+   - Initially disabled; becomes active when all required fields are valid.
+   - Show a loading spinner during form submission.
+   - Provide clear feedback on success or failure (e.g., toast notifications).
+
+5. **Error Handling and UX Enhancements:**
+   - Real-time field validation with error messages below invalid fields.
+   - Display backend errors (e.g., file upload failure) clearly and actionable.
+
+6. **Design:**
+   - Use a professional healthcare theme with Tailwind CSS (blue and white palette).
+   - Ensure a mobile-first, responsive layout with accessible elements.
+
+7. **Integration:**
+   - On form submission, send a POST request to `/api/referrals`.
+   - Use React Query to handle loading states and errors gracefully.
+   - Add a success confirmation screen with the referral summary and tracking link.
+
+Files to Modify:
+- `client/src/components/dashboard/clinician/ReferralForm.tsx`: Create the referral form.
+- `client/src/components/ui`: Use existing form, button, and input components.
+
+Testing Requirements:
+- Validate all field constraints and error messages.
+- Test responsiveness on mobile, tablet, and desktop views.
+- Simulate file uploads to ensure they meet validation criteria.
