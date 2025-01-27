@@ -115,8 +115,8 @@ app.use((req, res, next) => {
 
   // Set server hostname to 0.0.0.0 to allow external connections
   const hostname = '0.0.0.0';
-  const port = parseInt(process.env.PORT || '3000', 10);
-  const fallbackPort = 3001;
+  const port = parseInt(process.env.PORT || '3001', 10);
+  const fallbackPort = 3002;
 
   server.listen(port, hostname, () => {
     logger.info({
