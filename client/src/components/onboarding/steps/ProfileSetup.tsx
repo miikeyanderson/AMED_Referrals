@@ -6,11 +6,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SPECIALTIES = [
@@ -45,29 +44,20 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileSetupData) => {
-      try {
-        const response = await fetch("/api/clinician/profile", {
-          method: "PUT",
-          headers: { 
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify(data),
-        });
+      const response = await fetch("/api/clinician/profile", {
+        method: "PUT",
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const json = await response.json();
-          if (!response.ok) {
-            throw new Error(json.error || "Failed to update profile");
-          }
-          return json;
-        } else {
-          throw new Error("Invalid response format from server");
-        }
-      } catch (error) {
-        throw new Error(error instanceof Error ? error.message : "Failed to communicate with server");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update profile");
       }
+
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -80,7 +70,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to update profile",
+        description: error instanceof Error ? error.message : "Failed to update profile",
       });
     },
   });
@@ -100,18 +90,6 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="flex items-center gap-6">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={form.watch("avatar")} />
-            <AvatarFallback>
-              <Upload className="h-8 w-8 text-muted-foreground" />
-            </AvatarFallback>
-          </Avatar>
-          <Button type="button" variant="outline">
-            Upload Photo
-          </Button>
-        </div>
-
         <FormField
           control={form.control}
           name="bio"
@@ -121,7 +99,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
               <FormControl>
                 <Textarea
                   placeholder="Tell us about your professional background and expertise..."
-                  className="resize-none"
+                  className="resize-none min-h-[100px]"
                   {...field}
                 />
               </FormControl>
@@ -141,7 +119,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
                   type="number"
                   min={0}
                   {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                 />
               </FormControl>
               <FormMessage />

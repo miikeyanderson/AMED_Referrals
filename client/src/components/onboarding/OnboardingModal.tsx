@@ -117,17 +117,24 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     }
   }, [user?.currentOnboardingStep, onOpenChange]);
 
+  const stepTitle = steps[currentStepIndex]?.title || "Onboarding";
+  const stepDescription = steps[currentStepIndex]?.description || "Complete your profile setup";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] p-0">
+      <DialogContent 
+        className="sm:max-w-[600px] p-0"
+        aria-labelledby="onboarding-title"
+        aria-describedby="onboarding-description"
+      >
         <div className="flex flex-col">
           <div className="p-6 space-y-4">
             <div className="space-y-2">
-              <h2 className="text-2xl font-semibold tracking-tight">
-                {steps[currentStepIndex].title}
+              <h2 id="onboarding-title" className="text-2xl font-semibold tracking-tight">
+                {stepTitle}
               </h2>
-              <p className="text-muted-foreground">
-                {steps[currentStepIndex].description}
+              <p id="onboarding-description" className="text-muted-foreground">
+                {stepDescription}
               </p>
             </div>
 
