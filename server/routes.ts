@@ -11,6 +11,12 @@ import { add, format, startOfWeek, endOfWeek, parseISO, isValid, startOfMonth, e
 import { referralSubmissionSchema } from "@db/schema";
 import { ZodError, z } from "zod";
 import { sanitizeHtml } from "./utils/sanitize";
+import { 
+  clinicianProfiles, 
+  clinicianOnboardingSchema, 
+  onboardingStepEnum,
+  type ClinicianProfile
+} from "@db/schema";
 
 // Type definitions
 interface PipelineQueryParams {
@@ -49,6 +55,8 @@ declare global {
     interface User {
       id: number;
       role: 'clinician' | 'recruiter' | 'leadership';
+      currentOnboardingStep?: string;
+      hasCompletedOnboarding?: boolean;
     }
   }
 }
@@ -117,6 +125,18 @@ export function registerRoutes(app: Express): Server {
     toDate: z.string().optional(),
   });
 
+  // Add this to the existing middleware section
+  const isOnboarded = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user?.hasCompletedOnboarding) {
+      return res.status(403).json({
+        error: "Onboarding not completed",
+        code: "ONBOARDING_REQUIRED"
+      });
+    }
+    next();
+  };
+
+
   /**
    * @swagger
    * /api/clinician/referrals-stats:
@@ -162,6 +182,7 @@ export function registerRoutes(app: Express): Server {
     "/api/clinician/referrals-stats",
     checkAuth,
     checkClinicianRole,
+    isOnboarded,
     async (req: Request, res: Response) => {
       try {
         // Validate and parse query parameters
@@ -335,7 +356,7 @@ export function registerRoutes(app: Express): Server {
    *       500:
    *         description: Server error
    */
-  app.get("/api/clinician/rewards-snapshot", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
+  app.get("/api/clinician/rewards-snapshot", checkAuth, checkClinicianRole, isOnboarded, async (req: Request, res: Response) => {
     try {
       // Get pending rewards with explicit type casting
       const [pendingRewards] = await db
@@ -886,7 +907,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.post("/api/referrals", checkAuth, async (req: Request, res: Response) => {
+  app.post("/api/referrals", checkAuth, isOnboarded, async (req: Request, res: Response) => {
     if (req.user?.role !== 'clinician') {
       const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
       logUnauthorizedAccess(
@@ -1035,7 +1056,7 @@ export function registerRoutes(app: Express): Server {
    *       500:
    *         description: Server error while updating referral
    */
-  app.get("/api/referrals/:id", checkAuth, async (req: Request, res: Response) => {
+  app.get("/api/referrals/:id", checkAuth, isOnboarded, async (req: Request, res: Response) => {
     try {
       const [referral] = await db
         .select()
@@ -1141,7 +1162,7 @@ export function registerRoutes(app: Express): Server {
    *       500:
    *         description: Server error while fetching rewards
    */
-  app.get("/api/rewards", checkAuth, async (req: Request, res: Response) => {
+  app.get("/api/rewards", checkAuth, isOnboarded, async (req: Request, res: Response) => {
     try {
       const userRewards = await db
         .select()
@@ -1187,7 +1208,7 @@ export function registerRoutes(app: Express): Server {
    *       500:
    *         description: Server error
    */
-  app.get("/api/candidate/:id", checkAuth, async (req: Request, res: Response) => {
+  app.get("/api/candidate/:id", checkAuth, isOnboarded, async (req: Request, res: Response) => {
     try {
       const candidateId = parseInt(req.params.id);
 
@@ -1937,69 +1958,70 @@ export function registerRoutes(app: Express): Server {
       const lastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
       const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
 
-      // Get current month metrics with proper null handling
-      const currentMetrics = await db.execute(sql`
-        WITH hired_referrals AS (
-          SELECT
-            id,
-            created_at,
-            updated_at,
-            EXTRACT(EPOCH FROM (updated_at - created_at)) / 86400 as days_to_hire
-          FROM ${referrals}
-          WHERE
-            status = 'hired'
-            AND updated_at >= ${currentMonth.toISOString()}
-            AND updated_at < ${nextMonth.toISOString()}
-        ),
-        total_referrals AS (
-          SELECT COALESCE(COUNT(*), 0) as total
-          FROM ${referrals}
-          WHERE created_at >= ${currentMonth.toISOString()}
-            AND created_at < ${nextMonth.toISOString()}
-        )
-        SELECT
-          COALESCE(COUNT(hired_referrals.id), 0) as hired_count,
-          COALESCE(AVG(NULLIF(hired_referrals.days_to_hire, 0)), 0) as avg_days_to_hire,
-          COALESCE((SELECT total FROM total_referrals), 0) as total_referrals
-        FROM hired_referrals
-      `);
+      // Fix the analytics query
+      const analyticsQuery = sql`
+WITH hired_referrals AS (
+  SELECT
+    r.id,
+    r.created_at,
+    r.updated_at,
+    EXTRACT(EPOCH FROM (r.updated_at - r.created_at)) / 86400 as days_to_hire
+  FROM ${referrals} r
+  WHERE r.status = 'hired'
+  AND r.updated_at >= ${lastMonth}
+  AND r.updated_at < ${currentMonth}
+),
+total_referrals AS (
+  SELECT COUNT(*) as total
+  FROM ${referrals} r
+  WHERE r.created_at >= ${lastMonth}
+  AND r.created_at < ${currentMonth}
+)
+SELECT
+  COALESCE(COUNT(hired_referrals.id), 0) as hired_count,
+  COALESCE(AVG(NULLIF(hired_referrals.days_to_hire, 0)), 0) as avg_days_to_hire,
+  (SELECT total FROM total_referrals) as total_referrals
+FROM hired_referrals;
+`;
 
-      // Get last month metrics
+      // Get current month metrics using the corrected query
+      const currentMetrics = await db.execute(analyticsQuery);
+
+      // Get last month metrics using the corrected query, updating variable names for clarity
       const lastMonthMetrics = await db.execute(sql`
-        WITH hired_referrals AS (
-          SELECT
-            id,
-            created_at,
-            updated_at,
-            EXTRACT(EPOCH FROM (updated_at - created_at)) / 86400 as days_to_hire
-          FROM ${referrals}
-          WHERE
-            status = 'hired'
-            AND updatedat >= ${lastMonth.toISOString()}
-            AND updated_at < ${currentMonth.toISOString()}
-        ),
-        total_referrals AS (
-          SELECT COUNT(*) as total
-          FROM ${referrals}
-          WHERE created_at >= ${lastMonth.toISOString()}
-            AND created_at < ${currentMonth.toISOString()}
-        )
-        SELECT
-          COALESCE(COUNT(hired_referrals.id), 0) as hired_count,
-          COALESCE(AVG(hired_referrals.days_to_hire), 0) as avg_days_to_hire,
-          (SELECT total FROM total_referrals) as total_referrals
-        FROM hired_referrals
-      `);
+WITH hired_referrals AS (
+  SELECT
+    r.id,
+    r.created_at,
+    r.updated_at,
+    EXTRACT(EPOCH FROM (r.updated_at - r.created_at)) / 86400 as days_to_hire
+  FROM ${referrals} r
+  WHERE r.status = 'hired'
+  AND r.updated_at >= ${lastMonth}
+  AND r.updated_at < ${currentMonth}
+),
+total_referrals AS (
+  SELECT COUNT(*) as total
+  FROM ${referrals} r
+  WHERE r.created_at >= ${lastMonth}
+  AND r.created_at < ${currentMonth}
+)
+SELECT
+  COALESCE(COUNT(hired_referrals.id), 0) as hired_count,
+  COALESCE(AVG(NULLIF(hired_referrals.days_to_hire, 0)), 0) as avg_days_to_hire,
+  (SELECT total FROM total_referrals) as total_referrals
+FROM hired_referrals;
+`);
 
       // Calculate current month KPIs
-      const current = currentMetrics[0];
+      const current = currentMetrics.rows[0];
       const currentConversionRate = current.total_referrals > 0
         ? (Number(current.hired_count) / Number(current.total_referrals)) * 100
         : 0;
       const currentTimeToHire = Number(current.avg_days_to_hire);
 
       // Calculate last month KPIs
-      const last = lastMonthMetrics[0];
+      const last = lastMonthMetrics.rows[0];
       const lastConversionRate = last.total_referrals > 0
         ? (Number(last.hired_count) / Number(last.total_referrals)) * 100
         : 0;
@@ -2423,6 +2445,143 @@ export function registerRoutes(app: Express): Server {
       }
     }
   );
+
+  // Add these new endpoints inside the registerRoutes function
+  app.get("/api/clinician/onboarding/status", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
+    try {
+      const [profile] = await db
+        .select()
+        .from(clinicianProfiles)
+        .where(eq(clinicianProfiles.userId, req.user!.id))
+        .limit(1);
+
+      res.json({
+        currentStep: req.user!.currentOnboardingStep,
+        isCompleted: req.user!.hasCompletedOnboarding,
+        profile: profile || null
+      });
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'get-onboarding-status',
+        userId: req.user?.id,
+        role: req.user?.role
+      });
+      res.status(500).json({
+        error: "Failed to fetch onboarding status",
+        code: "SERVER_ERROR"
+      });
+    }
+  });
+
+  app.post("/api/clinician/onboarding/profile", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
+    try {
+      const validatedData = clinicianOnboardingSchema.parse(req.body);
+
+      // Check if profile already exists
+      const [existingProfile] = await db
+        .select()
+        .from(clinicianProfiles)
+        .where(eq(clinicianProfiles.userId, req.user!.id))
+        .limit(1);
+
+      let profile: ClinicianProfile;
+
+      if (existingProfile) {
+        [profile] = await db
+          .update(clinicianProfiles)
+          .set({
+            ...validatedData,
+            updatedAt: new Date()
+          })
+          .where(eq(clinicianProfiles.userId, req.user!.id))
+          .returning();
+      } else {
+        [profile] = await db
+          .insert(clinicianProfiles)
+          .values({
+            ...validatedData,
+            userId: req.user!.id,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          })
+          .returning();
+      }
+
+      // Update the user's current onboarding step
+      await db
+        .update(users)
+        .set({
+          currentOnboardingStep: 'document_verification'
+        })
+        .where(eq(users.id, req.user!.id));
+
+      res.json({
+        message: "Profile updated successfully",
+        profile
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          error: "Validation failed",
+          code: "VALIDATION_ERROR",
+          details: error.errors
+        });
+      }
+
+      logServerError(error as Error, {
+        context: 'update-clinician-profile',
+        userId: req.user?.id,
+        role: req.user?.role,
+        body: req.body
+      });
+
+      res.status(500).json({
+        error: "Failed to update profile",
+        code: "SERVER_ERROR"
+      });
+    }
+  });
+
+  app.put("/api/clinician/onboarding/step", checkAuth, checkClinicianRole, async (req: Request, res: Response) => {
+    try {
+      const { step } = req.body;
+
+      if (!Object.values(onboardingStepEnum.enumValues).includes(step)) {
+        return res.status(400).json({
+          error: "Invalid onboarding step",
+          code: "INVALID_STEP",
+          validSteps: Object.values(onboardingStepEnum.enumValues)
+        });
+      }
+
+      const [updatedUser] = await db
+        .update(users)
+        .set({
+          currentOnboardingStep: step as typeof onboardingStepEnum.enumValues,
+          hasCompletedOnboarding: step === 'completed'
+        })
+        .where(eq(users.id, req.user!.id))
+        .returning();
+
+      res.json({
+        message: "Onboarding step updated successfully",
+        currentStep: updatedUser.currentOnboardingStep,
+        isCompleted: updatedUser.hasCompletedOnboarding
+      });
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'update-onboarding-step',
+        userId: req.user?.id,
+        role: req.user?.role,
+        body: req.body
+      });
+
+      res.status(500).json({
+        error: "Failed to update onboarding step",
+        code: "SERVER_ERROR"
+      });
+    }
+  });
 
   return httpServer;
 }

@@ -7,6 +7,15 @@ export const roleEnum = pgEnum('role', ['recruiter', 'clinician', 'leadership'])
 export const referralStatusEnum = pgEnum('referral_status', ['pending', 'contacted', 'interviewing', 'hired', 'rejected']);
 export const alertTypeEnum = pgEnum('alert_type', ['new_referral', 'pipeline_update', 'system_notification']);
 
+// New enum for onboarding steps
+export const onboardingStepEnum = pgEnum('onboarding_step', [
+  'profile_creation',
+  'document_verification',
+  'compliance_training',
+  'orientation',
+  'completed'
+]);
+
 // Enhanced validation schema for referral submission
 export const referralSubmissionSchema = z.object({
   candidateName: z.string()
@@ -55,11 +64,32 @@ export const users = pgTable("users", {
   role: roleEnum("role").notNull().default('clinician'),
   name: text("name").notNull(),
   email: text("email").unique().notNull(),
+  hasCompletedOnboarding: boolean("has_completed_onboarding").default(false).notNull(),
+  currentOnboardingStep: onboardingStepEnum("current_onboarding_step").default('profile_creation'),
   createdAt: timestamp("created_at").defaultNow().notNull()
 }, (table) => ({
   usernameIdx: index("username_idx").on(table.username),
   emailIdx: index("email_idx").on(table.email),
   roleIdx: index("role_idx").on(table.role)
+}));
+
+export const clinicianProfiles = pgTable("clinician_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  specialty: text("specialty"),
+  licenseNumber: text("license_number"),
+  licenseState: text("license_state"),
+  licenseExpiryDate: timestamp("license_expiry_date"),
+  yearsOfExperience: integer("years_of_experience"),
+  certifications: text("certifications").array(),
+  preferredShiftType: text("preferred_shift_type"),
+  availabilityStart: timestamp("availability_start"),
+  availabilityEnd: timestamp("availability_end"),
+  documentationStatus: jsonb("documentation_status"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+}, (table) => ({
+  userIdIdx: index("user_id_idx").on(table.userId)
 }));
 
 export const referrals = pgTable("referrals", {
@@ -122,6 +152,8 @@ export type Reward = typeof rewards.$inferSelect;
 export type InsertReward = typeof rewards.$inferInsert;
 export type Alert = typeof alerts.$inferSelect;
 export type InsertAlert = typeof alerts.$inferInsert;
+export type ClinicianProfile = typeof clinicianProfiles.$inferSelect;
+export type InsertClinicianProfile = typeof clinicianProfiles.$inferInsert;
 
 // Schemas
 export const insertUserSchema = createInsertSchema(users);
@@ -130,3 +162,18 @@ export const insertReferralSchema = createInsertSchema(referrals);
 export const selectReferralSchema = createSelectSchema(referrals);
 export const insertAlertSchema = createInsertSchema(alerts);
 export const selectAlertSchema = createSelectSchema(alerts);
+export const insertClinicianProfileSchema = createInsertSchema(clinicianProfiles);
+export const selectClinicianProfileSchema = createSelectSchema(clinicianProfiles);
+
+// Onboarding validation schema
+export const clinicianOnboardingSchema = z.object({
+  specialty: z.string().min(2, "Specialty must be at least 2 characters long"),
+  licenseNumber: z.string().min(5, "License number must be at least 5 characters"),
+  licenseState: z.string().length(2, "State must be a 2-letter code"),
+  licenseExpiryDate: z.string().datetime(),
+  yearsOfExperience: z.number().min(0),
+  certifications: z.array(z.string()),
+  preferredShiftType: z.string(),
+  availabilityStart: z.string().datetime().optional(),
+  availabilityEnd: z.string().datetime().optional(),
+});
