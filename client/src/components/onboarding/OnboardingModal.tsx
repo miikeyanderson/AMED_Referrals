@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
@@ -121,7 +121,6 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] p-0">
         <div className="flex flex-col">
-          <DialogTitle className="sr-only">Onboarding</DialogTitle>
           <DialogTitle className="sr-only">Onboarding</DialogTitle>
           <div className="p-6 space-y-4">
             <div className="space-y-2">
