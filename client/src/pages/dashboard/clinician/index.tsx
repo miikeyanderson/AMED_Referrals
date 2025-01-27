@@ -3,7 +3,7 @@ import { ClipboardList } from "lucide-react";
 import { ReferralStatsWidget } from "@/components/dashboard/ReferralStatsWidget";
 import { ClinicianBadges } from "@/components/dashboard/ClinicianBadges";
 import { RewardsSnapshotWidget } from "@/components/RewardsSnapshotWidget";
-import { ReferralForm, ReferralFormContent } from "@/components/dashboard/ReferralForm";
+import { ReferralForm } from "@/components/dashboard/ReferralForm";
 import { useQuery } from "@tanstack/react-query";
 
 export default function ClinicianDashboard() {
@@ -29,15 +29,6 @@ export default function ClinicianDashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">My Dashboard</h1>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Referral</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ReferralFormContent isEmbedded={true} />
-        </CardContent>
-      </Card>
       
       <div className="flex justify-end mb-4">
         <ReferralForm />
