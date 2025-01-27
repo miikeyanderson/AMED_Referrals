@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
@@ -17,6 +18,7 @@ export default defineConfig({
       protocol: "ws",
       host: "0.0.0.0",
     },
+    allowedHosts: [".replit.dev", ".repl.co"],
   },
   resolve: {
     alias: {
