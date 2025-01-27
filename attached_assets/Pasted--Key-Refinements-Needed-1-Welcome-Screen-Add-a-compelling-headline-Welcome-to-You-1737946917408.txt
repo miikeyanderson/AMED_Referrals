@@ -1,0 +1,39 @@
+**Key Refinements Needed:**
+
+1. **Welcome Screen:**
+   - Add a compelling headline (*“Welcome to Your Referral Hub!”*) and subheadline (*“Refer. Track. Earn.”*).
+   - Replace long text explanations with 2-3 bullet points summarizing platform benefits:
+     - *Effortless referrals in minutes.*
+     - *Real-time status tracking.*
+     - *Earn $500 per successful placement.*
+   - Include a visually appealing hero graphic or animation to reinforce professionalism.
+   - Ensure the **“Let’s Get Started”** button transitions seamlessly to the next step.
+
+2. **How It Works Overview:**
+   - Use a **3-step visual walkthrough** to explain the referral process:
+     - Step 1: *Refer a colleague.* Include a simple icon of a form.
+     - Step 2: *We handle the rest.* Show a recruiter reviewing a profile.
+     - Step 3: *Earn your reward.* Display a rewards icon with a $500 badge.
+   - Keep descriptions for each step concise (one sentence max).
+   - Add a **“Show Me Around”** button that transitions to the feature walkthrough.
+
+3. **Feature Walkthrough:**
+   - Implement **tooltips or guided overlays** to explain:
+     - **Referral Form:** Highlight the “Submit Referral” button with a tooltip: *“This is where you refer your colleagues. Let’s try it now!”*
+     - **Referral Dashboard:** Guide users to the tracking section with: *“Track your referral’s progress here.”*
+     - **Rewards Section:** Highlight the rewards summary with: *“Redeem your rewards here after successful placements!”*
+   - Use clear **“Next”** and **“Back”** buttons to allow navigation between features.
+
+4. **Call-to-Action Screen:**
+   - Design a final screen that encourages immediate action:
+     - Headline: *“Start Earning Today!”*
+     - Subheadline: *“Your next step is to make your first referral.”*
+     - Include a **“Refer a Colleague Now”** button that redirects to the referral form.
+     - Add progress reinforcement, e.g., *“You’re one step closer to earning your first reward!”*
+
+5. **Additional UX Enhancements:**
+   - Ensure the entire onboarding flow is **skippable** with a prominent “Skip Onboarding” button.
+   - Add **contextual reminders** for skipped or incomplete onboarding:
+     - A banner on the dashboard: *“Complete your onboarding to unlock all features!”*
+     - Allow users to reopen onboarding at any time from the dashboard menu.
+   - Make the flow **mobile-responsive** with touch-friendly elements and condensed layouts for smaller screens.
