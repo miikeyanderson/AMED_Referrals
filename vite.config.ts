@@ -25,7 +25,7 @@ export default defineConfig({
       usePolling: true
     },
     strictPort: true,
-    allowedHosts: ["frontend_web", ".replit.dev", ".picard.replit.dev"],
+    allowedHosts: [".replit.dev", ".picard.replit.dev"],
   },
   resolve: {
     alias: {
