@@ -138,6 +138,34 @@ export default function ClinicianDashboard() {
 
   return (
     <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 md:px-8">
+      <div className="flex flex-col justify-start pb-6 animate-fade-in">
+        <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight w-full">
+          <div className="flex items-center gap-2 w-full whitespace-nowrap overflow-hidden">
+            Welcome, <span className="text-blue-400 font-extrabold">{user?.name}</span>👋
+          </div>
+        </div>
+        <p className="text-sm sm:text-base text-muted-foreground/80 mt-2">
+          Make your next referral today and claim your reward.
+        </p>
+        <div className="flex gap-4 mt-4">
+          <Button 
+            size="default"
+            variant="default"
+            className="font-medium w-48"
+            onClick={() => setLocation('/dashboard/clinician/refer')}
+          >
+            Make A Referral
+          </Button>
+          <Button 
+            size="default"
+            variant="secondary" 
+            className="font-medium w-48"
+            onClick={() => setLocation('/tips-to-get-started')}
+          >
+            Tips to Get Started
+          </Button>
+        </div>
+      </div>
 
       <div className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
