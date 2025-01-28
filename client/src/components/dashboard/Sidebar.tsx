@@ -379,13 +379,16 @@ export function Sidebar() {
               {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             </span>
           </Button>
+          <div className="px-2 mb-2">
+            <ThemeToggle />
+          </div>
+          {/* Feedback Modal */}
+          <FeedbackModal
+            open={isFeedbackModalOpen}
+            onOpenChange={setIsFeedbackModalOpen}
+          />
         </>
       )}
-
-      <FeedbackModal
-        open={isFeedbackModalOpen}
-        onOpenChange={setIsFeedbackModalOpen}
-      />
     </motion.div>
   );
 }

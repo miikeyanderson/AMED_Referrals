@@ -101,15 +101,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system">
-        <TooltipProvider> {/* TooltipProvider added here */}
+        <TooltipProvider>
           <div className="relative">
-            <div className="fixed top-4 right-4 z-50">
-              <ThemeToggle />
-            </div>
             <Router />
             <Toaster />
           </div>
-        </TooltipProvider> {/* TooltipProvider closed here */}
+        </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
