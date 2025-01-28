@@ -156,12 +156,10 @@ export default function ClinicianDashboard() {
                     onClick={() => setLocation(link.href)}
                     className={`w-full p-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background ${
                       link.label === 'New Referral' 
+                        ? 'bg-green-900/30 text-green-100 border border-green-200 hover:bg-green-900/40 focus:ring-green-200'
+                        : link.label === 'Resources'
                         ? 'bg-blue-900/30 text-blue-100 border border-blue-200 hover:bg-blue-900/40 focus:ring-blue-200'
-                        : link.label === 'Pending Reviews'
-                        ? 'bg-yellow-900/30 text-yellow-100 border border-yellow-200 hover:bg-yellow-900/40 focus:ring-yellow-200'
-                        : link.label === 'My Rewards'
-                        ? 'bg-purple-900/30 text-purple-100 border border-purple-200 hover:bg-purple-900/40 focus:ring-purple-200'
-                        : 'bg-green-900/30 text-green-100 border border-green-200 hover:bg-green-900/40 focus:ring-green-200'
+                        : 'bg-red-900/30 text-red-100 border border-red-200 hover:bg-red-900/40 focus:ring-red-200'
                     }`}
                   >
                     <div className="flex items-center gap-3">
