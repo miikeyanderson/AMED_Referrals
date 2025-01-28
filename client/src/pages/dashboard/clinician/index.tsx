@@ -27,6 +27,25 @@ export default function ClinicianDashboard() {
 
   return (
     <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 md:px-8">
+      <div className="flex flex-col items-center justify-center text-center pb-6">
+        <div className="text-xl sm:text-2xl font-bold leading-tight text-primary animate-fade-in flex flex-wrap items-center justify-center gap-2">
+          Your Next <span className="text-green-400 font-extrabold animate-pulse">$500</span> Is Waiting, 
+          <span className="whitespace-nowrap">{user?.name}</span>
+          <span className="inline-block animate-bounce">
+            <Gift className="h-6 w-6 text-green-400" />
+          </span>
+        </div>
+        <div className="text-sm text-muted-foreground/80 mt-2">
+          Make a referral today to claim your reward
+        </div>
+        <button 
+          onClick={() => window.location.href = '/dashboard/clinician/refer'}
+          className="mt-4 px-6 py-2 bg-green-500 text-white font-medium rounded-full hover:bg-green-600 transition-colors duration-200 shadow-sm"
+        >
+          Refer Now
+        </button>
+      </div>
+
       <h1 className="text-2xl sm:text-3xl font-bold">My Dashboard</h1>
 
       <RewardsSnapshotWidget />
