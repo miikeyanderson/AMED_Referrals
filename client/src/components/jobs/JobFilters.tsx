@@ -44,7 +44,7 @@ export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFi
         />
       </div>
       <Select value={filters.specialty} onValueChange={(value) => handleFilterChange("specialty", value)}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-full md:w-[180px]">
           <SelectValue placeholder="Specialty" />
         </SelectTrigger>
         <SelectContent>
@@ -56,7 +56,7 @@ export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFi
         </SelectContent>
       </Select>
       <Select value={filters.location} onValueChange={(value) => handleFilterChange("location", value)}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-full md:w-[180px]">
           <SelectValue placeholder="Location" />
         </SelectTrigger>
         <SelectContent>
@@ -68,7 +68,7 @@ export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFi
         </SelectContent>
       </Select>
       <Select value={filters.jobType} onValueChange={(value) => handleFilterChange("jobType", value)}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-full md:w-[180px]">
           <SelectValue placeholder="Job Type" />
         </SelectTrigger>
         <SelectContent>
