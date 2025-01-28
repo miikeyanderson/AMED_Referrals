@@ -21,6 +21,8 @@ export default defineConfig({
     watch: {
       usePolling: true
     },
+    strictPort: true,
+    allowedHosts: [".replit.dev", ".picard.replit.dev"],
   },
   resolve: {
     alias: {
