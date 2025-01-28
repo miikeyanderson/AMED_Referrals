@@ -43,9 +43,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}>
         <div className="h-16 border-b flex items-center px-4 sm:px-6">
           <div className="ml-auto flex items-center gap-4">
-            <span className="text-sm text-muted-foreground font-medium">
-              Your Next $500 Is Waiting, {user.name}!
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold">
+                Your Next <span className="text-green-500">$500</span> Is Waiting,{" "}
+                <span className="text-lg font-medium text-muted-foreground">{user.name}!</span>
+              </span>
+            </div>
           </div>
         </div>
         <main className={cn(
