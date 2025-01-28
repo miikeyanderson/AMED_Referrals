@@ -15,12 +15,12 @@ export default function RecruiterDashboard() {
       <KPIGroupWidget />
 
       {/* Candidate Pipeline */}
-      <Card>
-        <CardHeader className="flex flex-row items-center gap-2">
+      <Card className="w-full mx-auto">
+        <CardHeader className="flex flex-row items-center gap-2 p-4 md:p-6">
           <Users className="h-5 w-5" />
           <CardTitle>Candidate Pipeline</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2 md:p-4 lg:p-6">
           <CandidatePipeline />
         </CardContent>
       </Card>

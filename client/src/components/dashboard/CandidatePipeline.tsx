@@ -148,14 +148,14 @@ export function CandidatePipeline() {
       <div className="space-y-4">
         <FilterBar onFilterChange={handleFilterChange} isLoading={isLoading} />
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="flex gap-2 overflow-x-auto pb-2 min-w-0">
+          <div className="flex gap-2 overflow-x-auto pb-2 min-w-0 px-2 md:px-4">
             {PIPELINE_STAGES.map((stage) => (
               <Droppable key={stage.id} droppableId={stage.id}>
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="space-y-2 min-w-[280px] flex-shrink-0"
+                    className="space-y-2 min-w-[250px] sm:min-w-[280px] flex-shrink-0"
                   >
                     <h3 className={`flex items-center justify-between p-2 rounded-md ${stage.color}`}>
                       <div className="flex items-center space-x-2">
@@ -184,7 +184,7 @@ export function CandidatePipeline() {
                               className={`transition-colors cursor-pointer border ${PIPELINE_STAGES.find(s => s.id === stage.id)?.color} hover:bg-accent`}
                               onClick={() => handleCandidateClick(candidate.id)}
                             >
-                              <CardContent className="p-3 space-y-2.5">
+                              <CardContent className="p-2 sm:p-3 space-y-2 sm:space-y-2.5">
                                 <div className="flex items-start justify-between">
                                   <div className="flex items-center space-x-2 min-w-0">
                                     <Avatar className="h-8 w-8 flex-shrink-0">
