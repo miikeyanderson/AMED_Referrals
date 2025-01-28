@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,16 +26,16 @@ export function ReferralStatsWidget() {
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="w-full">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
         <div>
-          <CardTitle>Referral Statistics</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl">Referral Statistics</CardTitle>
           <p className="text-sm text-muted-foreground">
             {data?.timeframe?.start && new Date(data.timeframe.start).toLocaleDateString()} - {data?.timeframe?.end && new Date(data.timeframe.end).toLocaleDateString()}
           </p>
         </div>
         <Select defaultValue="week">
-          <SelectTrigger className="w-28">
+          <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Select range" />
           </SelectTrigger>
           <SelectContent>
@@ -45,58 +46,58 @@ export function ReferralStatsWidget() {
         </Select>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card className="bg-gradient-to-br from-blue-500/10 to-transparent hover:from-blue-500/20 transition-all">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="rounded-lg bg-blue-500/20 p-2 sm:p-3">
-                  <FileSpreadsheet className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="rounded-lg bg-blue-500/20 p-2">
+                  <FileSpreadsheet className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                 </div>
                 <div>
-                  <p className="text-sm sm:text-base font-medium leading-none text-muted-foreground">Total</p>
-                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">{stats.totalReferrals}</p>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-0.5">{stats.totalReferrals}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-amber-500/10 to-transparent hover:from-amber-500/20 transition-all">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="rounded-lg bg-amber-500/20 p-2 sm:p-3">
-                  <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-amber-500" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="rounded-lg bg-amber-500/20 p-2">
+                  <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-sm sm:text-base font-medium leading-none text-muted-foreground">Pending</p>
-                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">{stats.pendingReferrals}</p>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Pending</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-0.5">{stats.pendingReferrals}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-purple-500/10 to-transparent hover:from-purple-500/20 transition-all">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="rounded-lg bg-purple-500/20 p-2 sm:p-3">
-                  <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="rounded-lg bg-purple-500/20 p-2">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
                 </div>
                 <div>
-                  <p className="text-sm sm:text-base font-medium leading-none text-muted-foreground">In Progress</p>
-                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">{stats.inProgressReferrals}</p>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">In Progress</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-0.5">{stats.inProgressReferrals}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-green-500/10 to-transparent hover:from-green-500/20 transition-all">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="rounded-lg bg-green-500/20 p-2 sm:p-3">
-                  <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="rounded-lg bg-green-500/20 p-2">
+                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-sm sm:text-base font-medium leading-none text-muted-foreground">Completed</p>
-                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">{stats.completedReferrals}</p>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Completed</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-0.5">{stats.completedReferrals}</p>
                 </div>
               </div>
             </CardContent>
