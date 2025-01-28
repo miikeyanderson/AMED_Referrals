@@ -47,8 +47,8 @@ const getBreadcrumbItems = (path: string, role: string) => {
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useUser();
-  const { location, canGoBack, canGoForward, goBack, goForward } = useNavigation();
+  const { user } = useUser();
+  const { location, canGoBack, canGoForward, goBack, goForward, isNavigating } = useNavigation();
   const isMobile = useIsMobile();
 
   if (!user) {
@@ -58,6 +58,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const userRoutes = roleRoutes[user.role as keyof typeof roleRoutes] || [];
   const routes = [...userRoutes, ...commonRoutes];
   const breadcrumbItems = getBreadcrumbItems(location, user.role);
+  const showNavigation = !isMobile && (canGoBack || canGoForward);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -67,34 +68,41 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         isMobile ? "w-full px-4 pb-20" : "pl-[80px]"
       )}>
         <div className="h-16 border-b flex items-center px-4 sm:px-6">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              disabled={!canGoBack}
-              onClick={goBack}
-              className="h-8 w-8"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              disabled={!canGoForward}
-              onClick={goForward}
-              className="h-8 w-8"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <div className="h-8 w-px bg-border mx-2" />
-            <Breadcrumb items={breadcrumbItems} />
-          </div>
+          {/* Navigation controls - only show on desktop when history exists */}
+          {showNavigation && (
+            <div className="flex items-center gap-2 mr-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                disabled={!canGoBack || isNavigating}
+                onClick={goBack}
+                className="h-8 w-8"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                disabled={!canGoForward || isNavigating}
+                onClick={goForward}
+                className="h-8 w-8"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <div className="h-8 w-px bg-border" />
+            </div>
+          )}
+
+          {/* Breadcrumb - always show */}
+          <Breadcrumb items={breadcrumbItems} />
+
           <div className="ml-auto flex items-center gap-4">
             <span className="text-sm text-muted-foreground font-medium">
               Your Next $500 Is Waiting, {user.name}!
             </span>
           </div>
         </div>
+
         <main className={cn(
           "mx-auto w-full",
           "p-4 sm:p-6 md:p-8",
@@ -107,7 +115,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </main>
       </div>
 
-      {/* Sidebar */}
+      {/* Sidebar - separate component */}
       <div className={cn(
         "fixed",
         isMobile ? "bottom-0 left-0 right-0" : "inset-y-0 left-0",
