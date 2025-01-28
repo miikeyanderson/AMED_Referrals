@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useLocation } from "wouter";
+import { useRouter } from 'next/router'; // Import useRouter for client-side routing
 
 interface QuickLink {
   icon: JSX.Element;
@@ -55,9 +56,21 @@ const staticQuickLinks: QuickLink[] = [
   }
 ];
 
+//New Docs page component
+function DocsPage() {
+  return (
+    <div>
+      <h1>App Documentation</h1>
+      <p>This is the documentation page for the app.  Details on how to use the app will go here.</p>
+      {/* Add more documentation content here */}
+    </div>
+  );
+}
+
+
 export default function ClinicianDashboard() {
   const { user } = useUser();
-  const [, setLocation] = useLocation();
+  const router = useRouter(); // Use useRouter for client-side routing
 
   // Fetch user's recent activities
   const { data: recentActivities } = useQuery({
@@ -141,7 +154,7 @@ export default function ClinicianDashboard() {
           size="default"
           variant="secondary" 
           className="mt-4 font-medium w-48"
-          onClick={() => setLocation("/dashboard/clinician/refer")}
+          onClick={() => router.push('/docs')} // Use router.push for client-side navigation
         >
           Tips to Get Started
         </Button>
@@ -163,7 +176,7 @@ export default function ClinicianDashboard() {
               <Tooltip key={link.label}>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => setLocation(link.href)}
+                    onClick={() => router.push(link.href)} // Use router.push for client-side navigation
                     className={`w-full p-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background ${
                       link.label === 'New Referral' 
                         ? 'bg-green-900/30 text-green-100 border border-green-200 hover:bg-green-900/40 focus:ring-green-200'
@@ -218,3 +231,6 @@ export default function ClinicianDashboard() {
     </div>
   );
 }
+
+//This is the new documentation page
+export { DocsPage };

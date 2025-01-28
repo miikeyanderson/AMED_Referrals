@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -11,10 +11,11 @@ import RecruiterDashboard from "@/pages/dashboard/recruiter";
 import LeadershipDashboard from "@/pages/dashboard/leadership";
 import { useUser } from "@/hooks/use-user";
 import { Loader2 } from "lucide-react";
-import { useLocation } from "wouter";
 import { ThemeProvider } from "@/components/themes/theme-provider";
 import { ThemeToggle } from "@/components/themes/theme-toggle";
 import { TooltipProvider } from "@/components/ui/tooltip"; // Added import
+import Docs from "./pages/docs"; // Added import
+
 
 function ProtectedRoute({ 
   component: Component, 
@@ -90,6 +91,7 @@ function Router() {
       } />
 
       <Route path="/auth" component={AuthPage} />
+      <Route path="/docs" component={Docs} /> {/* Added docs route */}
       <Route component={NotFound} />
     </Switch>
   );
