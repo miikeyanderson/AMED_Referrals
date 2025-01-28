@@ -31,6 +31,9 @@ import {
   HelpCircle,
   MessageCircle,
   CalendarClock,
+  Home,
+  Briefcase,
+  UserCircle
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -40,6 +43,56 @@ import { ThemeToggle } from "@/components/themes/theme-toggle";
 
 // Navigation items with loading priority
 const navigationItems = [
+  {
+    icon: Home,
+    label: "Dashboard",
+    path: "/dashboard/clinician",
+    role: "clinician",
+    priority: 1,
+  },
+  {
+    icon: UserPlus,
+    label: "Make a Referral",
+    path: "/dashboard/clinician/refer",
+    role: "clinician",
+    priority: 1,
+  },
+  {
+    icon: ClipboardList,
+    label: "Referrals",
+    path: "/dashboard/clinician/referrals",
+    role: "clinician",
+    priority: 1,
+  },
+  {
+    icon: Gift,
+    label: "Rewards",
+    path: "/dashboard/clinician/rewards",
+    role: "clinician",
+    priority: 1,
+  },
+  {
+    icon: Briefcase,
+    label: "Jobs",
+    path: "/dashboard/clinician/jobs",
+    role: "clinician",
+    priority: 1,
+  },
+  {
+    icon: Bell,
+    label: "Notifications",
+    path: "/dashboard/clinician/notifications",
+    role: "clinician",
+    priority: 2,
+  },
+  {
+    icon: UserCircle,
+    label: "Profile",
+    path: "/dashboard/clinician/profile",
+    role: "clinician",
+    priority: 2,
+  },
+  // Keep existing recruiter items
   {
     icon: LayoutDashboard,
     label: "Dashboard",
