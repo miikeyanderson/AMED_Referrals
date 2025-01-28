@@ -33,8 +33,9 @@ export function JobHighlightsSection() {
         ...(filters.search && { search: filters.search }),
         ...(filters.specialty && { specialty: filters.specialty }),
         ...(filters.location && { location: filters.location }),
-        minPay: filters.minPay.toString(),
-        maxPay: filters.maxPay.toString(),
+        ...(filters.minPay > 0 && { minPay: filters.minPay.toString() }),
+        ...(filters.maxPay > 0 && { maxPay: filters.maxPay.toString() }),
+        sortBy: 'date_desc'
       });
 
       const response = await fetch(`/api/jobs?${searchParams}`);

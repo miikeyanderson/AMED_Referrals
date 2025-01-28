@@ -2508,6 +2508,17 @@ export function registerRoutes(app: Express): Server {
         );
       }
 
+      if (req.query.search) {
+        const searchTerm = `%${req.query.search}%`;
+        conditions.push(
+          or(
+            sql`${jobs.title}::text ILIKE ${searchTerm}`,
+            sql`${jobs.description}::text ILIKE ${searchTerm}`,
+            sql`${jobs.facility}::text ILIKE ${searchTerm}`
+          )
+        );
+      }
+
       if (minPay && maxPay) {
         conditions.push(
           between(jobs.basePay, Number(minPay), Number(maxPay))
