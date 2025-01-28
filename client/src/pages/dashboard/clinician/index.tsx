@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClipboardList, UserPlus, Gift, FileText, Users, Clock, Star } from "lucide-react";
 import { ReferralStatsWidget } from "@/components/dashboard/ReferralStatsWidget";
+import { JobHighlightsSection } from "@/components/jobs/JobHighlightsSection";
 import { ClinicianBadges } from "@/components/dashboard/ClinicianBadges";
 import { RewardsSnapshotWidget } from "@/components/RewardsSnapshotWidget";
 import { useQuery } from "@tanstack/react-query";
@@ -235,6 +236,16 @@ export default function ClinicianDashboard() {
           completedReferrals: stats?.statistics.completedReferrals || 0,
         }}
       />
+
+      <Card>
+        <CardHeader className="flex flex-row items-center gap-2 p-4 sm:p-6">
+          <Users className="h-5 w-5" />
+          <CardTitle className="text-lg sm:text-xl">Featured Job Opportunities</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 sm:p-6">
+          <JobHighlightsSection />
+        </CardContent>
+      </Card>
 
       </div>
   );
