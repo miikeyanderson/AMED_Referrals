@@ -149,7 +149,7 @@ export default function ClinicianDashboard() {
         <Button 
           size="default"
           variant="secondary" 
-          className="mt-4 font-medium w-48"
+          className="mt-2 font-medium w-48"
           onClick={() => setLocation('/tips-to-get-started')}
         >
           Tips to Get Started
@@ -157,8 +157,8 @@ export default function ClinicianDashboard() {
       </div>
 
       {/* Quick Links Section */}
-      <div className="py-4">
-        <div className="flex justify-end mb-4">
+      <div className="pt-2">
+        <div className="flex justify-end mb-2">
           {recentActivities?.length > 0 && (
             <p className="text-sm text-muted-foreground">
               Personalized based on your recent activity
