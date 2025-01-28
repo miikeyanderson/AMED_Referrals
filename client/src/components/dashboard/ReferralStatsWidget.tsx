@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileSpreadsheet, HelpCircle, Hourglass, Inbox, ThumbsDown, CheckCircle } from "lucide-react";
+import { FileSpreadsheet, ClipboardList, Clock, CheckCircle2 } from "lucide-react";
 
 export function ReferralStatsWidget() {
   const { data } = useQuery({
@@ -45,50 +45,58 @@ export function ReferralStatsWidget() {
         </Select>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <FileSpreadsheet className="h-5 w-5 text-blue-500" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-br from-blue-500/10 to-transparent hover:from-blue-500/20 transition-all">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="rounded-lg bg-blue-500/20 p-2 sm:p-3">
+                  <FileSpreadsheet className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium leading-none">Total</p>
-                  <p className="text-2xl font-bold">{stats.totalReferrals}</p>
+                  <p className="text-sm sm:text-base font-medium leading-none text-muted-foreground">Total</p>
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">{stats.totalReferrals}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <Inbox className="h-5 w-5 text-yellow-500" />
+          <Card className="bg-gradient-to-br from-amber-500/10 to-transparent hover:from-amber-500/20 transition-all">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="rounded-lg bg-amber-500/20 p-2 sm:p-3">
+                  <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-amber-500" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium leading-none">Pending</p>
-                  <p className="text-2xl font-bold">{stats.pendingReferrals}</p>
+                  <p className="text-sm sm:text-base font-medium leading-none text-muted-foreground">Pending</p>
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">{stats.pendingReferrals}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <Hourglass className="h-5 w-5 text-orange-500" />
+          <Card className="bg-gradient-to-br from-purple-500/10 to-transparent hover:from-purple-500/20 transition-all">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="rounded-lg bg-purple-500/20 p-2 sm:p-3">
+                  <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium leading-none">In Progress</p>
-                  <p className="text-2xl font-bold">{stats.inProgressReferrals}</p>
+                  <p className="text-sm sm:text-base font-medium leading-none text-muted-foreground">In Progress</p>
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">{stats.inProgressReferrals}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <CheckCircle className="h-5 w-5 text-green-500" />
+          <Card className="bg-gradient-to-br from-green-500/10 to-transparent hover:from-green-500/20 transition-all">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="rounded-lg bg-green-500/20 p-2 sm:p-3">
+                  <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium leading-none">Completed</p>
-                  <p className="text-2xl font-bold">{stats.completedReferrals}</p>
+                  <p className="text-sm sm:text-base font-medium leading-none text-muted-foreground">Completed</p>
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">{stats.completedReferrals}</p>
                 </div>
               </div>
             </CardContent>
