@@ -1,4 +1,4 @@
-import { Settings, Users, ChartBar, ClipboardList } from "lucide-react";
+import { Settings, Users, ChartBar, ClipboardList, Gift } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { useUser } from "@/hooks/use-user";
 import { useLocation } from "wouter";
@@ -43,12 +43,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}>
         <div className="h-20 border-b flex items-center justify-between px-4 sm:px-6">
           <div className="flex flex-col items-center flex-grow">
-            <div className="text-2xl font-bold leading-tight text-primary">
-              Your Next <span className="text-green-400 font-extrabold">$500</span> Is Waiting
+            <div className="text-2xl font-bold leading-tight text-primary animate-fade-in flex items-center gap-2">
+              Your Next <span className="text-green-400 font-extrabold animate-pulse">$500</span> Is Waiting, {user.name}
+              <span className="inline-block animate-bounce">
+                <Gift className="h-6 w-6 text-green-400" />
+              </span>
             </div>
-            <div className="text-lg font-medium text-muted-foreground/90 mt-1">
+            {/*<div className="text-lg font-medium text-muted-foreground/90 mt-1 animate-slide-in">
               {user.name}
-            </div>
+            </div>*/}
           </div>
           <button 
             onClick={() => window.location.href = '/dashboard/clinician'}
