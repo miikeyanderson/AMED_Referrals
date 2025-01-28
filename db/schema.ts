@@ -243,5 +243,4 @@ export const selectUserActivitySchema = createSelectSchema(userActivities);
 export const insertJobSchema = createInsertSchema(jobs);
 export const selectJobSchema = createSelectSchema(jobs);
 
-// Export validation schemas
-export { jobSubmissionSchema, referralSubmissionSchema };
+// Export validation schemas - these are already exported above
