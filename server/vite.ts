@@ -40,7 +40,8 @@ export async function setupVite(app: Express, server: Server) {
         port: 5173,
         clientPort: 443,
         protocol: 'wss',
-        host: 'cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev'
+        path: '/hmr/',
+        timeout: 3000
       },
     },
     appType: "custom",
