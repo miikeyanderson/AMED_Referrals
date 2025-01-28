@@ -17,6 +17,11 @@ export default defineConfig({
       protocol: "ws",
       host: "0.0.0.0",
     },
+    watch: {
+      usePolling: true
+    },
+    strictPort: true,
+    proxy: {},
   },
   resolve: {
     alias: {
