@@ -31,10 +31,10 @@ export default function ClinicianDashboard() {
   return (
     <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 md:px-8">
       <div className="flex flex-col justify-start pb-6 animate-fade-in">
-        <div className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight">
-          <div className="flex flex-wrap items-center gap-2">
-            Your Next <span className="text-green-400 font-extrabold animate-pulse">$500</span> Is Waiting,
-            <span className="text-lg sm:text-xl md:text-2xl font-medium">{user?.name}</span>
+        <div className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight w-full overflow-x-auto">
+          <div className="flex items-center whitespace-nowrap min-w-max pr-4">
+            Your Next <span className="text-green-400 font-extrabold animate-pulse mx-2">$500</span> Is Waiting,
+            <span className="text-lg sm:text-xl md:text-2xl font-medium ml-2">{user?.name}</span>
           </div>
         </div>
         <p className="text-sm text-muted-foreground/80 mt-2">
