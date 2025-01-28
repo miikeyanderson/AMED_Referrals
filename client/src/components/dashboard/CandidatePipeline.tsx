@@ -148,14 +148,14 @@ export function CandidatePipeline() {
       <div className="space-y-4">
         <FilterBar onFilterChange={handleFilterChange} isLoading={isLoading} />
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="flex gap-2 overflow-x-auto pb-2 min-w-0 px-2 md:px-4">
+          <div className="flex flex-col lg:flex-row gap-4 overflow-x-auto pb-2 min-w-0 px-2 md:px-4">
             {PIPELINE_STAGES.map((stage) => (
               <Droppable key={stage.id} droppableId={stage.id}>
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="space-y-2 min-w-[250px] sm:min-w-[280px] flex-shrink-0"
+                    className="space-y-2 w-full lg:min-w-[280px] lg:max-w-[300px] flex-shrink-0"
                   >
                     <h3 className={`flex items-center justify-between p-2 rounded-md ${stage.color}`}>
                       <div className="flex items-center space-x-2">
@@ -166,7 +166,7 @@ export function CandidatePipeline() {
                       </div>
                     </h3>
                     <div
-                      className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-2 space-y-2 transition-colors ${
+                      className={`min-h-[300px] lg:min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-2 space-y-2 transition-colors ${
                         snapshot.isDraggingOver ? "bg-muted/50" : "bg-muted/10"
                       }`}
                     >
