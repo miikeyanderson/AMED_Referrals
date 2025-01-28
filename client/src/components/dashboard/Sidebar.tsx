@@ -101,6 +101,7 @@ const navigationItems = [
     priority: 1,
   },
   {
+    icon: Moon,
     component: ThemeToggle,
     label: "Theme",
     priority: 1,
