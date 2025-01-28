@@ -26,16 +26,16 @@ export function ReferralStatsWidget() {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div className="flex-1">
-          <CardTitle className="text-xl sm:text-2xl">Referral Statistics</CardTitle>
+    <Card className="w-full bg-background/5 backdrop-blur-sm border-0">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <div>
+          <CardTitle className="text-xl">Referral Statistics</CardTitle>
           <p className="text-sm text-muted-foreground">
             {data?.timeframe?.start && new Date(data.timeframe.start).toLocaleDateString()} - {data?.timeframe?.end && new Date(data.timeframe.end).toLocaleDateString()}
           </p>
         </div>
         <Select defaultValue="week">
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger className="w-[120px] bg-background/10 border-0">
             <SelectValue placeholder="Select range" />
           </SelectTrigger>
           <SelectContent>
@@ -45,60 +45,52 @@ export function ReferralStatsWidget() {
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-1 gap-3 sm:gap-4">
-          <Card className="bg-gradient-to-br from-blue-500/10 to-transparent hover:from-blue-500/20 transition-all">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="rounded-lg bg-blue-500/20 p-2">
-                  <FileSpreadsheet className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-0.5">{stats.totalReferrals}</p>
-                </div>
+      <CardContent className="space-y-2">
+        <div className="grid grid-cols-1 gap-2">
+          <Card className="bg-blue-500/10 hover:bg-blue-500/20 transition-all border-0">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="rounded-lg bg-blue-500/20 p-2">
+                <FileSpreadsheet className="h-5 w-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold">{stats.totalReferrals}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-amber-500/10 to-transparent hover:from-amber-500/20 transition-all">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="rounded-lg bg-amber-500/20 p-2">
-                  <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Pending</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-0.5">{stats.pendingReferrals}</p>
-                </div>
+          <Card className="bg-amber-500/10 hover:bg-amber-500/20 transition-all border-0">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="rounded-lg bg-amber-500/20 p-2">
+                <ClipboardList className="h-5 w-5 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Pending</p>
+                <p className="text-2xl font-bold">{stats.pendingReferrals}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-500/10 to-transparent hover:from-purple-500/20 transition-all">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="rounded-lg bg-purple-500/20 p-2">
-                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">In Progress</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-0.5">{stats.inProgressReferrals}</p>
-                </div>
+          <Card className="bg-purple-500/10 hover:bg-purple-500/20 transition-all border-0">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="rounded-lg bg-purple-500/20 p-2">
+                <Clock className="h-5 w-5 text-purple-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">In Progress</p>
+                <p className="text-2xl font-bold">{stats.inProgressReferrals}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500/10 to-transparent hover:from-green-500/20 transition-all">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="rounded-lg bg-green-500/20 p-2">
-                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Completed</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-0.5">{stats.completedReferrals}</p>
-                </div>
+          <Card className="bg-green-500/10 hover:bg-green-500/20 transition-all border-0">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="rounded-lg bg-green-500/20 p-2">
+                <CheckCircle2 className="h-5 w-5 text-green-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                <p className="text-2xl font-bold">{stats.completedReferrals}</p>
               </div>
             </CardContent>
           </Card>
