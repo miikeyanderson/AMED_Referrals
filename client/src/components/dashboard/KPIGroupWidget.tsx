@@ -83,12 +83,12 @@ export function KPIGroupWidget() {
 
   return (
     <Card className="col-span-full relative z-[1]">
-      <CardHeader>
+      <CardHeader className="p-4 sm:p-6">
         <CardTitle className="text-lg font-medium">Recruiter Performance KPIs</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-8">
+      <CardContent className="p-4 sm:p-6 space-y-6 sm:space-y-8">
         {/* KPI Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Conversion Rate Card */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -151,7 +151,7 @@ export function KPIGroupWidget() {
         </div>
 
         {/* Trend Analysis Charts */}
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Conversion Rate Trend */}
           <Card>
             <CardHeader>
