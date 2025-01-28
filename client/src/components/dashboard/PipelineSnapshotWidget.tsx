@@ -77,11 +77,11 @@ export function PipelineSnapshotWidget() {
 
   return (
     <Card className="border-border/50">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 pb-2">
         <CardTitle className="text-base font-medium">Pipeline Snapshot</CardTitle>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full md:w-auto">
           <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-            <SelectTrigger className="w-[180px] bg-background border-border/50">
+            <SelectTrigger className="w-full sm:w-[180px] bg-background border-border/50">
               <SelectValue placeholder="Filter by department" />
             </SelectTrigger>
             <SelectContent>
@@ -93,7 +93,7 @@ export function PipelineSnapshotWidget() {
             </SelectContent>
           </Select>
           <Select value={selectedRecruiter} onValueChange={setSelectedRecruiter}>
-            <SelectTrigger className="w-[180px] bg-background border-border/50">
+            <SelectTrigger className="w-full sm:w-[180px] bg-background border-border/50">
               <SelectValue placeholder="Filter by recruiter" />
             </SelectTrigger>
             <SelectContent>
