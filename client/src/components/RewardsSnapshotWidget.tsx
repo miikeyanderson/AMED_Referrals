@@ -102,7 +102,7 @@ export function RewardsSnapshotWidget() {
           </TabsList>
 
           <TabsContent value="metrics" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between space-x-4">

@@ -82,31 +82,43 @@ export function ReferralTable({ role }: ReferralTableProps) {
       </div>
 
       <div className="rounded-md border">
-        <Table>
+        <Table className="min-w-[300px] overflow-x-auto">
           <TableHeader>
             <TableRow>
-              <TableHead onClick={() => {
-                setSortField("candidateName");
-                setSortDirection(current => current === "asc" ? "desc" : "asc");
-              }} className="cursor-pointer hover:bg-secondary">
+              <TableHead 
+                onClick={() => {
+                  setSortField("candidateName");
+                  setSortDirection(current => current === "asc" ? "desc" : "asc");
+                }} 
+                className="cursor-pointer hover:bg-secondary whitespace-normal text-sm sm:text-base"
+              >
                 Candidate {sortField === "candidateName" && (sortDirection === "asc" ? "↑" : "↓")}
               </TableHead>
-              <TableHead onClick={() => {
-                setSortField("position");
-                setSortDirection(current => current === "asc" ? "desc" : "asc");
-              }} className="cursor-pointer hover:bg-secondary">
+              <TableHead 
+                onClick={() => {
+                  setSortField("position");
+                  setSortDirection(current => current === "asc" ? "desc" : "asc");
+                }} 
+                className="cursor-pointer hover:bg-secondary hidden sm:table-cell whitespace-normal text-sm sm:text-base"
+              >
                 Position {sortField === "position" && (sortDirection === "asc" ? "↑" : "↓")}
               </TableHead>
-              <TableHead onClick={() => {
-                setSortField("status");
-                setSortDirection(current => current === "asc" ? "desc" : "asc");
-              }} className="cursor-pointer hover:bg-secondary">
+              <TableHead 
+                onClick={() => {
+                  setSortField("status");
+                  setSortDirection(current => current === "asc" ? "desc" : "asc");
+                }} 
+                className="cursor-pointer hover:bg-secondary whitespace-normal text-sm sm:text-base"
+              >
                 Status {sortField === "status" && (sortDirection === "asc" ? "↑" : "↓")}
               </TableHead>
-              <TableHead onClick={() => {
-                setSortField("department");
-                setSortDirection(current => current === "asc" ? "desc" : "asc");
-              }} className="cursor-pointer hover:bg-secondary">
+              <TableHead 
+                onClick={() => {
+                  setSortField("department");
+                  setSortDirection(current => current === "asc" ? "desc" : "asc");
+                }} 
+                className="cursor-pointer hover:bg-secondary hidden md:table-cell whitespace-normal text-sm sm:text-base"
+              >
                 Department {sortField === "department" && (sortDirection === "asc" ? "↑" : "↓")}
               </TableHead>
               {role !== "clinician" && (

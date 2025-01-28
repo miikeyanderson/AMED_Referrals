@@ -7,8 +7,8 @@ import { CandidatePipeline } from "@/components/dashboard/CandidatePipeline";
 
 export default function RecruiterDashboard() {
   return (
-    <div className="space-y-3 sm:space-y-4 md:space-y-6 p-3 sm:p-4 md:p-6 lg:p-8">
-      <h1 className="text-2xl sm:text-3xl font-bold">Recruiter Dashboard</h1>
+    <div className="space-y-3 sm:space-y-4 md:space-y-6 p-3 sm:p-4 md:p-6 lg:p-8 max-w-[100vw] overflow-x-hidden">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Recruiter Dashboard</h1>
 
       {/* KPI Group Widget */}
       <KPIGroupWidget />

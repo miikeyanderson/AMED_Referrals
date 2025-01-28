@@ -145,10 +145,10 @@ export function CandidatePipeline() {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-4 px-2 sm:px-4 md:px-6">
         <FilterBar onFilterChange={handleFilterChange} isLoading={isLoading} />
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="flex flex-col lg:flex-row gap-4 overflow-x-auto pb-2 min-w-0 px-2 md:px-4">
+          <div className="flex flex-col lg:flex-row gap-4 overflow-x-auto pb-2 min-w-0">
             {PIPELINE_STAGES.map((stage) => (
               <Droppable key={stage.id} droppableId={stage.id}>
                 {(provided, snapshot) => (
