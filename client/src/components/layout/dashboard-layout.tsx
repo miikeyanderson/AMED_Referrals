@@ -41,14 +41,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         // Mobile: full width, no left padding, bottom padding for sidebar
         isMobile ? "w-full px-4 pb-20" : "pl-[80px]"
       )}>
-        <div className="h-16 border-b flex items-center px-4 sm:px-6">
-          <div className="ml-auto flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">
-                Your Next <span className="text-green-500">$500</span> Is Waiting,{" "}
-                <span className="text-lg font-medium text-muted-foreground">{user.name}!</span>
-              </span>
-            </div>
+        <div className="h-20 border-b flex flex-col justify-center items-center px-4 sm:px-6 py-3">
+          <div className="text-2xl font-bold leading-tight">
+            Your Next <span className="text-green-500">$500</span> Is Waiting
+          </div>
+          <div className="text-lg font-medium text-muted-foreground mt-1">
+            {user.name}
           </div>
         </div>
         <main className={cn(
