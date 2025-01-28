@@ -108,13 +108,13 @@ export function ReferralStatsWidget() {
             </Select>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4 md:p-6">
           {isLoading ? (
             <div className="flex justify-center items-center h-[300px]">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-3 sm:gap-4 md:gap-6 md:grid-cols-2">
               <div className="space-y-4">
                 <Tooltip>
                   <TooltipTrigger asChild>
