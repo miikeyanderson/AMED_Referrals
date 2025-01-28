@@ -39,7 +39,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className={cn(
         "flex-1 transition-all duration-300 min-h-screen",
         // Mobile: full width, no left padding, bottom padding for sidebar
-        isMobile ? "w-full px-4 pb-20" : "pl-[80px]"
+        isMobile ? "w-full px-4 pt-20" : "pl-[80px]"
       )}>
         <main className={cn(
           "mx-auto w-full",
@@ -60,7 +60,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Sidebar */}
       <div className={cn(
         "fixed",
-        isMobile ? "bottom-0 left-0 right-0" : "inset-y-0 left-0",
+        isMobile ? "top-0 left-0 right-0" : "inset-y-0 left-0",
         "z-[100]"
       )}>
         <Sidebar />

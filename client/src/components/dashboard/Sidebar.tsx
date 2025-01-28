@@ -265,7 +265,7 @@ export function Sidebar() {
   const sidebarClassName = cn(
     "z-[100] flex border-r backdrop-blur-sm bg-sidebar/95",
     isMobile
-      ? "fixed bottom-0 left-0 right-0 h-16 flex-row items-center justify-around border-t"
+      ? "fixed top-0 left-0 right-0 h-16 flex-row items-center justify-around border-b"
       : "fixed h-screen flex-col"
   );
 
