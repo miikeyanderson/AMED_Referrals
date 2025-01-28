@@ -142,8 +142,7 @@ export default function ClinicianDashboard() {
         <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight w-full">
           <div className="flex flex-wrap items-center gap-2 w-full">
             <div className="flex flex-wrap items-center gap-2 w-full">
-              Your Next <span className="text-green-400 font-extrabold animate-pulse">$500</span> Is Waiting,
-              <span className="text-blue-400 font-extrabold">{user?.name} 🤑</span>
+              Welcome, <span className="text-blue-400 font-extrabold">{user?.name}</span>! 👋
             </div>
           </div>
         </div>
