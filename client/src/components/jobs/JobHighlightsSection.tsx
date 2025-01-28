@@ -3,6 +3,9 @@ import { useState } from "react";
 import { JobCard } from "./JobCard";
 import { JobFilters } from "./JobFilters";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button"; // Inferred import
+import { ArrowRight } from "lucide-react";       // Inferred import
+
 
 export function JobHighlightsSection() {
   const [filters, setFilters] = useState({
@@ -43,10 +46,27 @@ export function JobHighlightsSection() {
   return (
     <div className="space-y-4">
       <JobFilters filters={filters} onFilterChange={setFilters} />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {jobs?.jobs?.map((job: any) => (
-          <JobCard key={job.id} job={job} />
-        ))}
+      <div className="relative">
+        <div className="overflow-x-auto pb-4">
+          <div className="flex space-x-4 w-max">
+            {jobs?.jobs?.map((job: any) => (
+              <div key={job.id} className="w-[85vw] sm:w-[350px] shrink-0">
+                <JobCard job={job} />
+              </div>
+            ))}
+            <div className="flex items-center justify-center w-[85vw] sm:w-[350px] shrink-0">
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="gap-2"
+                onClick={() => window.location.href = '/dashboard/clinician/jobs'}
+              >
+                View All Jobs
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
