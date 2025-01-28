@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ClipboardList, UserPlus, Gift, FileText, Users, Clock } from "lucide-react";
+import { ClipboardList, UserPlus, Gift, FileText, Users, Clock, Star } from "lucide-react";
 import { ReferralStatsWidget } from "@/components/dashboard/ReferralStatsWidget";
 import { ClinicianBadges } from "@/components/dashboard/ClinicianBadges";
 import { RewardsSnapshotWidget } from "@/components/RewardsSnapshotWidget";
@@ -19,9 +19,11 @@ interface QuickLink {
   description: string;
   href: string;
   color: string;
+  priority?: number;
 }
 
-const quickLinks: QuickLink[] = [
+// Static quick links
+const staticQuickLinks: QuickLink[] = [
   {
     icon: <UserPlus className="h-6 w-6" />,
     label: "New Referral",
@@ -55,6 +57,20 @@ const quickLinks: QuickLink[] = [
 export default function ClinicianDashboard() {
   const { user } = useUser();
   const [, setLocation] = useLocation();
+
+  // Fetch user's recent activities
+  const { data: recentActivities } = useQuery({
+    queryKey: ['/api/clinician/recent-activities'],
+    queryFn: async () => {
+      const response = await fetch('/api/clinician/recent-activities');
+      if (!response.ok) {
+        return [];
+      }
+      return response.json();
+    }
+  });
+
+  // Fetch regular stats
   const { data: stats } = useQuery({
     queryKey: ['/api/clinician/referrals-stats', { range: 'week' }],
     queryFn: async () => {
@@ -74,6 +90,39 @@ export default function ClinicianDashboard() {
     }
   });
 
+  // Generate personalized quick links based on recent activities
+  const getPersonalizedQuickLinks = () => {
+    const personalizedLinks: QuickLink[] = [...staticQuickLinks];
+
+    if (recentActivities?.length > 0) {
+      // Add recent activity based links
+      recentActivities.forEach((activity: any) => {
+        switch (activity.type) {
+          case 'view_referral':
+            if (activity.metadata?.referralId) {
+              personalizedLinks.unshift({
+                icon: <Star className="h-6 w-6" />,
+                label: `Return to Referral #${activity.metadata.referralId}`,
+                description: "Continue where you left off",
+                href: `/dashboard/clinician/referral/${activity.metadata.referralId}`,
+                color: "bg-yellow-500 hover:bg-yellow-600",
+                priority: 1
+              });
+            }
+            break;
+          // Add more activity types here
+        }
+      });
+    }
+
+    // Sort by priority and limit to 6 items
+    return personalizedLinks
+      .sort((a, b) => (b.priority || 0) - (a.priority || 0))
+      .slice(0, 6);
+  };
+
+  const quickLinks = getPersonalizedQuickLinks();
+
   return (
     <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 md:px-8">
       <div className="flex flex-col justify-start pb-6 animate-fade-in">
@@ -90,9 +139,16 @@ export default function ClinicianDashboard() {
 
       {/* Quick Links Section */}
       <div className="py-4">
-        <h2 className="text-xl font-semibold mb-4">Quick Links</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Quick Links</h2>
+          {recentActivities?.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              Personalized based on your recent activity
+            </p>
+          )}
+        </div>
         <TooltipProvider>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {quickLinks.map((link) => (
               <Tooltip key={link.label}>
                 <TooltipTrigger asChild>
@@ -138,7 +194,6 @@ export default function ClinicianDashboard() {
           <CardTitle className="text-lg sm:text-xl">Recent Referrals</CardTitle>
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
-          {/* Add referral list component here */}
           <p className="text-muted-foreground text-sm sm:text-base">No referrals yet. Start by submitting a new referral!</p>
         </CardContent>
       </Card>
