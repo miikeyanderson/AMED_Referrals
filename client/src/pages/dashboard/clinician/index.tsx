@@ -12,7 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useLocation } from "wouter";
+import { useNavigation } from "@/hooks/use-navigation";
 
 interface QuickLink {
   icon: JSX.Element;
@@ -69,7 +69,7 @@ function DocsPage() {
 
 export default function ClinicianDashboard() {
   const { user } = useUser();
-  const [, setLocation] = useLocation();
+  const { navigate } = useNavigation();
 
   // Fetch user's recent activities
   const { data: recentActivities } = useQuery({
