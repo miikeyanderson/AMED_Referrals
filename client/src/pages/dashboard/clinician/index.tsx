@@ -154,7 +154,7 @@ export default function ClinicianDashboard() {
                 <TooltipTrigger asChild>
                   <button
                     onClick={() => setLocation(link.href)}
-                    className={`w-full p-4 rounded-lg text-white ${link.color} transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-${link.color}`}
+                    className="w-full p-4 rounded-lg text-white bg-primary hover:bg-primary/90 transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-primary"
                   >
                     <div className="flex items-center gap-3">
                       {link.icon}
