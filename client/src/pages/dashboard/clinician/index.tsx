@@ -154,14 +154,14 @@ export default function ClinicianDashboard() {
                 <TooltipTrigger asChild>
                   <button
                     onClick={() => setLocation(link.href)}
-                    className={`w-full p-4 rounded-lg text-white transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background ${
+                    className={`w-full p-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background ${
                       link.label === 'New Referral' 
-                        ? 'bg-[hsl(var(--chart-2))] hover:bg-[hsl(var(--chart-2)_/_0.9)] focus:ring-[hsl(var(--chart-2))]'
+                        ? 'bg-blue-900/30 text-blue-100 border border-blue-200 hover:bg-blue-900/40 focus:ring-blue-200'
                         : link.label === 'Pending Reviews'
-                        ? 'bg-[hsl(var(--chart-1))] hover:bg-[hsl(var(--chart-1)_/_0.9)] focus:ring-[hsl(var(--chart-1))]'
+                        ? 'bg-yellow-900/30 text-yellow-100 border border-yellow-200 hover:bg-yellow-900/40 focus:ring-yellow-200'
                         : link.label === 'My Rewards'
-                        ? 'bg-[hsl(var(--chart-4))] hover:bg-[hsl(var(--chart-4)_/_0.9)] focus:ring-[hsl(var(--chart-4))]'
-                        : 'bg-[hsl(var(--chart-5))] hover:bg-[hsl(var(--chart-5)_/_0.9)] focus:ring-[hsl(var(--chart-5))]'
+                        ? 'bg-purple-900/30 text-purple-100 border border-purple-200 hover:bg-purple-900/40 focus:ring-purple-200'
+                        : 'bg-green-900/30 text-green-100 border border-green-200 hover:bg-green-900/40 focus:ring-green-200'
                     }`}
                   >
                     <div className="flex items-center gap-3">
