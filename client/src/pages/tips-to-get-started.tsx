@@ -1,12 +1,31 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ClipboardList, Gift, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ClipboardList, Gift, Users, ArrowLeft } from "lucide-react";
+import { useNavigation } from "@/hooks/use-navigation";
+import { useUser } from "@/hooks/use-user";
 
 export default function TipsToGetStarted() {
+  const { navigate } = useNavigation();
+  const { user } = useUser();
+  
+  const handleBack = () => {
+    navigate(`/dashboard/${user?.role}`);
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8">Platform Documentation</h1>
+      <div className="flex items-center gap-4 mb-8">
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={handleBack}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-3xl font-bold">Platform Documentation</h1>
+      </div>
       
       <div className="grid gap-8">
         <Card>
