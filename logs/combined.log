@@ -1889,3 +1889,8 @@
 {"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T16:46:58.465Z"}
 {"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T16:47:37.555Z"}
 {"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T16:48:14.395Z"}
+{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T16:48:44.905Z"}
+{"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.75","resource":"/api/user","timestamp":"2025-01-28T16:48:49.040Z","userId":-1},"service":"arm-platform","timestamp":"2025-01-28T16:48:49.040Z"}
+{"correlationId":"11a6d0b5-c9a1-44b5-8222-21b814877198","duration":6,"level":"info","message":"GET /api/user 401 in 6ms","method":"GET","path":"/api/user","rateLimit":{"currentCount":1,"limit":100,"remaining":99,"resetTime":1738083824608},"service":"arm-platform","statusCode":401,"timestamp":"2025-01-28T16:48:49.045Z"}
+{"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.75","resource":"/api/user","timestamp":"2025-01-28T16:48:49.079Z","userId":-1},"service":"arm-platform","timestamp":"2025-01-28T16:48:49.079Z"}
+{"correlationId":"d6303145-2ed4-4907-ae1c-c47d7dc15715","duration":4,"level":"info","message":"GET /api/user 401 in 4ms","method":"GET","path":"/api/user","rateLimit":{"currentCount":2,"limit":100,"remaining":98,"resetTime":1738083824608},"service":"arm-platform","statusCode":401,"timestamp":"2025-01-28T16:48:49.083Z"}
