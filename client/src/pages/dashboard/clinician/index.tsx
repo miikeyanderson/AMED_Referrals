@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button"; // Import Button component
 
 interface QuickLink {
   icon: JSX.Element;
@@ -133,11 +134,18 @@ export default function ClinicianDashboard() {
               <span className="text-blue-400 font-extrabold">{user?.name}</span>
             </div>
           </div>
+          <p className="text-sm sm:text-base text-muted-foreground/80 mt-2">
+            Make a referral today to claim your reward
+          </p>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="mt-4"
+            onClick={() => window.open('/tips', '_self')}
+          >
+            Tips to Get Started
+          </Button>
         </div>
-        <p className="text-sm sm:text-base text-muted-foreground/80 mt-2">
-          Make a referral today to claim your reward
-        </p>
-      </div>
 
       {/* Quick Links Section */}
       <div className="py-4">
