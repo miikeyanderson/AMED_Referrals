@@ -37,7 +37,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen flex flex-col">
       {/* Main content */}
       <div className={cn(
-        "flex-1 transition-all duration-300",
+        "flex-1 transition-all duration-300 min-h-screen",
         // Mobile: full width, no left padding, bottom padding for sidebar
         isMobile ? "w-full px-4 pb-20" : "pl-[80px]"
       )}>
@@ -50,7 +50,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           "p-4 sm:p-6 md:p-8",
           "max-w-screen-xl",
           // Center content on larger screens
-          "lg:px-8"
+          "lg:px-8",
+          // Ensure proper scroll behavior
+          "overflow-y-auto"
         )}>
           <div className="grid gap-6 sm:gap-8">
             {children}
