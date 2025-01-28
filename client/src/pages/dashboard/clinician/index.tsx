@@ -154,7 +154,15 @@ export default function ClinicianDashboard() {
                 <TooltipTrigger asChild>
                   <button
                     onClick={() => setLocation(link.href)}
-                    className="w-full p-4 rounded-lg text-white bg-primary hover:bg-primary/90 transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-primary"
+                    className={`w-full p-4 rounded-lg text-white transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background ${
+                      link.label === 'New Referral' 
+                        ? 'bg-[hsl(var(--chart-2))] hover:bg-[hsl(var(--chart-2)_/_0.9)] focus:ring-[hsl(var(--chart-2))]'
+                        : link.label === 'Pending Reviews'
+                        ? 'bg-[hsl(var(--chart-1))] hover:bg-[hsl(var(--chart-1)_/_0.9)] focus:ring-[hsl(var(--chart-1))]'
+                        : link.label === 'My Rewards'
+                        ? 'bg-[hsl(var(--chart-4))] hover:bg-[hsl(var(--chart-4)_/_0.9)] focus:ring-[hsl(var(--chart-4))]'
+                        : 'bg-[hsl(var(--chart-5))] hover:bg-[hsl(var(--chart-5)_/_0.9)] focus:ring-[hsl(var(--chart-5))]'
+                    }`}
                   >
                     <div className="flex items-center gap-3">
                       {link.icon}
