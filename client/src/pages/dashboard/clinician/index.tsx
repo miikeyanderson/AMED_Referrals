@@ -13,7 +13,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useLocation } from "wouter";
-import { useLocation } from 'wouter';
 
 interface QuickLink {
   icon: JSX.Element;
