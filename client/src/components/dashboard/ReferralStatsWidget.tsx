@@ -27,8 +27,8 @@ export function ReferralStatsWidget() {
 
   return (
     <Card className="w-full">
-      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
-        <div>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div className="flex-1">
           <CardTitle className="text-xl sm:text-2xl">Referral Statistics</CardTitle>
           <p className="text-sm text-muted-foreground">
             {data?.timeframe?.start && new Date(data.timeframe.start).toLocaleDateString()} - {data?.timeframe?.end && new Date(data.timeframe.end).toLocaleDateString()}
