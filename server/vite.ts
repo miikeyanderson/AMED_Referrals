@@ -38,8 +38,8 @@ export async function setupVite(app: Express, server: Server) {
       hmr: {
         server,
         port: 5173,
-        clientPort: 443,
-        protocol: 'wss',
+        clientPort: 5173,
+        protocol: 'ws',
         host: 'cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev'
       },
     },
