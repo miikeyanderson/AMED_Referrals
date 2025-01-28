@@ -194,29 +194,38 @@ export function Sidebar() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <Tooltip delayDuration={0}>
+            <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start relative",
+                    "relative min-w-[44px] min-h-[44px]", // Minimum touch target size
                     isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
-                    isCollapsed && "justify-center p-2",
-                    isMobile && "h-12"
+                    // Mobile specific styles
+                    isMobile && "w-12 h-12 p-0 flex flex-col items-center justify-center",
+                    // Desktop styles
+                    !isMobile && "w-full justify-start",
+                    isCollapsed && !isMobile && "justify-center p-2"
                   )}
                   onClick={() => {
                     triggerHapticFeedback();
                     setLocation(path);
                   }}
                 >
-                  <Icon className={cn("h-4 w-4", !isCollapsed && "mr-2")} />
-                  {!isCollapsed && <span>{label}</span>}
+                  <Icon className={cn(
+                    "shrink-0",
+                    // Larger icons on mobile
+                    isMobile ? "h-6 w-6" : "h-4 w-4",
+                    !isCollapsed && !isMobile && "mr-2"
+                  )} />
+                  {/* Hide text on mobile, show on desktop if not collapsed */}
+                  {!isCollapsed && !isMobile && <span>{label}</span>}
                   {badge !== undefined && badge > 0 && (
                     <Badge 
                       variant="secondary" 
                       className={cn(
-                        "ml-auto",
-                        isCollapsed && "absolute -top-1 -right-1 w-4 h-4 p-0 flex items-center justify-center"
+                        "absolute -top-1 -right-1 w-4 h-4 p-0 flex items-center justify-center",
+                        !isMobile && !isCollapsed && "static ml-auto"
                       )}
                     >
                       {badge}
@@ -224,8 +233,13 @@ export function Sidebar() {
                   )}
                 </Button>
               </TooltipTrigger>
+              {/* Always show tooltip on mobile or when collapsed on desktop */}
               {(isCollapsed || isMobile) && (
-                <TooltipContent side="right" className="font-medium">
+                <TooltipContent 
+                  side={isMobile ? "top" : "right"} 
+                  className="font-medium"
+                  sideOffset={isMobile ? 16 : 4}
+                >
                   {label}
                   {badge !== undefined && badge > 0 && ` (${badge})`}
                 </TooltipContent>
