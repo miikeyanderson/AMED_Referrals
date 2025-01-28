@@ -11,6 +11,9 @@ const __dirname = dirname(__filename);
 
 export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
+  optimizeDeps: {
+    exclude: ['@replit/vite-plugin-runtime-error-modal', '@replit/vite-plugin-shadcn-theme-json']
+  },
   server: {
     host: true,
     port: 5173,
