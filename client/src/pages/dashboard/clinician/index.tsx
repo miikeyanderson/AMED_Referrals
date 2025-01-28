@@ -1,14 +1,60 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, UserPlus, Gift, FileText, Users, Clock } from "lucide-react";
 import { ReferralStatsWidget } from "@/components/dashboard/ReferralStatsWidget";
 import { ClinicianBadges } from "@/components/dashboard/ClinicianBadges";
 import { RewardsSnapshotWidget } from "@/components/RewardsSnapshotWidget";
 import { useQuery } from "@tanstack/react-query";
-import { Gift } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useLocation } from "wouter";
+
+interface QuickLink {
+  icon: JSX.Element;
+  label: string;
+  description: string;
+  href: string;
+  color: string;
+}
+
+const quickLinks: QuickLink[] = [
+  {
+    icon: <UserPlus className="h-6 w-6" />,
+    label: "New Referral",
+    description: "Submit a new candidate referral",
+    href: "/dashboard/clinician/refer",
+    color: "bg-green-500 hover:bg-green-600"
+  },
+  {
+    icon: <Clock className="h-6 w-6" />,
+    label: "Pending Reviews",
+    description: "Check status of pending referrals",
+    href: "/dashboard/clinician/pending",
+    color: "bg-blue-500 hover:bg-blue-600"
+  },
+  {
+    icon: <Gift className="h-6 w-6" />,
+    label: "My Rewards",
+    description: "View and track your rewards",
+    href: "/dashboard/clinician/rewards",
+    color: "bg-purple-500 hover:bg-purple-600"
+  },
+  {
+    icon: <FileText className="h-6 w-6" />,
+    label: "Resources",
+    description: "Access referral guidelines and tips",
+    href: "/dashboard/clinician/resources",
+    color: "bg-orange-500 hover:bg-orange-600"
+  }
+];
 
 export default function ClinicianDashboard() {
   const { user } = useUser();
+  const [, setLocation] = useLocation();
   const { data: stats } = useQuery({
     queryKey: ['/api/clinician/referrals-stats', { range: 'week' }],
     queryFn: async () => {
@@ -40,14 +86,38 @@ export default function ClinicianDashboard() {
         <p className="text-sm text-muted-foreground/80 mt-2">
           Make a referral today to claim your reward
         </p>
-        <button 
-          onClick={() => window.location.href = '/dashboard/clinician/refer'}
-          className="mt-4 px-6 py-2 bg-green-500 text-white font-medium rounded-full hover:bg-green-600 transition-colors duration-200 shadow-sm"
-        >
-          Refer Now
-        </button>
       </div>
-      
+
+      {/* Quick Links Section */}
+      <div className="py-4">
+        <h2 className="text-xl font-semibold mb-4">Quick Links</h2>
+        <TooltipProvider>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {quickLinks.map((link) => (
+              <Tooltip key={link.label}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setLocation(link.href)}
+                    className={`w-full p-4 rounded-lg text-white ${link.color} transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-${link.color}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      {link.icon}
+                      <div className="text-left">
+                        <div className="font-semibold">{link.label}</div>
+                        <div className="text-sm opacity-90">{link.description}</div>
+                      </div>
+                    </div>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{link.description}</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </div>
+        </TooltipProvider>
+      </div>
+
       <h1 className="text-2xl sm:text-3xl font-bold">My Dashboard</h1>
 
       <RewardsSnapshotWidget />
