@@ -59,7 +59,7 @@ export function KPIGroupWidget() {
     }
     return value !== undefined ? (
       <>
-        <div className="text-2xl font-bold">
+        <div className="text-lg sm:text-xl lg:text-2xl font-bold">
           {label.includes('days') ? `${value} days` : `${value.toFixed(1)}%`}
         </div>
         {target && (
@@ -111,7 +111,7 @@ export function KPIGroupWidget() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold">
                 {kpiData.timeToHire.current} days
               </div>
               <Progress 
@@ -134,7 +134,7 @@ export function KPIGroupWidget() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{kpiData.activeRequisitions}</div>
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold">{kpiData.activeRequisitions}</div>
             </CardContent>
           </Card>
 
@@ -145,7 +145,7 @@ export function KPIGroupWidget() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{kpiData.totalPlacements}</div>
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold">{kpiData.totalPlacements}</div>
             </CardContent>
           </Card>
         </div>
