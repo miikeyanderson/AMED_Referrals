@@ -12,7 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useNavigation } from "@/hooks/use-navigation";
+import { useLocation } from "wouter";
 
 interface QuickLink {
   icon: JSX.Element;
@@ -69,7 +69,7 @@ function DocsPage() {
 
 export default function ClinicianDashboard() {
   const { user } = useUser();
-  const { navigate } = useNavigation();
+  const [, setLocation] = useLocation();
 
   // Fetch user's recent activities
   const { data: recentActivities } = useQuery({
@@ -153,7 +153,7 @@ export default function ClinicianDashboard() {
           size="default"
           variant="secondary" 
           className="mt-4 font-medium w-48"
-          onClick={() => navigate('/tips-to-get-started')}
+          onClick={() => setLocation('/tips-to-get-started')}
         >
           Tips to Get Started
         </Button>

@@ -33,11 +33,6 @@ const getBreadcrumbItems = (path: string, role: string) => {
       label: role.charAt(0).toUpperCase() + role.slice(1),
       href: `/dashboard/${role}`,
     });
-  } else if (parts[0] === 'tips-to-get-started') {
-    items.push({
-      label: 'Tips',
-      href: '/tips-to-get-started',
-    });
   }
 
   if (parts.length > 2) {
@@ -102,6 +97,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Breadcrumb items={breadcrumbItems} />
 
           <div className="ml-auto flex items-center gap-4">
+            <span className="text-sm text-muted-foreground font-medium">
+              Your Next $500 Is Waiting, {user.name}!
+            </span>
           </div>
         </div>
 
