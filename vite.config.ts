@@ -17,7 +17,7 @@ export default defineConfig({
       protocol: "ws",
       host: "0.0.0.0",
     },
-    allowedHosts: [".replit.dev", ".picard.replit.dev"],
+    allowedHosts: [".replit.dev", ".picard.replit.dev", "*.picard.replit.dev"],
   },
   resolve: {
     alias: {
