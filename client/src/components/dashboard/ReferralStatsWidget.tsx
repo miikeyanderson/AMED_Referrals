@@ -46,7 +46,7 @@ export function ReferralStatsWidget() {
         </Select>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4">
           <Card className="bg-gradient-to-br from-blue-500/10 to-transparent hover:from-blue-500/20 transition-all">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center gap-2 sm:gap-3">
