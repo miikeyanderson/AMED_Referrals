@@ -29,28 +29,28 @@ const staticQuickLinks: QuickLink[] = [
     label: "New Referral",
     description: "Submit a new candidate referral",
     href: "/dashboard/clinician/refer",
-    color: "bg-green-500 hover:bg-green-600"
+    color: "bg-[hsl(var(--chart-2))] hover:bg-[hsl(var(--chart-2)_/_0.9)]"
   },
   {
     icon: <Clock className="h-6 w-6" />,
     label: "Pending Reviews",
     description: "Check status of pending referrals",
     href: "/dashboard/clinician/pending",
-    color: "bg-blue-500 hover:bg-blue-600"
+    color: "bg-[hsl(var(--chart-1))] hover:bg-[hsl(var(--chart-1)_/_0.9)]"
   },
   {
     icon: <Gift className="h-6 w-6" />,
     label: "My Rewards",
     description: "View and track your rewards",
     href: "/dashboard/clinician/rewards",
-    color: "bg-purple-500 hover:bg-purple-600"
+    color: "bg-[hsl(var(--chart-4))] hover:bg-[hsl(var(--chart-4)_/_0.9)]"
   },
   {
     icon: <FileText className="h-6 w-6" />,
     label: "Resources",
     description: "Access referral guidelines and tips",
     href: "/dashboard/clinician/resources",
-    color: "bg-orange-500 hover:bg-orange-600"
+    color: "bg-[hsl(var(--chart-5))] hover:bg-[hsl(var(--chart-5)_/_0.9)]"
   }
 ];
 
@@ -148,7 +148,7 @@ export default function ClinicianDashboard() {
           )}
         </div>
         <TooltipProvider>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-1">
             {quickLinks.map((link) => (
               <Tooltip key={link.label}>
                 <TooltipTrigger asChild>
