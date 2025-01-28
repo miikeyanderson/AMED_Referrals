@@ -203,8 +203,6 @@ export default function ClinicianDashboard() {
         </TooltipProvider>
       </div>
 
-      <h1 className="text-2xl sm:text-3xl font-bold">My Dashboard</h1>
-
       <RewardsSnapshotWidget />
 
       <ReferralStatsWidget />
