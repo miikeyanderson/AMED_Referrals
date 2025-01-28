@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -112,7 +111,7 @@ export function PipelineSnapshotWidget() {
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : pipelineData ? (
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { ReferralInflowWidget } from "@/components/dashboard/ReferralInflowWidget";
@@ -26,11 +25,11 @@ export default function RecruiterDashboard() {
       </Card>
 
       {/* Pipeline Snapshot and Referral Inflow Widgets */}
-      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
-        <div className="w-full min-h-[400px] sm:min-h-[500px]">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2 w-full max-w-[1440px] mx-auto">
+        <div className="w-full min-h-[350px] sm:min-h-[400px] lg:min-h-[500px]">
           <PipelineSnapshotWidget />
         </div>
-        <div className="w-full min-h-[400px] sm:min-h-[500px]">
+        <div className="w-full min-h-[350px] sm:min-h-[400px] lg:min-h-[500px]">
           <ReferralInflowWidget />
         </div>
       </div>
