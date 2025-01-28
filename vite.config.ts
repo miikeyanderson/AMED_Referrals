@@ -16,7 +16,8 @@ export default defineConfig({
       clientPort: 443,
       protocol: "wss",
       host: "cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev",
-      timeout: 120000
+      timeout: 120000,
+      secure: true
     },
     https: true,
     cors: true,
