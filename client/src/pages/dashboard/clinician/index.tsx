@@ -184,14 +184,6 @@ export default function ClinicianDashboard() {
         </CardContent>
       </Card>
 
-      <ClinicianBadges
-        stats={{
-          totalReferrals: stats?.statistics.totalReferrals || 0,
-          inProgressReferrals: stats?.statistics.inProgressReferrals || 0,
-          completedReferrals: stats?.statistics.completedReferrals || 0,
-        }}
-      />
-
       {/* Quick Links Section */}
       <div className="pt-2">
         <div className="flex justify-end mb-2">
@@ -235,6 +227,14 @@ export default function ClinicianDashboard() {
           </div>
         </TooltipProvider>
       </div>
+
+      <ClinicianBadges
+        stats={{
+          totalReferrals: stats?.statistics.totalReferrals || 0,
+          inProgressReferrals: stats?.statistics.inProgressReferrals || 0,
+          completedReferrals: stats?.statistics.completedReferrals || 0,
+        }}
+      />
 
       </div>
   );
