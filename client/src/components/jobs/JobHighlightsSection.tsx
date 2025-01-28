@@ -14,13 +14,15 @@ export function JobHighlightsSection() {
   });
 
   const { data: jobs, error, isLoading } = useQuery({
-    queryKey: ["/api/jobs", filters],
+    queryKey: ["/api/jobs", { ...filters, limit: 2 }],
     queryFn: async () => {
-      const response = await fetch("/api/jobs?" + new URLSearchParams({
+      const params = new URLSearchParams({
         specialty: filters.specialty,
         location: filters.location,
-        minPay: filters.minPay.toString()
-      }));
+        minPay: filters.minPay.toString(),
+        limit: "2"
+      });
+      const response = await fetch("/api/jobs?" + params);
       if (!response.ok) {
         throw new Error("Failed to fetch jobs");
       }
