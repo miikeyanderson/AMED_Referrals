@@ -151,6 +151,7 @@ export function PipelineSnapshotWidget() {
                   wrapperStyle={{
                     paddingTop: '20px',
                   }}
+                  className="hidden sm:block" // Hide on smaller screens
                 />
               </PieChart>
             </ResponsiveContainer>
