@@ -1,4 +1,4 @@
-import { Settings, Users, ChartBar, ClipboardList, Gift } from "lucide-react";
+import { Settings, Users, ChartBar, ClipboardList } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { useUser } from "@/hooks/use-user";
 import { useLocation } from "wouter";
@@ -41,7 +41,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         // Mobile: full width, no left padding, bottom padding for sidebar
         isMobile ? "w-full px-4 pb-20" : "pl-[80px]"
       )}>
-        <div className="h-16 border-b">
+        <div className="h-16 border-b flex items-center px-4 sm:px-6">
+          <div className="ml-auto flex items-center gap-4">
+            <span className="text-sm text-muted-foreground font-medium">
+              Your Next $500 Is Waiting, {user.name}!
+            </span>
+          </div>
         </div>
         <main className={cn(
           "mx-auto w-full",
