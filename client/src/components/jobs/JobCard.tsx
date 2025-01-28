@@ -40,8 +40,8 @@ export function JobCard({ job }: JobCardProps) {
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-blue-400">{job.title}</h3>
-            <div className="flex items-center gap-2 text-slate-400">
+            <h3 className="text-xl font-semibold text-primary">{job.title}</h3>
+            <div className="flex items-center gap-2 text-muted-foreground">
               <MapPin className="h-4 w-4" />
               <span className="text-sm">
                 {location.city}, {location.state}
@@ -96,20 +96,20 @@ export function JobCard({ job }: JobCardProps) {
       <CardContent className="pb-4">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-green-500" />
-            <span className="font-medium text-green-400">
+            <DollarSign className="h-5 w-5 text-primary" />
+            <span className="font-medium text-primary">
               ${Number(job.basePay).toLocaleString()}/year
             </span>
           </div>
           {job.bonusAmount && (
             <div className="flex items-center gap-2">
-              <Gift className="h-5 w-5 text-purple-400" />
+              <Gift className="h-5 w-5 text-accent-foreground" />
               <div>
-                <span className="font-medium text-purple-400">
+                <span className="font-medium text-accent-foreground">
                   ${Number(job.bonusAmount).toLocaleString()} Bonus
                 </span>
                 {job.bonusDetails && (
-                  <p className="text-sm text-slate-400 mt-0.5">{job.bonusDetails}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{job.bonusDetails}</p>
                 )}
               </div>
             </div>
@@ -118,14 +118,14 @@ export function JobCard({ job }: JobCardProps) {
       </CardContent>
       <CardFooter className="bg-slate-900/50 py-3">
         <div className="flex flex-wrap gap-2">
-          <span className="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-sm border border-blue-500/20">
+          <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm border border-primary/20">
             {job.specialty}
           </span>
-          <span className="bg-slate-500/10 text-slate-400 px-3 py-1 rounded-full text-sm border border-slate-500/20">
+          <span className="bg-secondary/50 text-secondary-foreground px-3 py-1 rounded-full text-sm border border-secondary/20">
             {job.type}
           </span>
           {job.shift && (
-            <span className="bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full text-sm border border-purple-500/20">
+            <span className="bg-accent/10 text-accent-foreground px-3 py-1 rounded-full text-sm border border-accent/20">
               {job.shift} shift
             </span>
           )}
