@@ -86,9 +86,9 @@ export function KPIGroupWidget() {
       <CardHeader className="p-4 sm:p-6">
         <CardTitle className="text-lg font-medium">Recruiter Performance KPIs</CardTitle>
       </CardHeader>
-      <CardContent className="p-4 sm:p-6 space-y-6 sm:space-y-8">
+      <CardContent className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 md:space-y-8">
         {/* KPI Grid */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {/* Conversion Rate Card */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
