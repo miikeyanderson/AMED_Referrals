@@ -4,8 +4,11 @@ import { ReferralStatsWidget } from "@/components/dashboard/ReferralStatsWidget"
 import { ClinicianBadges } from "@/components/dashboard/ClinicianBadges";
 import { RewardsSnapshotWidget } from "@/components/RewardsSnapshotWidget";
 import { useQuery } from "@tanstack/react-query";
+import { Gift } from "lucide-react";
+import { useUser } from "@/hooks/use-user";
 
 export default function ClinicianDashboard() {
+  const { user } = useUser();
   const { data: stats } = useQuery({
     queryKey: ['/api/clinician/referrals-stats', { range: 'week' }],
     queryFn: async () => {
