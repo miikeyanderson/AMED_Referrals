@@ -37,24 +37,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen flex flex-col">
       {/* Main content */}
       <div className={cn(
-        "flex-1 transition-all duration-300",
+        "flex-1 transition-all duration-300 min-h-screen",
         // Mobile: full width, no left padding, bottom padding for sidebar
-        isMobile ? "w-full px-4 pb-20" : "pl-[80px]"
+        isMobile ? "w-full px-4 pt-20" : "pl-[80px]"
       )}>
-        <div className="h-16 border-b flex items-center px-4 sm:px-6">
-          <div className="ml-auto flex items-center gap-4">
-            <span className="text-sm text-muted-foreground font-medium">
-              Your Next $500 Is Waiting, {user.name}!
-            </span>
-          </div>
-        </div>
         <main className={cn(
           "mx-auto w-full",
           // Responsive padding and max-width
           "p-4 sm:p-6 md:p-8",
           "max-w-screen-xl",
           // Center content on larger screens
-          "lg:px-8"
+          "lg:px-8",
+          // Ensure proper scroll behavior
+          "overflow-y-auto"
         )}>
           <div className="grid gap-6 sm:gap-8">
             {children}
@@ -65,7 +60,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Sidebar */}
       <div className={cn(
         "fixed",
-        isMobile ? "bottom-0 left-0 right-0" : "inset-y-0 left-0",
+        isMobile ? "top-0 left-0 right-0" : "inset-y-0 left-0",
         "z-[100]"
       )}>
         <Sidebar />

@@ -7,6 +7,29 @@ export const roleEnum = pgEnum('role', ['recruiter', 'clinician', 'leadership'])
 export const referralStatusEnum = pgEnum('referral_status', ['pending', 'contacted', 'interviewing', 'hired', 'rejected']);
 export const alertTypeEnum = pgEnum('alert_type', ['new_referral', 'pipeline_update', 'system_notification']);
 
+// New enum for activity types
+export const activityTypeEnum = pgEnum('activity_type', [
+  'view_referral',
+  'submit_referral',
+  'check_rewards',
+  'view_resources',
+  'update_profile',
+  'view_pending'
+]);
+
+// Activity tracking table
+export const userActivities = pgTable("user_activities", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  activityType: activityTypeEnum("activity_type").notNull(),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("user_activities_user_id_idx").on(table.userId),
+  activityTypeIdx: index("user_activities_type_idx").on(table.activityType),
+  createdAtIdx: index("user_activities_created_at_idx").on(table.createdAt)
+}));
+
 // Enhanced validation schema for referral submission
 export const referralSubmissionSchema = z.object({
   candidateName: z.string()
@@ -122,6 +145,8 @@ export type Reward = typeof rewards.$inferSelect;
 export type InsertReward = typeof rewards.$inferInsert;
 export type Alert = typeof alerts.$inferSelect;
 export type InsertAlert = typeof alerts.$inferInsert;
+export type UserActivity = typeof userActivities.$inferSelect;
+export type InsertUserActivity = typeof userActivities.$inferInsert;
 
 // Schemas
 export const insertUserSchema = createInsertSchema(users);
@@ -130,3 +155,5 @@ export const insertReferralSchema = createInsertSchema(referrals);
 export const selectReferralSchema = createSelectSchema(referrals);
 export const insertAlertSchema = createInsertSchema(alerts);
 export const selectAlertSchema = createSelectSchema(alerts);
+export const insertUserActivitySchema = createInsertSchema(userActivities);
+export const selectUserActivitySchema = createSelectSchema(userActivities);
