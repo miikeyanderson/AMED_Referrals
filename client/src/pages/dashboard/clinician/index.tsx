@@ -157,7 +157,13 @@ export default function ClinicianDashboard() {
         </Button>
       </div>
 
-      <RewardsSnapshotWidget />
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold">Analytics & Rewards</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <RewardsSnapshotWidget />
+          <ReferralStatsWidget />
+        </div>
+      </div>
 
       {/* Quick Links Section */}
       <div className="pt-2">
@@ -202,8 +208,6 @@ export default function ClinicianDashboard() {
           </div>
         </TooltipProvider>
       </div>
-
-      <ReferralStatsWidget />
 
       <ClinicianBadges
         stats={{
