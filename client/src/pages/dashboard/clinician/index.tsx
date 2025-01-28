@@ -161,8 +161,7 @@ export default function ClinicianDashboard() {
 
       {/* Quick Links Section */}
       <div className="py-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Quick Links</h2>
+        <div className="flex justify-end mb-4">
           {recentActivities?.length > 0 && (
             <p className="text-sm text-muted-foreground">
               Personalized based on your recent activity
