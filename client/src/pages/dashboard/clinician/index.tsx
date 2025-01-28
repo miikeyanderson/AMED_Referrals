@@ -166,13 +166,13 @@ export default function ClinicianDashboard() {
           )}
         </div>
         <TooltipProvider>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-1">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 px-1">
             {quickLinks.map((link) => (
               <Tooltip key={link.label}>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => router.push(link.href)} // Use router.push for client-side navigation
-                    className={`w-full p-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background ${
+                    onClick={() => router.push(link.href)}
+                    className={`w-full p-3 sm:p-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background ${
                       link.label === 'New Referral' 
                         ? 'bg-green-900/30 text-green-100 border border-green-200 hover:bg-green-900/40 focus:ring-green-200'
                         : link.label === 'Resources'
@@ -182,11 +182,11 @@ export default function ClinicianDashboard() {
                         : 'bg-red-900/30 text-red-100 border border-red-200 hover:bg-red-900/40 focus:ring-red-200'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-center text-center gap-2">
                       {link.icon}
-                      <div className="text-left">
-                        <div className="font-semibold">{link.label}</div>
-                        <div className="text-sm opacity-90">{link.description}</div>
+                      <div>
+                        <div className="font-semibold text-sm sm:text-base">{link.label}</div>
+                        <div className="text-xs opacity-90 hidden sm:block">{link.description}</div>
                       </div>
                     </div>
                   </button>
