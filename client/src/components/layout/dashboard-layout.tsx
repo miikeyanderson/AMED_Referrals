@@ -41,13 +41,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         // Mobile: full width, no left padding, bottom padding for sidebar
         isMobile ? "w-full px-4 pb-20" : "pl-[80px]"
       )}>
-        <div className="h-16 border-b flex items-center px-4 sm:px-6">
-          <div className="ml-auto flex items-center gap-4" />
-        </div>
         <main className={cn(
           "mx-auto w-full",
           // Responsive padding and max-width
-          "pt-4 p-4 sm:p-6 md:p-8", // Removed excess top padding
+          "p-4 sm:p-6 md:p-8",
           "max-w-screen-xl",
           // Center content on larger screens
           "lg:px-8",
