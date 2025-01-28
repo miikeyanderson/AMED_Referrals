@@ -20,7 +20,7 @@ const DEFAULT_FILTERS: JobFilters = {
   jobType: "all-types",
 };
 
-export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFilters) => void }) {
+export function JobFilters({ onFilterChange, compact = false }: { onFilterChange: (filters: JobFilters) => void, compact?: boolean }) {
   const [filters, setFilters] = useState<JobFilters>(DEFAULT_FILTERS);
   const isMobile = useIsMobile();
 
@@ -31,9 +31,9 @@ export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFi
   };
 
   const FilterContent = () => (
-    <div className="flex flex-col md:flex-row gap-2">
+    <div className="flex flex-col gap-2">
       <Select value={filters.specialty} onValueChange={(value) => handleFilterChange("specialty", value)}>
-        <SelectTrigger className="w-full md:w-[180px]">
+        <SelectTrigger className="w-full">
           <SelectValue placeholder="Specialty" />
         </SelectTrigger>
         <SelectContent>
@@ -43,7 +43,7 @@ export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFi
         </SelectContent>
       </Select>
       <Select value={filters.location} onValueChange={(value) => handleFilterChange("location", value)}>
-        <SelectTrigger className="w-full md:w-[180px]">
+        <SelectTrigger className="w-full">
           <SelectValue placeholder="Location" />
         </SelectTrigger>
         <SelectContent>
@@ -54,7 +54,7 @@ export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFi
         </SelectContent>
       </Select>
       <Select value={filters.jobType} onValueChange={(value) => handleFilterChange("jobType", value)}>
-        <SelectTrigger className="w-full md:w-[180px]">
+        <SelectTrigger className="w-full">
           <SelectValue placeholder="Job Type" />
         </SelectTrigger>
         <SelectContent>
@@ -72,13 +72,13 @@ export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFi
     return (
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="outline" size="icon">
-            <Menu className="h-4 w-4" />
+          <Button variant="outline" size="icon" className={compact ? "h-8 w-8" : undefined}>
+            <Menu className={compact ? "h-4 w-4" : "h-5 w-5"} />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left">
+        <SheetContent side="right" className="w-[80vw] max-w-sm">
           <SheetHeader>
-            <SheetTitle>Filters</SheetTitle>
+            <SheetTitle>Filter Jobs</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
             <FilterContent />
