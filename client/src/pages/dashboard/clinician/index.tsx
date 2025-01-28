@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useLocation } from "wouter";
-import { useRouter } from 'next/router'; // Import useRouter for client-side routing
+import { useLocation } from 'wouter';
 
 interface QuickLink {
   icon: JSX.Element;
@@ -70,7 +70,7 @@ function DocsPage() {
 
 export default function ClinicianDashboard() {
   const { user } = useUser();
-  const router = useRouter(); // Use useRouter for client-side routing
+  const [, setLocation] = useLocation();
 
   // Fetch user's recent activities
   const { data: recentActivities } = useQuery({
@@ -154,7 +154,7 @@ export default function ClinicianDashboard() {
           size="default"
           variant="secondary" 
           className="mt-4 font-medium w-48"
-          onClick={() => router.push('/docs')} // Use router.push for client-side navigation
+          onClick={() => setLocation('/docs')}
         >
           Tips to Get Started
         </Button>
