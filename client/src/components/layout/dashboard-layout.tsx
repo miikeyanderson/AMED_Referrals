@@ -43,10 +43,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}>
         <div className="h-20 border-b flex items-center justify-between px-4 sm:px-6">
           <div className="flex flex-col items-center flex-grow">
-            <div className="text-2xl font-bold leading-tight">
-              Your Next <span className="text-green-500">$500</span> Is Waiting
+            <div className="text-2xl font-bold leading-tight text-primary">
+              Your Next <span className="text-green-400 font-extrabold">$500</span> Is Waiting
             </div>
-            <div className="text-lg font-medium text-muted-foreground mt-1">
+            <div className="text-lg font-medium text-muted-foreground/90 mt-1">
               {user.name}
             </div>
           </div>
