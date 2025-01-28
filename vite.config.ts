@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
@@ -21,27 +22,18 @@ export default defineConfig({
     ],
   },
   server: {
-    // Binding to 0.0.0.0 allows external access
     host: "0.0.0.0",
     port: 5173,
     hmr: {
-      // Replit typically uses secure websockets on port 443
       clientPort: 443,
       protocol: "wss",
+      host: "cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev"
     },
     watch: {
-      // For container environments
       usePolling: true,
     },
     strictPort: true,
-    allowedHosts: [
-      "frontend_web",
-      ".replit.dev",
-      ".picard.replit.dev",
-      "cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev",
-      "274h5wpqe1gyy.picard.replit.dev",
-      "all"
-    ],
+    allowedHosts: ["all"]
   },
   resolve: {
     alias: {
@@ -49,7 +41,6 @@ export default defineConfig({
       "@": path.resolve(__dirname, "client", "src"),
     },
   },
-  // Assuming your code is in "client" directory
   root: path.resolve(__dirname, "client"),
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
