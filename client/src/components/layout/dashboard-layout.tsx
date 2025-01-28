@@ -43,8 +43,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}>
         <div className="h-16 border-b flex items-center px-4 sm:px-6">
           <div className="ml-auto flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
-              Welcome, {user.name}
+            <span className="text-sm text-muted-foreground font-medium">
+              Your Next $500 Is Waiting, {user.name}!
             </span>
           </div>
         </div>
