@@ -101,11 +101,11 @@ export function RewardsSnapshotWidget() {
             <TabsTrigger value="history">Payment History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="metrics" className="space-y-4">
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+          <TabsContent value="metrics" className="space-y-6">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3">
               <Card>
                 <CardContent className="pt-6">
-                  <div className="flex items-center justify-between space-x-4">
+                  <div className="flex items-center justify-start space-x-4">
                     <div className="flex items-center space-x-4">
                       <DollarSign className="h-5 w-5 text-green-500" />
                       <div>
@@ -118,17 +118,15 @@ export function RewardsSnapshotWidget() {
               </Card>
 
               <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between space-x-4">
-                    <div className="flex items-center space-x-4">
-                      <Clock className="h-5 w-5 text-yellow-500" />
-                      <div>
-                        <p className="text-sm font-medium leading-none">Pending</p>
-                        <p className="text-2xl font-bold">${data.pending.amount}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {data.pending.count} referrals
-                        </p>
-                      </div>
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-4">
+                    <Clock className="h-5 w-5 text-yellow-500" />
+                    <div>
+                      <p className="text-sm font-medium leading-none mb-1">Pending</p>
+                      <p className="text-2xl font-bold mb-1">${data.pending.amount}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {data.pending.count} referrals
+                      </p>
                     </div>
                   </div>
                 </CardContent>
