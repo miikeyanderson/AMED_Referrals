@@ -130,7 +130,7 @@ export function FilterBar({ onFilterChange, isLoading = false }: FilterBarProps)
             <Button
               variant="outline"
               className={cn(
-                "w-full md:w-[240px] justify-start text-left font-normal", {/* Modified */}
+                "w-full md:w-[240px] justify-start text-left font-normal",
                 !filters.dateRange.from && "text-muted-foreground"
               )}
               disabled={isLoading}
