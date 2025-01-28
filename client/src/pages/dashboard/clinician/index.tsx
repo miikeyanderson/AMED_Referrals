@@ -157,6 +157,8 @@ export default function ClinicianDashboard() {
         </Button>
       </div>
 
+      <RewardsSnapshotWidget />
+
       {/* Quick Links Section */}
       <div className="pt-2">
         <div className="flex justify-end mb-2">
@@ -200,8 +202,6 @@ export default function ClinicianDashboard() {
           </div>
         </TooltipProvider>
       </div>
-
-      <RewardsSnapshotWidget />
 
       <ReferralStatsWidget />
 
