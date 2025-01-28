@@ -1770,13 +1770,5 @@
 {"correlationId":"fa320f17-a09c-49b0-bf45-19716cd9fc60","duration":8,"level":"info","message":"GET /api/user 401 in 8ms","method":"GET","path":"/api/user","rateLimit":{"currentCount":1,"limit":100,"remaining":99,"resetTime":1737680614259},"service":"arm-platform","statusCode":401,"timestamp":"2025-01-24T00:48:40.491Z"}
 {"level":"warn","message":{"event":"unauthorized_access","ip":"172.31.196.38","resource":"/api/user","timestamp":"2025-01-24T00:48:40.561Z","userId":-1},"service":"arm-platform","timestamp":"2025-01-24T00:48:40.561Z"}
 {"correlationId":"ca741248-78c0-407f-abf9-3fccedcaf5fc","duration":4,"level":"info","message":"GET /api/user 401 in 4ms","method":"GET","path":"/api/user","rateLimit":{"currentCount":2,"limit":100,"remaining":98,"resetTime":1737680614259},"service":"arm-platform","statusCode":401,"timestamp":"2025-01-24T00:48:40.564Z"}
-{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T00:59:47.508Z"}
-{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T15:10:34.374Z"}
-{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T15:13:31.455Z"}
-{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T15:13:36.438Z"}
-{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T15:16:33.061Z"}
-{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T15:17:36.928Z"}
-{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T15:18:21.732Z"}
-{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T15:18:31.135Z"}
-{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T15:19:40.516Z"}
-{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-platform","timestamp":"2025-01-28T15:20:23.231Z"}
+{"hostname":"0.0.0.0","level":"info","message":"Server running at http://0.0.0.0:5000/","port":5000,"service":"arm-pl
+

@@ -10,14 +10,17 @@ deploymentTarget = "cloudrun"
 build = ["npm", "run", "build"]
 run = ["npm", "run", "start"]
 
+# If you have a back-end on port 5000, keep this mapping:
 [[ports]]
 localPort = 5000
 externalPort = 80
 
+# Map Vite’s dev server on port 5173
 [[ports]]
 localPort = 5173
 externalPort = 5173
 
+# (Optional) Another port if you need it
 [[ports]]
 localPort = 5174
 externalPort = 3000
@@ -41,10 +44,13 @@ author = "agent"
 [workflows.workflow.metadata]
 agentRequireRestartOnSave = false
 
+# Install dependencies if needed
 [[workflows.workflow.tasks]]
 task = "packager.installForAll"
 
+# The critical piece: actually run "npm run dev" and wait for port 5173,
+# which is Vite’s dev server port.
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
-waitForPort = 5000
+waitForPort = 5173
