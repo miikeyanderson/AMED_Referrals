@@ -36,6 +36,7 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { FeedbackModal } from "./FeedbackModal";
+import { ThemeToggle } from "@/components/themes/theme-toggle";
 
 // Navigation items with loading priority
 const navigationItems = [
@@ -44,6 +45,11 @@ const navigationItems = [
     label: "Dashboard",
     path: "/dashboard",
     role: "recruiter",
+    priority: 1,
+  },
+  {
+    component: ThemeToggle,
+    label: "Theme",
     priority: 1,
   },
   {
@@ -167,15 +173,17 @@ export function Sidebar() {
 
   const NavItem = ({ 
     icon: Icon, 
+    component: Component,
     label, 
     path, 
     badge,
     priority = 1,
     show = true 
   }: { 
-    icon: any;
+    icon?: any;
+    component?: React.ComponentType;
     label: string;
-    path: string;
+    path?: string;
     badge?: number;
     priority?: number;
     show?: boolean;
@@ -209,15 +217,18 @@ export function Sidebar() {
                   )}
                   onClick={() => {
                     triggerHapticFeedback();
-                    setLocation(path);
+                    if (path) setLocation(path);
                   }}
                 >
-                  <Icon className={cn(
-                    "shrink-0",
-                    // Larger icons on mobile
-                    isMobile ? "h-6 w-6" : "h-4 w-4",
-                    !isCollapsed && !isMobile && "mr-2"
-                  )} />
+                  {Icon && (
+                    <Icon className={cn(
+                      "shrink-0",
+                      // Larger icons on mobile
+                      isMobile ? "h-6 w-6" : "h-4 w-4",
+                      !isCollapsed && !isMobile && "mr-2"
+                    )} />
+                  )}
+                  {Component && <Component />}
                   {/* Hide text on mobile, show on desktop if not collapsed */}
                   {!isCollapsed && !isMobile && <span>{label}</span>}
                   {badge !== undefined && badge > 0 && (
