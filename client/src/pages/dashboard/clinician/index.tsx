@@ -215,6 +215,5 @@ export default function ClinicianDashboard() {
           <p className="text-muted-foreground text-sm sm:text-base">No referrals yet. Start by submitting a new referral!</p>
         </CardContent>
       </Card>
-    </div>
   );
 }
