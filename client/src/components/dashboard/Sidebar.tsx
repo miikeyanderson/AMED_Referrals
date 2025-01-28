@@ -37,24 +37,65 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { FeedbackModal } from "./FeedbackModal";
 
-interface NavItemProps {
-  icon: any;
-  label: string;
-  path: string;
-  badge?: number;
-  priority?: number;
-  show?: boolean;
-}
+// Navigation items with loading priority
+const navigationItems = [
+  {
+    icon: LayoutDashboard,
+    label: "Dashboard",
+    path: "/dashboard",
+    role: "recruiter",
+    priority: 1,
+  },
+  {
+    icon: Users,
+    label: "Candidate Pipeline",
+    path: "/pipeline",
+    role: "recruiter",
+    priority: 1,
+  },
+  {
+    icon: Bell,
+    label: "Notifications",
+    path: "/notifications",
+    priority: 1,
+  },
+  {
+    icon: BarChart3,
+    label: "Performance",
+    path: "/performance",
+    role: "recruiter",
+    priority: 2,
+  },
+  {
+    icon: Gift,
+    label: "Rewards",
+    path: "/rewards",
+    role: "recruiter",
+    priority: 2,
+  },
+  {
+    icon: CalendarClock,
+    label: "Calendar",
+    path: "/calendar",
+    role: "recruiter",
+    priority: 3,
+  },
+  {
+    icon: HelpCircle,
+    label: "Help & Support",
+    path: "/help",
+    role: "recruiter",
+    priority: 3,
+  },
+  {
+    icon: Settings,
+    label: "Settings",
+    path: "/settings",
+    priority: 2,
+  },
+];
 
-interface SidebarProps {
-  routes: {
-    icon: any;
-    label: string;
-    href: string;
-  }[];
-}
-
-export function Sidebar({ routes }: SidebarProps) {
+export function Sidebar() {
   const { user, logout } = useUser();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
@@ -70,14 +111,14 @@ export function Sidebar({ routes }: SidebarProps) {
     priorities.forEach((priority, index) => {
       setTimeout(() => {
         setLoadedItems(prev => [...prev, priority]);
-      }, index * 150);
+      }, index * 150); // Load items with 150ms delay between priority levels
     });
   }, []);
 
   // Haptic feedback function
   const triggerHapticFeedback = () => {
     if (navigator.vibrate) {
-      navigator.vibrate(50);
+      navigator.vibrate(50); // 50ms vibration
     }
   };
 
@@ -131,7 +172,14 @@ export function Sidebar({ routes }: SidebarProps) {
     badge,
     priority = 1,
     show = true 
-  }: NavItemProps) => {
+  }: { 
+    icon: any;
+    label: string;
+    path: string;
+    badge?: number;
+    priority?: number;
+    show?: boolean;
+  }) => {
     if (!show) return null;
 
     const isActive = location === path;
@@ -151,9 +199,11 @@ export function Sidebar({ routes }: SidebarProps) {
                 <Button
                   variant="ghost"
                   className={cn(
-                    "relative min-w-[44px] min-h-[44px]",
+                    "relative min-w-[44px] min-h-[44px]", // Minimum touch target size
                     isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
+                    // Mobile specific styles
                     isMobile && "w-12 h-12 p-0 flex flex-col items-center justify-center",
+                    // Desktop styles
                     !isMobile && "w-full justify-start",
                     isCollapsed && !isMobile && "justify-center p-2"
                   )}
@@ -164,9 +214,11 @@ export function Sidebar({ routes }: SidebarProps) {
                 >
                   <Icon className={cn(
                     "shrink-0",
+                    // Larger icons on mobile
                     isMobile ? "h-6 w-6" : "h-4 w-4",
                     !isCollapsed && !isMobile && "mr-2"
                   )} />
+                  {/* Hide text on mobile, show on desktop if not collapsed */}
                   {!isCollapsed && !isMobile && <span>{label}</span>}
                   {badge !== undefined && badge > 0 && (
                     <Badge 
@@ -181,6 +233,7 @@ export function Sidebar({ routes }: SidebarProps) {
                   )}
                 </Button>
               </TooltipTrigger>
+              {/* Always show tooltip on mobile or when collapsed on desktop */}
               {(isCollapsed || isMobile) && (
                 <TooltipContent 
                   side={isMobile ? "top" : "right"} 
@@ -229,15 +282,28 @@ export function Sidebar({ routes }: SidebarProps) {
 
           <ScrollArea className="flex-1">
             <div className="p-4 space-y-4">
-              {routes.map((route, index) => (
-                <NavItem
-                  key={route.href}
-                  icon={route.icon}
-                  label={route.label}
-                  path={route.href}
-                  priority={Math.floor(index / 3) + 1}
-                />
-              ))}
+              {navigationItems
+                .filter(item => !item.role || item.role === user?.role)
+                .map((item, index) => (
+                  <NavItem
+                    key={item.path}
+                    icon={item.icon}
+                    label={item.label}
+                    path={item.path}
+                    priority={item.priority}
+                    badge={
+                      item.path === '/notifications'
+                        ? notifications?.count
+                        : item.path === '/pipeline'
+                        ? pendingReferrals?.count
+                        : item.path === '/rewards'
+                        ? pendingRewards?.count
+                        : item.path === '/calendar'
+                        ? calendarEvents?.count
+                        : undefined
+                    }
+                  />
+                ))}
             </div>
           </ScrollArea>
         </>
@@ -245,14 +311,22 @@ export function Sidebar({ routes }: SidebarProps) {
 
       {isMobile ? (
         <div className="flex items-center justify-around w-full px-4">
-          {routes
-            .filter(item => item.priority <=1)
+          {navigationItems
+            .filter(item => !item.role || item.role === user?.role)
+            .filter(item => item.priority === 1) // Only show high-priority items on mobile
             .map((item) => (
               <NavItem
-                key={item.href}
+                key={item.path}
                 icon={item.icon}
                 label={item.label}
-                path={item.href}
+                path={item.path}
+                badge={
+                  item.path === '/notifications'
+                    ? notifications?.count
+                    : item.path === '/pipeline'
+                    ? pendingReferrals?.count
+                    : undefined
+                }
               />
             ))}
         </div>
