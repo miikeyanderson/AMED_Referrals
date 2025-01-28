@@ -31,6 +31,7 @@ import {
   HelpCircle,
   MessageCircle,
   CalendarClock,
+  Briefcase, // Added import for Briefcase icon
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -97,6 +98,13 @@ const navigationItems = [
     icon: Settings,
     label: "Settings",
     path: "/settings",
+    priority: 2,
+  },
+  { // Added Jobs navigation item
+    icon: Briefcase,
+    label: "Jobs",
+    path: "/dashboard/clinician/jobs",
+    role: "clinician", // Assuming this is clinician specific
     priority: 2,
   },
 ];
@@ -294,7 +302,7 @@ export function Sidebar() {
           <ScrollArea className="flex-1">
             <div className="p-4 space-y-4">
               {navigationItems
-                .filter(item => !item.role || item.role === user?.role)
+                .filter(item => !item.role || item.role === user?.role || item.role === 'clinician') //Added clinician role check
                 .map((item, index) => (
                   <NavItem
                     key={item.path}
@@ -323,7 +331,7 @@ export function Sidebar() {
       {isMobile ? (
         <div className="flex items-center justify-around w-full px-4">
           {navigationItems
-            .filter(item => !item.role || item.role === user?.role)
+            .filter(item => !item.role || item.role === user?.role || item.role === 'clinician') //Added clinician role check
             .filter(item => item.priority === 1) // Only show high-priority items on mobile
             .map((item) => (
               <NavItem
