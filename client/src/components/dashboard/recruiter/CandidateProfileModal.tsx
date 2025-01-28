@@ -92,7 +92,7 @@ export function CandidateProfileModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl h-[80vh]">
+      <DialogContent className="max-w-full md:max-w-md lg:max-w-lg p-4 md:p-6 lg:p-8 h-[80vh]">
         <DialogHeader>
           <DialogTitle>Candidate Profile</DialogTitle>
         </DialogHeader>
@@ -120,24 +120,26 @@ export function CandidateProfileModal({
                 {/* Basic Information */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Basic Information</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                     <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{candidate.candidateName}</span>
+                      <User className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
+                      <span className="font-medium text-sm md:text-base">
+                        {candidate.candidateName}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Building className="h-4 w-4 text-muted-foreground" />
-                      <span>{candidate.position}</span>
+                      <Building className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
+                      <span className="text-sm md:text-base">{candidate.position}</span>
                     </div>
                     {candidate.department && (
                       <div className="flex items-center gap-2">
-                        <Tag className="h-4 w-4 text-muted-foreground" />
-                        <span>{candidate.department}</span>
+                        <Tag className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
+                        <span className="text-sm md:text-base">{candidate.department}</span>
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>
+                      <Clock className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
+                      <span className="text-sm md:text-base">
                         Created: {format(new Date(candidate.createdAt), "PPP")}
                       </span>
                     </div>
@@ -151,15 +153,15 @@ export function CandidateProfileModal({
                   <>
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Contact Details</h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                         <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <span>{candidate.candidateEmail}</span>
+                          <Mail className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
+                          <span className="text-sm md:text-base">{candidate.candidateEmail}</span>
                         </div>
                         {candidate.candidatePhone && (
                           <div className="flex items-center gap-2">
-                            <Phone className="h-4 w-4 text-muted-foreground" />
-                            <span>{candidate.candidatePhone}</span>
+                            <Phone className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
+                            <span className="text-sm md:text-base">{candidate.candidatePhone}</span>
                           </div>
                         )}
                       </div>
@@ -194,9 +196,9 @@ export function CandidateProfileModal({
                             href={url as string}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
+                            className="flex items-center gap-2 text-sm md:text-base text-muted-foreground hover:text-primary"
                           >
-                            <Globe className="h-4 w-4" />
+                            <Globe className="h-6 w-6 md:h-8 md:w-8" />
                             {platform}
                           </a>
                         )
@@ -211,7 +213,7 @@ export function CandidateProfileModal({
                 <TabsContent value="notes" className="space-y-6">
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Recruiter Notes</h3>
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    <p className="text-sm md:text-base text-muted-foreground whitespace-pre-wrap">
                       {candidate.recruiterNotes || "No notes available"}
                     </p>
                   </div>
@@ -225,9 +227,9 @@ export function CandidateProfileModal({
                         <div key={index} className="flex items-start gap-4">
                           <div className="h-2 w-2 mt-2 rounded-full bg-primary" />
                           <div className="flex-1">
-                            <p className="text-sm font-medium">{action.action}</p>
+                            <p className="text-sm md:text-base font-medium">{action.action}</p>
                             {action.notes && (
-                              <p className="text-sm text-muted-foreground mt-1">
+                              <p className="text-sm md:text-base text-muted-foreground mt-1">
                                 {action.notes}
                               </p>
                             )}
@@ -249,12 +251,12 @@ export function CandidateProfileModal({
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Resume</h3>
                       <div className="flex items-center gap-4">
-                        <FileText className="h-6 w-6 text-muted-foreground" />
+                        <FileText className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
                         <a
                           href={candidate.resumeUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-primary hover:underline"
+                          className="text-primary hover:underline text-sm md:text-base"
                         >
                           View Resume
                         </a>
@@ -262,8 +264,8 @@ export function CandidateProfileModal({
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <AlertCircle className="h-4 w-4" />
-                      <span>No resume available</span>
+                      <AlertCircle className="h-6 w-6 md:h-8 md:w-8" />
+                      <span className="text-sm md:text-base">No resume available</span>
                     </div>
                   )}
                 </TabsContent>
@@ -274,18 +276,20 @@ export function CandidateProfileModal({
             {isRecruiter && (
               <div className="mt-6 space-y-4">
                 <h3 className="text-lg font-semibold">Quick Actions</h3>
-                <div className="flex gap-4">
+                <div className="flex flex-col md:flex-row gap-4">
                   <Button
                     variant="outline"
+                    className="w-full md:w-auto justify-center"
                     onClick={() => {
                       window.location.href = `mailto:${candidate.candidateEmail}`;
                     }}
                   >
-                    <Mail className="h-4 w-4 mr-2" />
+                    <Mail className="h-6 w-6 md:h-8 md:w-8 mr-2" />
                     Send Email
                   </Button>
                   <Button
                     variant="outline"
+                    className="w-full md:w-auto justify-center"
                     onClick={() => {
                       // TODO: Implement scheduling functionality
                       toast({
@@ -294,7 +298,7 @@ export function CandidateProfileModal({
                       });
                     }}
                   >
-                    <Calendar className="h-4 w-4 mr-2" />
+                    <Calendar className="h-6 w-6 md:h-8 md:w-8 mr-2" />
                     Schedule Interview
                   </Button>
                 </div>
