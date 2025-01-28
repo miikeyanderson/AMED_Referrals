@@ -139,8 +139,9 @@ export default function ClinicianDashboard() {
           Make a referral today to claim your reward
         </p>
         <Button 
-          size="lg" 
-          className="mt-4 font-semibold"
+          size="default"
+          variant="secondary" 
+          className="mt-4 font-medium w-40"
           onClick={() => setLocation("/dashboard/clinician/refer")}
         >
           Make a Referral
