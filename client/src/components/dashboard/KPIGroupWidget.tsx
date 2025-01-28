@@ -91,7 +91,7 @@ export function KPIGroupWidget() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {/* Conversion Rate Card */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-x-2 md:space-x-4 pb-2">
               <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -106,7 +106,7 @@ export function KPIGroupWidget() {
 
           {/* Time to Hire Card */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-x-2 md:space-x-4 pb-2">
               <CardTitle className="text-sm font-medium">Time to Hire</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -129,7 +129,7 @@ export function KPIGroupWidget() {
 
           {/* Active Requisitions */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-x-2 md:space-x-4 pb-2">
               <CardTitle className="text-sm font-medium">Active Requisitions</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -140,7 +140,7 @@ export function KPIGroupWidget() {
 
           {/* Total Placements */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-x-2 md:space-x-4 pb-2">
               <CardTitle className="text-sm font-medium">Total Placements</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
