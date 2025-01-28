@@ -41,13 +41,13 @@ export function JobHighlightsSection() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       <JobFilters filters={filters} onFilterChange={setFilters} />
-      <div className="relative">
-        <div className="overflow-x-auto pb-4">
-          <div className="flex space-x-4 w-max">
+      <div className="relative w-full">
+        <div className="overflow-x-auto pb-4 -mx-4 sm:mx-0">
+          <div className="flex space-x-4 px-4 sm:px-0">
             {jobs?.jobs?.map((job: any) => (
-              <div key={job.id} className="w-[300px] sm:w-[350px]">
+              <div key={job.id} className="w-[85vw] sm:w-[350px] shrink-0">
                 <JobCard job={job} />
               </div>
             ))}
