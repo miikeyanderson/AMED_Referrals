@@ -13,16 +13,10 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     hmr: {
-      clientPort: 443,
-      protocol: "wss",
-      host: "cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev",
-      timeout: 120000,
-      secure: true
+      clientPort: 5173,
+      protocol: "ws",
+      host: "0.0.0.0",
     },
-    https: true,
-    cors: true,
-    strictPort: true,
-    allowedHosts: ["cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev"]
   },
   resolve: {
     alias: {
