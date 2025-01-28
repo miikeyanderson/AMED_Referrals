@@ -145,7 +145,8 @@ export default function ClinicianDashboard() {
           </div>
         </div>
         <p className="text-sm sm:text-base text-muted-foreground/80 mt-2">
-          </p>
+          Make your next referral today and claim your reward.
+        </p>
         <Button 
           size="default"
           variant="secondary" 
