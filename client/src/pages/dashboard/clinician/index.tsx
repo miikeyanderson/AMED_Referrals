@@ -147,7 +147,7 @@ export default function ClinicianDashboard() {
         <p className="text-sm sm:text-base text-muted-foreground/80 mt-2">
           Make your next referral today and claim your reward.
         </p>
-        <div className="flex gap-4 mt-2">
+        <div className="flex gap-4 mt-4">
           <Button 
             size="default"
             variant="default"
@@ -168,7 +168,6 @@ export default function ClinicianDashboard() {
       </div>
 
       <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">Analytics & Rewards</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <RewardsSnapshotWidget />
           <ReferralStatsWidget />
