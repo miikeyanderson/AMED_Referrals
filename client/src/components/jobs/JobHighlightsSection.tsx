@@ -43,10 +43,16 @@ export function JobHighlightsSection() {
   return (
     <div className="space-y-4">
       <JobFilters filters={filters} onFilterChange={setFilters} />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {jobs?.jobs?.map((job: any) => (
-          <JobCard key={job.id} job={job} />
-        ))}
+      <div className="relative">
+        <div className="overflow-x-auto pb-4">
+          <div className="flex space-x-4 w-max">
+            {jobs?.jobs?.map((job: any) => (
+              <div key={job.id} className="w-[300px] sm:w-[350px]">
+                <JobCard job={job} />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
