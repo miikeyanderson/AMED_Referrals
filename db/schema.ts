@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, index, jsonb, varchar, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -6,8 +6,6 @@ import { z } from "zod";
 export const roleEnum = pgEnum('role', ['recruiter', 'clinician', 'leadership']);
 export const referralStatusEnum = pgEnum('referral_status', ['pending', 'contacted', 'interviewing', 'hired', 'rejected']);
 export const alertTypeEnum = pgEnum('alert_type', ['new_referral', 'pipeline_update', 'system_notification']);
-
-// New enum for activity types
 export const activityTypeEnum = pgEnum('activity_type', [
   'view_referral',
   'submit_referral',
@@ -16,6 +14,88 @@ export const activityTypeEnum = pgEnum('activity_type', [
   'update_profile',
   'view_pending'
 ]);
+
+// New enum for job specialties
+export const specialtyEnum = pgEnum('specialty', [
+  'nursing',
+  'physician',
+  'therapy',
+  'pharmacy',
+  'technician',
+  'administrative',
+  'other'
+]);
+
+// Jobs table with comprehensive fields and indexes for efficient querying
+export const jobs = pgTable("jobs", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
+  specialty: specialtyEnum("specialty").notNull(),
+  location: jsonb("location").notNull(), // Structured location data including city, state, coordinates
+  basePay: decimal("base_pay", { precision: 10, scale: 2 }).notNull(),
+  bonusAmount: decimal("bonus_amount", { precision: 10, scale: 2 }),
+  bonusDetails: text("bonus_details"),
+  description: text("description").notNull(),
+  requirements: text("requirements").notNull(),
+  benefits: jsonb("benefits"), // Array of benefit details
+  shift: varchar("shift", { length: 50 }), // e.g., "day", "night", "rotating"
+  type: varchar("type", { length: 50 }).notNull(), // e.g., "full-time", "part-time", "contract"
+  department: varchar("department", { length: 100 }),
+  facility: varchar("facility", { length: 200 }).notNull(),
+  recruiterId: integer("recruiter_id").references(() => users.id).notNull(),
+  status: varchar("status", { length: 50 }).notNull().default('active'),
+  startDate: timestamp("start_date"),
+  expiryDate: timestamp("expiry_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  // Indexes for filtering and sorting
+  specialtyIdx: index("jobs_specialty_idx").on(table.specialty),
+  locationIdx: index("jobs_location_idx").on(table.location),
+  basePayIdx: index("jobs_base_pay_idx").on(table.basePay),
+  bonusAmountIdx: index("jobs_bonus_amount_idx").on(table.bonusAmount),
+  statusIdx: index("jobs_status_idx").on(table.status),
+  recruiterIdx: index("jobs_recruiter_idx").on(table.recruiterId),
+  createdAtIdx: index("jobs_created_at_idx").on(table.createdAt),
+  expiryDateIdx: index("jobs_expiry_date_idx").on(table.expiryDate),
+}));
+
+// Enhanced validation schema for job creation/updating
+export const jobSubmissionSchema = z.object({
+  title: z.string()
+    .min(3, "Title must be at least 3 characters long")
+    .max(200, "Title cannot exceed 200 characters"),
+  specialty: z.enum(['nursing', 'physician', 'therapy', 'pharmacy', 'technician', 'administrative', 'other']),
+  location: z.object({
+    city: z.string(),
+    state: z.string(),
+    coordinates: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+    }).optional(),
+  }),
+  basePay: z.number()
+    .min(0, "Base pay must be non-negative")
+    .transform(val => Number(val.toFixed(2))),
+  bonusAmount: z.number()
+    .min(0, "Bonus amount must be non-negative")
+    .optional()
+    .transform(val => val ? Number(val.toFixed(2)) : undefined),
+  bonusDetails: z.string().optional(),
+  description: z.string()
+    .min(10, "Description must be at least 10 characters")
+    .max(5000, "Description cannot exceed 5000 characters"),
+  requirements: z.string()
+    .min(10, "Requirements must be at least 10 characters")
+    .max(2000, "Requirements cannot exceed 2000 characters"),
+  benefits: z.array(z.string()).optional(),
+  shift: z.string().optional(),
+  type: z.string(),
+  department: z.string().optional(),
+  facility: z.string(),
+  startDate: z.string().datetime().optional(),
+  expiryDate: z.string().datetime().optional(),
+});
 
 // Activity tracking table
 export const userActivities = pgTable("user_activities", {
@@ -69,6 +149,7 @@ export const referralSubmissionSchema = z.object({
     .optional()
     .transform(val => val ? val.trim() : undefined),
 });
+
 
 // Database tables
 export const users = pgTable("users", {
@@ -147,6 +228,8 @@ export type Alert = typeof alerts.$inferSelect;
 export type InsertAlert = typeof alerts.$inferInsert;
 export type UserActivity = typeof userActivities.$inferSelect;
 export type InsertUserActivity = typeof userActivities.$inferInsert;
+export type Job = typeof jobs.$inferSelect;
+export type InsertJob = typeof jobs.$inferInsert;
 
 // Schemas
 export const insertUserSchema = createInsertSchema(users);
@@ -157,3 +240,8 @@ export const insertAlertSchema = createInsertSchema(alerts);
 export const selectAlertSchema = createSelectSchema(alerts);
 export const insertUserActivitySchema = createInsertSchema(userActivities);
 export const selectUserActivitySchema = createSelectSchema(userActivities);
+export const insertJobSchema = createInsertSchema(jobs);
+export const selectJobSchema = createSelectSchema(jobs);
+
+// Export validation schemas
+export { jobSubmissionSchema, referralSubmissionSchema };

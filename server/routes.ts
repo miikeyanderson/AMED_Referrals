@@ -3,12 +3,12 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from 'ws';
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { alerts, referrals, rewards, users, type Alert, type InsertAlert, type Referral } from "@db/schema";
-import { eq, desc, and, or, like, sql, inArray, asc } from "drizzle-orm";
+import { alerts, jobs, referrals, rewards, users, type Alert, type InsertAlert, type Referral, type Job } from "@db/schema";
+import { eq, desc, and, or, like, sql, inArray, asc, between, gte, lte } from "drizzle-orm";
 import { SQL } from "drizzle-orm";
 import { logUnauthorizedAccess, logServerError } from "./utils/logger";
 import { add, format, startOfWeek, endOfWeek, parseISO, isValid, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter } from "date-fns";
-import { referralSubmissionSchema } from "@db/schema";
+import { jobSubmissionSchema, referralSubmissionSchema } from "@db/schema";
 import { ZodError, z } from "zod";
 import { sanitizeHtml } from "./utils/sanitize";
 
@@ -2423,6 +2423,245 @@ export function registerRoutes(app: Express): Server {
       }
     }
   );
+
+  /**
+   * @swagger
+   * /api/jobs:
+   *   get:
+   *     summary: Get jobs with filtering and pagination
+   *     description: Retrieve jobs with optional filters for specialty, location, and pay range
+   *     tags: [Jobs]
+   *     parameters:
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           default: 1
+   *         description: Page number
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           maximum: 50
+   *           default: 10
+   *         description: Number of items per page
+   *       - in: query
+   *         name: specialty
+   *         schema:
+   *           type: string
+   *         description: Filter by job specialty
+   *       - in: query
+   *         name: location
+   *         schema:
+   *           type: string
+   *         description: Filter by location (city or state)
+   *       - in: query
+   *         name: minPay
+   *         schema:
+   *           type: number
+   *         description: Minimum base pay filter
+   *       - in: query
+   *         name: maxPay
+   *         schema:
+   *           type: number
+   *         description: Maximum base pay filter
+   *       - in: query
+   *         name: sortBy
+   *         schema:
+   *           type: string
+   *           enum: [pay_asc, pay_desc, bonus_asc, bonus_desc, date_desc]
+   *         description: Sort results by specified criteria
+   *     responses:
+   *       200:
+   *         description: List of jobs matching the criteria
+   *       400:
+   *         description: Invalid query parameters
+   *       500:
+   *         description: Server error
+   */
+  app.get("/api/jobs", async (req: Request, res: Response) => {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        specialty,
+        location,
+        minPay,
+        maxPay,
+        sortBy = 'date_desc'
+      } = req.query;
+
+      const offset = (Number(page) - 1) * Number(limit);
+      let conditions: SQL[] = [eq(jobs.status, 'active')];
+
+      // Apply filters
+      if (specialty) {
+        conditions.push(eq(jobs.specialty, specialty as string));
+      }
+
+      if (location) {
+        const searchLocation = `%${location}%`;
+        conditions.push(
+          sql`${jobs.location}::text ILIKE ${searchLocation}`
+        );
+      }
+
+      if (minPay && maxPay) {
+        conditions.push(
+          between(jobs.basePay, Number(minPay), Number(maxPay))
+        );
+      } else if (minPay) {
+        conditions.push(gte(jobs.basePay, Number(minPay)));
+      } else if (maxPay) {
+        conditions.push(lte(jobs.basePay, Number(maxPay)));
+      }
+
+      // Determine sort order
+      let orderBy: SQL[];
+      switch (sortBy) {
+        case 'pay_asc':
+          orderBy = [asc(jobs.basePay)];
+          break;
+        case 'pay_desc':
+          orderBy = [desc(jobs.basePay)];
+          break;
+        case 'bonus_asc':
+          orderBy = [asc(jobs.bonusAmount)];
+          break;
+        case 'bonus_desc':
+          orderBy = [desc(jobs.bonusAmount)];
+          break;
+        default:
+          orderBy = [desc(jobs.createdAt)];
+      }
+
+      // Get total count for pagination
+      const [{ count }] = await db
+        .select({ count: sql<number>`cast(count(*) as integer)` })
+        .from(jobs)
+        .where(and(...conditions));
+
+      // Fetch jobs with applied filters, sorting, and pagination
+      const jobsList = await db
+        .select({
+          id: jobs.id,
+          title: jobs.title,
+          specialty: jobs.specialty,
+          location: jobs.location,
+          basePay: jobs.basePay,
+          bonusAmount: jobs.bonusAmount,
+          bonusDetails: jobs.bonusDetails,
+          shift: jobs.shift,
+          type: jobs.type,
+          facility: jobs.facility,
+          department: jobs.department,
+          createdAt: jobs.createdAt,
+        })
+        .from(jobs)
+        .where(and(...conditions))
+        .orderBy(...orderBy)
+        .limit(Number(limit))
+        .offset(offset);
+
+      // Format response
+      const response = {
+        jobs: jobsList.map(job => ({
+          ...job,
+          basePay: Number(job.basePay),
+          bonusAmount: job.bonusAmount ? Number(job.bonusAmount) : null,
+          location: job.location as { city: string; state: string; coordinates?: { latitude: number; longitude: number } },
+          createdAt: job.createdAt.toISOString()
+        })),
+        pagination: {
+          currentPage: Number(page),
+          totalPages: Math.ceil(count / Number(limit)),
+          totalItems: count,
+          itemsPerPage: Number(limit)
+        }
+      };
+
+      res.json(response);
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'get-jobs',
+        query: req.query
+      });
+      res.status(500).json({
+        error: "Failed to fetch jobs",
+        code: "SERVER_ERROR"
+      });
+    }
+  });
+
+  /**
+   * @swagger
+   * /api/jobs/{id}:
+   *   get:
+   *     summary: Get job details by ID
+   *     description: Retrieve detailed information about a specific job
+   *     tags: [Jobs]
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: Job ID
+   *     responses:
+   *       200:
+   *         description: Job details
+   *       404:
+   *         description: Job not found
+   *       500:
+   *         description: Server error
+   */
+  app.get("/api/jobs/:id", async (req: Request, res: Response) => {
+    try {
+      const jobId = parseInt(req.params.id);
+
+      const [job] = await db
+        .select()
+        .from(jobs)
+        .where(and(
+          eq(jobs.id, jobId),
+          eq(jobs.status, 'active')
+        ))
+        .limit(1);
+
+      if (!job) {
+        return res.status(404).json({
+          error: "Job not found",
+          code: "NOT_FOUND"
+        });
+      }
+
+      // Format the response
+      const response = {
+        ...job,
+        basePay: Number(job.basePay),
+        bonusAmount: job.bonusAmount ? Number(job.bonusAmount) : null,
+        location: job.location as { city: string; state: string; coordinates?: { latitude: number; longitude: number } },
+        benefits: job.benefits as string[],
+        createdAt: job.createdAt.toISOString(),
+        updatedAt: job.updatedAt.toISOString(),
+        startDate: job.startDate?.toISOString(),
+        expiryDate: job.expiryDate?.toISOString()
+      };
+
+      res.json(response);
+    } catch (error) {
+      logServerError(error as Error, {
+        context: 'get-job-details',
+        jobId: req.params.id
+      });
+      res.status(500).json({
+        error: "Failed to fetch job details",
+        code: "SERVER_ERROR"
+      });
+    }
+  });
 
   return httpServer;
 }
