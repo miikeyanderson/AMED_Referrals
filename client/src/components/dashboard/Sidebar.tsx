@@ -297,7 +297,7 @@ export function Sidebar() {
                 .filter(item => !item.role || item.role === user?.role)
                 .map((item, index) => (
                   <NavItem
-                    key={item.path}
+                    key={index} //Added key here
                     icon={item.icon}
                     label={item.label}
                     path={item.path}
@@ -325,9 +325,9 @@ export function Sidebar() {
           {navigationItems
             .filter(item => !item.role || item.role === user?.role)
             .filter(item => item.priority === 1) // Only show high-priority items on mobile
-            .map((item) => (
+            .map((item, index) => ( //Added index here
               <NavItem
-                key={item.path}
+                key={index} //Added key here
                 icon={item.icon}
                 label={item.label}
                 path={item.path}
