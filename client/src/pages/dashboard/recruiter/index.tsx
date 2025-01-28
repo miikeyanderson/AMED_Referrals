@@ -26,7 +26,7 @@ export default function RecruiterDashboard() {
       </Card>
 
       {/* Pipeline Snapshot and Referral Inflow Widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         <div className="w-full min-h-[400px] sm:min-h-[500px]">
           <PipelineSnapshotWidget />
         </div>
