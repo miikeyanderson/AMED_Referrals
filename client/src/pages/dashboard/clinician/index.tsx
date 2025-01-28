@@ -141,10 +141,10 @@ export default function ClinicianDashboard() {
         <Button 
           size="default"
           variant="secondary" 
-          className="mt-4 font-medium w-40"
+          className="mt-4 font-medium w-48"
           onClick={() => setLocation("/dashboard/clinician/refer")}
         >
-          Make a Referral
+          Tips to Get Started
         </Button>
       </div>
 
