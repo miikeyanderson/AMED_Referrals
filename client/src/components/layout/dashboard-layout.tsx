@@ -41,13 +41,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         // Mobile: full width, no left padding, bottom padding for sidebar
         isMobile ? "w-full px-4 pb-20" : "pl-[80px]"
       )}>
-        <div className="h-20 border-b flex flex-col justify-center items-center px-4 sm:px-6 py-3">
-          <div className="text-2xl font-bold leading-tight">
-            Your Next <span className="text-green-500">$500</span> Is Waiting
+        <div className="h-20 border-b flex items-center justify-between px-4 sm:px-6">
+          <div className="flex flex-col items-center flex-grow">
+            <div className="text-2xl font-bold leading-tight">
+              Your Next <span className="text-green-500">$500</span> Is Waiting
+            </div>
+            <div className="text-lg font-medium text-muted-foreground mt-1">
+              {user.name}
+            </div>
           </div>
-          <div className="text-lg font-medium text-muted-foreground mt-1">
-            {user.name}
-          </div>
+          <button 
+            onClick={() => window.location.href = '/dashboard/clinician'}
+            className="ml-4 px-6 py-2 bg-green-500 text-white font-medium rounded-full hover:bg-green-600 transition-colors duration-200 shadow-sm"
+          >
+            Refer Now
+          </button>
         </div>
         <main className={cn(
           "mx-auto w-full",
