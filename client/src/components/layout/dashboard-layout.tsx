@@ -47,7 +47,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <main className={cn(
           "mx-auto w-full",
           // Responsive padding and max-width
-          "p-4 sm:p-6 md:p-8",
+          "pt-4 p-4 sm:p-6 md:p-8", // Removed excess top padding
           "max-w-screen-xl",
           // Center content on larger screens
           "lg:px-8",
