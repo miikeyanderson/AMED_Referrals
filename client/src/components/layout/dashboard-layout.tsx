@@ -42,14 +42,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       
       {/* Main content */}
       <div className="flex-1 pl-[80px] transition-all duration-300">
-        <div className="h-16 border-b flex items-center px-6">
+        <div className="h-16 border-b flex items-center px-4 sm:px-6">
           <div className="ml-auto flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
               Welcome, {user.name}
             </span>
           </div>
         </div>
-        <main className="p-6">{children}</main>
+        <main className="p-4 sm:p-6 md:p-8">{children}</main>
       </div>
     </div>
   );
