@@ -15,7 +15,27 @@ export default function TipsToGetStarted() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <>
+      <header className="border-b">
+        <div className="container flex h-16 items-center px-4">
+          <div className="flex gap-6 md:gap-10">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
+              className="mr-2"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center space-x-2">
+              <h2 className="text-2xl font-semibold">Platform Guide</h2>
+              <span className="text-muted-foreground">•</span>
+              <span className="text-muted-foreground">Tips to get started</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div className="container mx-auto py-8 px-4">
       <div className="flex items-center gap-4 mb-8">
         <Button 
           variant="ghost" 
@@ -85,6 +105,6 @@ export default function TipsToGetStarted() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </>
   );
 }
