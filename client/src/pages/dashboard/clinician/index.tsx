@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClipboardList, UserPlus, Gift, FileText, Users, Clock, Star } from "lucide-react";
 import { ReferralStatsWidget } from "@/components/dashboard/ReferralStatsWidget";
@@ -136,14 +137,14 @@ export default function ClinicianDashboard() {
         </div>
         <p className="text-sm sm:text-base text-muted-foreground/80 mt-2">
           Make a referral today to claim your reward
-            <Button 
-              size="lg" 
-              className="mt-4 font-semibold"
-              onClick={() => setLocation("/dashboard/clinician/referral/new")}
-            >
-              Make a Referral
-            </Button>
         </p>
+        <Button 
+          size="lg" 
+          className="mt-4 font-semibold"
+          onClick={() => setLocation("/dashboard/clinician/refer")}
+        >
+          Make a Referral
+        </Button>
       </div>
 
       {/* Quick Links Section */}
