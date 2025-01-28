@@ -35,19 +35,11 @@ export default defineConfig({
     },
     strictPort: true,
     allowedHosts: [
-      // The "friendly" name you might see in your Replit config
       "frontend_web",
-      // Wildcard for any subdomain of .replit.dev
       ".replit.dev",
-      // Wildcard for picard-based Replit domains
       ".picard.replit.dev",
-      // "all" is sometimes needed, but can also cause conflicts;
-
-      // see https://github.com/replit/vite/issues/1287
-      "all",
-    
-      // The exact domain that’s currently being blocked
       "cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev",
+      "all",
     ],
   },
   resolve: {
