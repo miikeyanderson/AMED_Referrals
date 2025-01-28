@@ -2617,7 +2617,92 @@ export function registerRoutes(app: Express): Server {
    *       500:
    *         description: Server error
    */
-  app.get("/api/jobs/:id", async (req: Request, res: Response) => {
+  /**
+ * @swagger
+ * /api/jobs/specialties:
+ *   get:
+ *     summary: Get list of available specialties
+ *     description: Retrieve all unique specialties from active job postings
+ *     tags: [Jobs]
+ *     responses:
+ *       200:
+ *         description: List of specialties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: string
+ *       500:
+ *         description: Server error
+ */
+app.get("/api/jobs/specialties", async (req: Request, res: Response) => {
+  try {
+    const specialties = await db
+      .selectDistinct({ specialty: jobs.specialty })
+      .from(jobs)
+      .where(eq(jobs.status, 'active'));
+
+    res.json(specialties.map(record => record.specialty));
+  } catch (error) {
+    logServerError(error as Error, {
+      context: 'get-specialties'
+    });
+    res.status(500).json({
+      error: "Failed to fetch specialties",
+      code: "SERVER_ERROR"
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/jobs/locations:
+ *   get:
+ *     summary: Get list of available locations
+ *     description: Retrieve all unique locations from active job postings
+ *     tags: [Jobs]
+ *     responses:
+ *       200:
+ *         description: List of locations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   city:
+ *                     type: string
+ *                   state:
+ *                     type: string
+ *       500:
+ *         description: Server error
+ */
+app.get("/api/jobs/locations", async (req: Request, res: Response) => {
+  try {
+    const uniqueLocations = await db
+      .selectDistinct({ location: jobs.location })
+      .from(jobs)
+      .where(eq(jobs.status, 'active'));
+
+    const locations = uniqueLocations
+      .map(record => record.location as { city: string; state: string })
+      .filter(location => location.city && location.state);
+
+    res.json(locations);
+  } catch (error) {
+    logServerError(error as Error, {
+      context: 'get-locations'
+    });
+    res.status(500).json({
+      error: "Failed to fetch locations",
+      code: "SERVER_ERROR"
+    });
+  }
+});
+
+app.get("/api/jobs/:id", async (req: Request, res: Response) => {
     try {
       const jobId = parseInt(req.params.id);
 
