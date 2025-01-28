@@ -38,6 +38,8 @@ export async function setupVite(app: Express, server: Server) {
       hmr: {
         server,
         port: 443,
+        clientPort: 443,
+        https: true,
         protocol: 'wss',
         host: process.env.REPL_SLUG + "." + process.env.REPL_OWNER + ".repl.co",
       },
