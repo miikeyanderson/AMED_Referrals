@@ -14,12 +14,8 @@ export function JobHighlightsSection() {
   });
 
   const { data: jobs, error, isLoading } = useQuery({
-    queryKey: ["/api/jobs", { ...filters, limit: 2 }],
+    queryKey: ["/api/jobs", filters],
     queryFn: async () => {
-      const searchParams = new URLSearchParams({
-        ...filters,
-        limit: "2"
-      });
       const response = await fetch("/api/jobs?" + new URLSearchParams({
         specialty: filters.specialty,
         location: filters.location,
