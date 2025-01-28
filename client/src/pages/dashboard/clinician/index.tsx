@@ -26,8 +26,8 @@ export default function ClinicianDashboard() {
   });
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">My Dashboard</h1>
+    <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 md:px-8">
+      <h1 className="text-2xl sm:text-3xl font-bold">My Dashboard</h1>
 
       <RewardsSnapshotWidget />
 
@@ -42,13 +42,13 @@ export default function ClinicianDashboard() {
       />
 
       <Card>
-        <CardHeader className="flex flex-row items-center gap-2">
+        <CardHeader className="flex flex-row items-center gap-2 p-4 sm:p-6">
           <ClipboardList className="h-5 w-5" />
-          <CardTitle>Recent Referrals</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Recent Referrals</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           {/* Add referral list component here */}
-          <p className="text-muted-foreground">No referrals yet. Start by submitting a new referral!</p>
+          <p className="text-muted-foreground text-sm sm:text-base">No referrals yet. Start by submitting a new referral!</p>
         </CardContent>
       </Card>
     </div>

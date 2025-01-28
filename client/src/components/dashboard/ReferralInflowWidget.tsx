@@ -59,11 +59,11 @@ export function ReferralInflowWidget() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 pb-2">
         <CardTitle className="text-base font-medium">Referral Inflow</CardTitle>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full md:w-auto">
           <Select value={timeframe} onValueChange={(value: "week" | "month") => setTimeframe(value)}>
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-full sm:w-[120px]">
               <SelectValue defaultValue={timeframe} placeholder="Time period" />
             </SelectTrigger>
             <SelectContent>
@@ -72,7 +72,7 @@ export function ReferralInflowWidget() {
             </SelectContent>
           </Select>
           <Select value={role} onValueChange={(value: RoleFilter) => setRole(value)}>
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-full sm:w-[120px]">
               <SelectValue defaultValue={role} placeholder="Role" />
             </SelectTrigger>
             <SelectContent>
@@ -117,7 +117,7 @@ export function ReferralInflowWidget() {
                 </p>
               </div>
             </div>
-            <div className="h-[300px] pt-4">
+            <div className="h-[250px] sm:h-[300px] w-full pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.timeSeries}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />

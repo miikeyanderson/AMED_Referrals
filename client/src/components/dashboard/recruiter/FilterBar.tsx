@@ -90,13 +90,13 @@ export function FilterBar({ onFilterChange, isLoading = false }: FilterBarProps)
 
   return (
     <div className="p-4 bg-card border rounded-lg space-y-4">
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-8"> {/* Added flex-col and md:flex-row */}
         <Select
           value={filters.role}
           onValueChange={(value) => handleFilterChange({ role: value })}
           disabled={isLoading}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full md:w-[200px]"> {/* Modified */}
             <SelectValue placeholder="Select role" />
           </SelectTrigger>
           <SelectContent>
@@ -113,7 +113,7 @@ export function FilterBar({ onFilterChange, isLoading = false }: FilterBarProps)
           onValueChange={(value) => handleFilterChange({ department: value })}
           disabled={isLoading}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full md:w-[200px]"> {/* Modified */}
             <SelectValue placeholder="Select department" />
           </SelectTrigger>
           <SelectContent>
@@ -130,7 +130,7 @@ export function FilterBar({ onFilterChange, isLoading = false }: FilterBarProps)
             <Button
               variant="outline"
               className={cn(
-                "w-[240px] justify-start text-left font-normal",
+                "w-full md:w-[240px] justify-start text-left font-normal",
                 !filters.dateRange.from && "text-muted-foreground"
               )}
               disabled={isLoading}
@@ -177,7 +177,7 @@ export function FilterBar({ onFilterChange, isLoading = false }: FilterBarProps)
           onValueChange={(value) => handleFilterChange({ sortBy: value })}
           disabled={isLoading}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full md:w-[200px]"> {/* Modified */}
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>

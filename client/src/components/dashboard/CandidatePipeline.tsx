@@ -145,17 +145,17 @@ export function CandidatePipeline() {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-4 px-2 sm:px-4 md:px-6">
         <FilterBar onFilterChange={handleFilterChange} isLoading={isLoading} />
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="flex gap-2 overflow-x-auto pb-2 min-w-0">
+          <div className="flex flex-row gap-4 overflow-x-auto pb-4 min-w-0 -mx-2 px-2 snap-x snap-mandatory">
             {PIPELINE_STAGES.map((stage) => (
               <Droppable key={stage.id} droppableId={stage.id}>
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="space-y-2 min-w-[280px] flex-shrink-0"
+                    className="space-y-2 min-w-[280px] max-w-[300px] w-[85vw] sm:w-[45vw] md:w-[35vw] lg:w-full flex-shrink-0 snap-center"
                   >
                     <h3 className={`flex items-center justify-between p-2 rounded-md ${stage.color}`}>
                       <div className="flex items-center space-x-2">
@@ -166,7 +166,7 @@ export function CandidatePipeline() {
                       </div>
                     </h3>
                     <div
-                      className={`min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-2 space-y-2 transition-colors ${
+                      className={`min-h-[300px] lg:min-h-[500px] max-h-[calc(100vh-12rem)] overflow-y-auto rounded-lg p-2 space-y-2 transition-colors ${
                         snapshot.isDraggingOver ? "bg-muted/50" : "bg-muted/10"
                       }`}
                     >
@@ -184,7 +184,7 @@ export function CandidatePipeline() {
                               className={`transition-colors cursor-pointer border ${PIPELINE_STAGES.find(s => s.id === stage.id)?.color} hover:bg-accent`}
                               onClick={() => handleCandidateClick(candidate.id)}
                             >
-                              <CardContent className="p-3 space-y-2.5">
+                              <CardContent className="p-2 sm:p-3 space-y-2 sm:space-y-2.5">
                                 <div className="flex items-start justify-between">
                                   <div className="flex items-center space-x-2 min-w-0">
                                     <Avatar className="h-8 w-8 flex-shrink-0">

@@ -59,7 +59,7 @@ export function KPIGroupWidget() {
     }
     return value !== undefined ? (
       <>
-        <div className="text-2xl font-bold">
+        <div className="text-lg sm:text-xl lg:text-2xl font-bold">
           {label.includes('days') ? `${value} days` : `${value.toFixed(1)}%`}
         </div>
         {target && (
@@ -83,15 +83,15 @@ export function KPIGroupWidget() {
 
   return (
     <Card className="col-span-full relative z-[1]">
-      <CardHeader>
+      <CardHeader className="p-4 sm:p-6">
         <CardTitle className="text-lg font-medium">Recruiter Performance KPIs</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-8">
+      <CardContent className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 md:space-y-8">
         {/* KPI Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {/* Conversion Rate Card */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-x-2 md:space-x-4 pb-2">
               <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -106,12 +106,12 @@ export function KPIGroupWidget() {
 
           {/* Time to Hire Card */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-x-2 md:space-x-4 pb-2">
               <CardTitle className="text-sm font-medium">Time to Hire</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold">
                 {kpiData.timeToHire.current} days
               </div>
               <Progress 
@@ -129,29 +129,29 @@ export function KPIGroupWidget() {
 
           {/* Active Requisitions */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-x-2 md:space-x-4 pb-2">
               <CardTitle className="text-sm font-medium">Active Requisitions</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{kpiData.activeRequisitions}</div>
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold">{kpiData.activeRequisitions}</div>
             </CardContent>
           </Card>
 
           {/* Total Placements */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-x-2 md:space-x-4 pb-2">
               <CardTitle className="text-sm font-medium">Total Placements</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{kpiData.totalPlacements}</div>
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold">{kpiData.totalPlacements}</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Trend Analysis Charts */}
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Conversion Rate Trend */}
           <Card>
             <CardHeader>

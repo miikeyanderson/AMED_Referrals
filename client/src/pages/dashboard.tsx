@@ -38,7 +38,7 @@ export default function Dashboard() {
             </h1>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             <AnalyticsCard
               title="Total Referrals"
               value={analytics?.totalReferrals || '0'}

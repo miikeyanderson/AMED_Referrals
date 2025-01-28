@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -77,11 +76,13 @@ export function PipelineSnapshotWidget() {
 
   return (
     <Card className="border-border/50">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-base font-medium">Pipeline Snapshot</CardTitle>
-        <div className="flex items-center gap-2">
+      <CardHeader className="flex flex-col space-y-4 pb-2">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-base font-medium">Pipeline Snapshot</CardTitle>
+        </div>
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 w-full">
           <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-            <SelectTrigger className="w-[180px] bg-background border-border/50">
+            <SelectTrigger className="w-full bg-background border-border/50 h-9">
               <SelectValue placeholder="Filter by department" />
             </SelectTrigger>
             <SelectContent>
@@ -93,7 +94,7 @@ export function PipelineSnapshotWidget() {
             </SelectContent>
           </Select>
           <Select value={selectedRecruiter} onValueChange={setSelectedRecruiter}>
-            <SelectTrigger className="w-[180px] bg-background border-border/50">
+            <SelectTrigger className="w-full bg-background border-border/50 h-9">
               <SelectValue placeholder="Filter by recruiter" />
             </SelectTrigger>
             <SelectContent>
@@ -112,7 +113,7 @@ export function PipelineSnapshotWidget() {
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : pipelineData ? (
-          <div className="h-[400px]">
+          <div className="h-[250px] xs:h-[300px] sm:h-[400px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -121,9 +122,11 @@ export function PipelineSnapshotWidget() {
                   nameKey="status"
                   cx="50%"
                   cy="50%"
-                  outerRadius={150}
+                  outerRadius="90%"
+                  innerRadius="0%"
+                  paddingAngle={2}
                   labelLine={false}
-                  label={({ name, value, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {pipelineData.statusBreakdown.map((entry: any) => (
                     <Cell 
@@ -138,10 +141,16 @@ export function PipelineSnapshotWidget() {
                 <Tooltip content={<CustomTooltip />} />
                 <Legend
                   formatter={(value: string) => (
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-xs sm:text-sm text-muted-foreground">
                       {value.charAt(0).toUpperCase() + value.slice(1)}
                     </span>
                   )}
+                  layout="horizontal"
+                  verticalAlign="bottom"
+                  align="center"
+                  wrapperStyle={{
+                    paddingTop: '20px',
+                  }}
                 />
               </PieChart>
             </ResponsiveContainer>
