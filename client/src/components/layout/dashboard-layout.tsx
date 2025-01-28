@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         // Mobile: full width, no left padding, bottom padding for sidebar
         isMobile ? "w-full px-4 pb-20" : "pl-[80px]"
       )}>
-        <div className="h-20 border-b flex items-center justify-between px-4 sm:px-6">
+        <div className="h-24 border-b flex items-center justify-between px-4 sm:px-6">
           <div className="flex flex-col items-center flex-grow">
             <div className="text-2xl font-bold leading-tight text-primary animate-fade-in flex items-center gap-2">
               Your Next <span className="text-green-400 font-extrabold animate-pulse">$500</span> Is Waiting, {user.name}
@@ -49,9 +49,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <Gift className="h-6 w-6 text-green-400" />
               </span>
             </div>
-            {/*<div className="text-lg font-medium text-muted-foreground/90 mt-1 animate-slide-in">
-              {user.name}
-            </div>*/}
+            <div className="text-sm text-muted-foreground/80 mt-1">
+              Make a referral today to claim your reward
+            </div>
           </div>
           <button 
             onClick={() => window.location.href = '/dashboard/clinician'}
