@@ -30,10 +30,10 @@ export default function ClinicianDashboard() {
 
   return (
     <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 md:px-8">
-      <div className="flex flex-col items-center justify-center text-center pb-6 animate-fade-in">
-        <div className="text-2xl sm:text-3xl font-bold leading-tight flex flex-wrap items-center justify-center gap-2">
-          Your Next <span className="text-green-400 font-extrabold animate-pulse">$500</span> Is Waiting,
-          <span className="text-xl sm:text-2xl font-medium">{user?.name}</span>
+      <div className="flex flex-col justify-start pb-6 animate-fade-in">
+        <div className="text-2xl sm:text-3xl font-bold leading-tight flex items-center whitespace-nowrap overflow-hidden">
+          Your Next <span className="text-green-400 font-extrabold animate-pulse mx-2">$500</span> Is Waiting,
+          <span className="text-xl sm:text-2xl font-medium ml-2">{user?.name}</span>
         </div>
         <p className="text-sm text-muted-foreground/80 mt-2">
           Make a referral today to claim your reward
