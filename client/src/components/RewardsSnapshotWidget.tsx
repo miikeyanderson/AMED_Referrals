@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button"; // Import Button component
 
 import { RewardsSnapshot } from "@/types/api";
 
@@ -27,7 +28,7 @@ export function RewardsSnapshotWidget() {
         throw new Error('Failed to fetch rewards data');
       }
       const rawData = await response.json();
-      
+
       // Validate data structure
       if (!rawData || typeof rawData !== 'object') {
         throw new Error('Invalid response format');
@@ -113,6 +114,14 @@ export function RewardsSnapshotWidget() {
                         <p className="text-2xl font-bold">${data.totalEarned}</p>
                       </div>
                     </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-4"
+                      onClick={() => window.open('/tips', '_self')}
+                    >
+                      Tips to Get Started
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
