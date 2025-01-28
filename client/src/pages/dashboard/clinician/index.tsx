@@ -4,8 +4,10 @@ import { ReferralStatsWidget } from "@/components/dashboard/ReferralStatsWidget"
 import { ClinicianBadges } from "@/components/dashboard/ClinicianBadges";
 import { RewardsSnapshotWidget } from "@/components/RewardsSnapshotWidget";
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@/hooks/use-user";
 
 export default function ClinicianDashboard() {
+  const { user } = useUser();
   const { data: stats } = useQuery({
     queryKey: ['/api/clinician/referrals-stats', { range: 'week' }],
     queryFn: async () => {
@@ -30,7 +32,7 @@ export default function ClinicianDashboard() {
       <div className="flex flex-col items-center justify-center text-center pb-6">
         <div className="text-xl sm:text-2xl font-bold leading-tight text-primary animate-fade-in flex flex-wrap items-center justify-center gap-2">
           Your Next <span className="text-green-400 font-extrabold animate-pulse">$500</span> Is Waiting, 
-          <span className="whitespace-nowrap">{user?.name}</span>
+          <span className="whitespace-nowrap">{user.name}</span>
           <span className="inline-block animate-bounce">
             <Gift className="h-6 w-6 text-green-400" />
           </span>
