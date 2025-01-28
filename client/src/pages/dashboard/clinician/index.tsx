@@ -147,14 +147,24 @@ export default function ClinicianDashboard() {
         <p className="text-sm sm:text-base text-muted-foreground/80 mt-2">
           Make your next referral today and claim your reward.
         </p>
-        <Button 
-          size="default"
-          variant="secondary" 
-          className="mt-2 font-medium w-48"
-          onClick={() => setLocation('/tips-to-get-started')}
-        >
-          Tips to Get Started
-        </Button>
+        <div className="flex gap-4 mt-2">
+          <Button 
+            size="default"
+            variant="default"
+            className="font-medium w-48"
+            onClick={() => setLocation('/dashboard/clinician/refer')}
+          >
+            Make A Referral
+          </Button>
+          <Button 
+            size="default"
+            variant="secondary" 
+            className="font-medium w-48"
+            onClick={() => setLocation('/tips-to-get-started')}
+          >
+            Tips to Get Started
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-4">
