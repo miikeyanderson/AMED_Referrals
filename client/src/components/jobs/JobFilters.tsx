@@ -1,13 +1,10 @@
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Menu } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface JobFilters {
   search: string;
@@ -25,6 +22,7 @@ const DEFAULT_FILTERS: JobFilters = {
 
 export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFilters) => void }) {
   const [filters, setFilters] = useState<JobFilters>(DEFAULT_FILTERS);
+  const isMobile = useIsMobile();
 
   const handleFilterChange = (key: keyof JobFilters, value: string) => {
     const newFilters = { ...filters, [key]: value };
@@ -32,17 +30,8 @@ export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFi
     onFilterChange(newFilters);
   };
 
-  return (
-    <div className="flex flex-col md:flex-row gap-4 mb-6">
-      <div className="relative flex-1">
-        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search jobs..."
-          className="pl-8"
-          value={filters.search}
-          onChange={(e) => handleFilterChange("search", e.target.value)}
-        />
-      </div>
+  const FilterContent = () => (
+    <div className="flex flex-col md:flex-row gap-2">
       <Select value={filters.specialty} onValueChange={(value) => handleFilterChange("specialty", value)}>
         <SelectTrigger className="w-full md:w-[180px]">
           <SelectValue placeholder="Specialty" />
@@ -51,8 +40,6 @@ export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFi
           <SelectItem value="all">All Specialties</SelectItem>
           <SelectItem value="nursing">Nursing</SelectItem>
           <SelectItem value="physician">Physician</SelectItem>
-          <SelectItem value="therapy">Therapy</SelectItem>
-          <SelectItem value="tech">Tech/Lab</SelectItem>
         </SelectContent>
       </Select>
       <Select value={filters.location} onValueChange={(value) => handleFilterChange("location", value)}>
@@ -62,7 +49,6 @@ export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFi
         <SelectContent>
           <SelectItem value="all-locations">All Locations</SelectItem>
           <SelectItem value="ca">California</SelectItem>
-          <SelectItem value="ny">New York</SelectItem>
           <SelectItem value="tx">Texas</SelectItem>
           <SelectItem value="fl">Florida</SelectItem>
         </SelectContent>
@@ -81,4 +67,26 @@ export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFi
       </Select>
     </div>
   );
+
+  if (isMobile) {
+    return (
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon">
+            <Menu className="h-4 w-4" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left">
+          <SheetHeader>
+            <SheetTitle>Filters</SheetTitle>
+          </SheetHeader>
+          <div className="mt-4">
+            <FilterContent />
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return <FilterContent />;
 }
