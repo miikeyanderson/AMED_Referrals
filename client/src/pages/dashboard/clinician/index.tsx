@@ -34,7 +34,7 @@ export default function ClinicianDashboard() {
         <div className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight w-full overflow-x-auto">
           <div className="flex items-center whitespace-nowrap min-w-max pr-4">
             Your Next <span className="text-green-400 font-extrabold animate-pulse mx-2">$500</span> Is Waiting,
-            <span className="text-lg sm:text-xl md:text-2xl font-medium text-blue-500">{user?.name}</span>
+            <span className="font-bold">{user?.name}</span>
           </div>
         </div>
         <p className="text-sm text-muted-foreground/80 mt-2">
