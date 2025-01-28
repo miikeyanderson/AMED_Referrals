@@ -174,6 +174,16 @@ export default function ClinicianDashboard() {
         </div>
       </div>
 
+      <Card>
+        <CardHeader className="flex flex-row items-center gap-2 p-4 sm:p-6">
+          <ClipboardList className="h-5 w-5" />
+          <CardTitle className="text-lg sm:text-xl">Recent Referrals</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 sm:p-6">
+          <p className="text-muted-foreground text-sm sm:text-base">No referrals yet. Start by submitting a new referral!</p>
+        </CardContent>
+      </Card>
+
       <ClinicianBadges
         stats={{
           totalReferrals: stats?.statistics.totalReferrals || 0,
@@ -226,16 +236,7 @@ export default function ClinicianDashboard() {
         </TooltipProvider>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center gap-2 p-4 sm:p-6">
-          <ClipboardList className="h-5 w-5" />
-          <CardTitle className="text-lg sm:text-xl">Recent Referrals</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 sm:p-6">
-          <p className="text-muted-foreground text-sm sm:text-base">No referrals yet. Start by submitting a new referral!</p>
-        </CardContent>
-      </Card>
-    </div>
+      </div>
   );
 }
 
