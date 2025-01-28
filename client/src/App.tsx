@@ -7,15 +7,14 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import DashboardLayout from "@/components/layout/dashboard-layout";
 import ClinicianDashboard from "@/pages/dashboard/clinician";
+import ClinicianJobsPage from "@/pages/dashboard/clinician/jobs";
 import RecruiterDashboard from "@/pages/dashboard/recruiter";
 import LeadershipDashboard from "@/pages/dashboard/leadership";
 import { useUser } from "@/hooks/use-user";
 import { Loader2 } from "lucide-react";
 import { ThemeProvider } from "@/components/themes/theme-provider";
-import { ThemeToggle } from "@/components/themes/theme-toggle";
-import { TooltipProvider } from "@/components/ui/tooltip"; // Added import
-import TipsToGetStarted from "./pages/tips-to-get-started"; // Added import
-
+import { TooltipProvider } from "@/components/ui/tooltip";
+import TipsToGetStarted from "./pages/tips-to-get-started";
 
 function ProtectedRoute({ 
   component: Component, 
@@ -83,6 +82,9 @@ function Router() {
       <Route path="/dashboard/clinician" component={() => 
         <ProtectedRoute component={ClinicianDashboard} allowedRoles={['clinician']} />
       } />
+      <Route path="/dashboard/clinician/jobs" component={() => 
+        <ProtectedRoute component={ClinicianJobsPage} allowedRoles={['clinician']} />
+      } />
       <Route path="/dashboard/recruiter" component={() => 
         <ProtectedRoute component={RecruiterDashboard} allowedRoles={['recruiter']} />
       } />
@@ -91,7 +93,7 @@ function Router() {
       } />
 
       <Route path="/auth" component={AuthPage} />
-      <Route path="/tips-to-get-started" component={TipsToGetStarted} /> {/* Added docs route */}
+      <Route path="/tips-to-get-started" component={TipsToGetStarted} />
       <Route component={NotFound} />
     </Switch>
   );
