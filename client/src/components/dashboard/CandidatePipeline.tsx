@@ -148,14 +148,14 @@ export function CandidatePipeline() {
       <div className="space-y-4 px-2 sm:px-4 md:px-6">
         <FilterBar onFilterChange={handleFilterChange} isLoading={isLoading} />
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="flex flex-col lg:flex-row gap-4 overflow-x-auto pb-2 min-w-0">
+          <div className="flex flex-row gap-4 overflow-x-auto pb-4 min-w-0 -mx-2 px-2 snap-x snap-mandatory">
             {PIPELINE_STAGES.map((stage) => (
               <Droppable key={stage.id} droppableId={stage.id}>
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="space-y-2 w-full lg:min-w-[280px] lg:max-w-[300px] flex-shrink-0"
+                    className="space-y-2 min-w-[280px] max-w-[300px] w-[85vw] sm:w-[45vw] md:w-[35vw] lg:w-full flex-shrink-0 snap-center"
                   >
                     <h3 className={`flex items-center justify-between p-2 rounded-md ${stage.color}`}>
                       <div className="flex items-center space-x-2">
