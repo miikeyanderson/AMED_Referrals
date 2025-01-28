@@ -14,6 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useLocation } from "wouter";
+import { Badge } from "@/components/ui/badge"; // Import Badge component
 
 interface QuickLink {
   icon: JSX.Element;
@@ -104,6 +105,19 @@ export default function ClinicianDashboard() {
     }
   });
 
+  // Fetch referral data
+  const { data: referralData } = useQuery({
+    queryKey: ['/api/clinician/referrals'],
+    queryFn: async () => {
+      const response = await fetch('/api/clinician/referrals');
+      if (!response.ok) {
+        return { referrals: [] };
+      }
+      return response.json();
+    }
+  });
+
+
   // Generate personalized quick links based on recent activities
   const getPersonalizedQuickLinks = () => {
     const personalizedLinks: QuickLink[] = [...staticQuickLinks];
@@ -181,7 +195,21 @@ export default function ClinicianDashboard() {
           <CardTitle className="text-lg sm:text-xl">Recent Referrals</CardTitle>
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
-          <p className="text-muted-foreground text-sm sm:text-base">No referrals yet. Start by submitting a new referral!</p>
+          {referralData?.referrals?.length > 0 ? (
+            <div className="space-y-4">
+              {referralData.referrals.map((referral: any) => (
+                <div key={referral.id} className="flex items-center justify-between border-b pb-2">
+                  <div>
+                    <p className="font-medium">{referral.candidateName}</p>
+                    <p className="text-sm text-muted-foreground">{referral.position}</p>
+                  </div>
+                  <Badge variant="secondary">{referral.status}</Badge>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-sm sm:text-base">No referrals yet. Start by submitting a new referral!</p>
+          )}
         </CardContent>
       </Card>
 
@@ -200,7 +228,7 @@ export default function ClinicianDashboard() {
               <Tooltip key={link.label}>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => router.push(link.href)}
+                    onClick={() => setLocation(link.href)} //Corrected to use setLocation
                     className={`w-full p-3 sm:p-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background ${
                       link.label === 'New Referral' 
                         ? 'bg-green-900/30 text-green-100 border border-green-200 hover:bg-green-900/40 focus:ring-green-200'
@@ -247,7 +275,7 @@ export default function ClinicianDashboard() {
         </CardContent>
       </Card>
 
-      </div>
+    </div>
   );
 }
 
