@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -8,109 +7,78 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Search, X } from "lucide-react";
-import { specialtyEnum } from "@db/schema";
+import { useState } from "react";
 
-interface JobFiltersProps {
-  onFilterChange: (filters: JobFilters) => void;
-}
-
-export interface JobFilters {
+interface JobFilters {
   search: string;
   specialty: string;
   location: string;
-  minPay: number;
-  maxPay: number;
+  jobType: string;
 }
 
 const DEFAULT_FILTERS: JobFilters = {
   search: "",
-  specialty: "",
-  location: "",
-  minPay: 0,
-  maxPay: 200000,
+  specialty: "all",
+  location: "all-locations",
+  jobType: "all-types",
 };
 
-export function JobFilters({ onFilterChange }: JobFiltersProps) {
+export function JobFilters({ onFilterChange }: { onFilterChange: (filters: JobFilters) => void }) {
   const [filters, setFilters] = useState<JobFilters>(DEFAULT_FILTERS);
-  const [payRange, setPayRange] = useState([DEFAULT_FILTERS.minPay, DEFAULT_FILTERS.maxPay]);
 
-  const handleFilterChange = (
-    key: keyof JobFilters,
-    value: string | number | number[]
-  ) => {
+  const handleFilterChange = (key: keyof JobFilters, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     onFilterChange(newFilters);
   };
 
-  const handlePayRangeChange = (value: number[]) => {
-    setPayRange(value);
-    handleFilterChange("minPay", value[0]);
-    handleFilterChange("maxPay", value[1]);
-  };
-
-  const resetFilters = () => {
-    setFilters(DEFAULT_FILTERS);
-    setPayRange([DEFAULT_FILTERS.minPay, DEFAULT_FILTERS.maxPay]);
-    onFilterChange(DEFAULT_FILTERS);
-  };
-
   return (
-    <div className="space-y-4 bg-card p-4 rounded-lg shadow-sm">
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search jobs..."
-            value={filters.search}
-            onChange={(e) => handleFilterChange("search", e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <div className="flex gap-2">
-          <Select
-            value={filters.specialty}
-            onValueChange={(value) => handleFilterChange("specialty", value)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Specialty" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Specialties</SelectItem>
-              {(specialtyEnum.enumValues as string[]).map((specialty) => (
-                <SelectItem key={specialty} value={specialty}>
-                  {specialty.charAt(0).toUpperCase() + specialty.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={resetFilters}
-            className="shrink-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Salary Range</label>
-        <Slider
-          min={0}
-          max={200000}
-          step={10000}
-          value={payRange}
-          onValueChange={handlePayRangeChange}
-          className="my-4"
+    <div className="flex flex-col md:flex-row gap-4 mb-6">
+      <div className="relative flex-1">
+        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search jobs..."
+          className="pl-8"
+          value={filters.search}
+          onChange={(e) => handleFilterChange("search", e.target.value)}
         />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>${payRange[0].toLocaleString()}</span>
-          <span>${payRange[1].toLocaleString()}</span>
-        </div>
       </div>
+      <Select value={filters.specialty} onValueChange={(value) => handleFilterChange("specialty", value)}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Specialty" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Specialties</SelectItem>
+          <SelectItem value="nursing">Nursing</SelectItem>
+          <SelectItem value="physician">Physician</SelectItem>
+          <SelectItem value="therapy">Therapy</SelectItem>
+          <SelectItem value="tech">Tech/Lab</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select value={filters.location} onValueChange={(value) => handleFilterChange("location", value)}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Location" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all-locations">All Locations</SelectItem>
+          <SelectItem value="ca">California</SelectItem>
+          <SelectItem value="ny">New York</SelectItem>
+          <SelectItem value="tx">Texas</SelectItem>
+          <SelectItem value="fl">Florida</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select value={filters.jobType} onValueChange={(value) => handleFilterChange("jobType", value)}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Job Type" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all-types">All Types</SelectItem>
+          <SelectItem value="full-time">Full Time</SelectItem>
+          <SelectItem value="part-time">Part Time</SelectItem>
+          <SelectItem value="contract">Contract</SelectItem>
+          <SelectItem value="per-diem">Per Diem</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }
