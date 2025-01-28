@@ -320,7 +320,7 @@ export function Sidebar() {
     "z-[100] flex border-r backdrop-blur-sm bg-sidebar/95",
     isMobile
       ? "fixed top-0 left-0 right-0 h-16 flex-row items-center justify-around border-b"
-      : "fixed h-screen flex-col"
+      : "fixed h-screen flex-col justify-center"
   );
 
   return (
@@ -346,7 +346,7 @@ export function Sidebar() {
           </div>
 
           <ScrollArea className="flex-1">
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-6">
               {navigationItems
                 .filter(item => !item.role || item.role === user?.role)
                 .map((item, index) => (
