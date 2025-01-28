@@ -25,9 +25,9 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     hmr: {
-      clientPort: 443,
+      clientPort: process.env.REPLIT ? 443 : undefined,
       protocol: "wss",
-      host: "cbc514d7-546e-43c5-9cc5-9fb282cbb7d4-00-274h5wpqe1gyy.picard.replit.dev"
+      host: process.env.REPLIT ? `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` : undefined
     },
     watch: {
       usePolling: true,
