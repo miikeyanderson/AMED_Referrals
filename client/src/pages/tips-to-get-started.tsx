@@ -7,8 +7,8 @@ import { ClipboardList, Gift, Users, HelpCircle, ArrowRight } from "lucide-react
 
 export default function TipsToGetStarted() {
   return (
-    <ScrollArea className="h-full">
-      <div className="container mx-auto py-8 px-4 space-y-8 max-w-6xl">
+    <ScrollArea>
+      <div className="container mx-auto py-8 px-4 space-y-8 max-w-6xl min-h-screen">
         {/* Hero Section */}
         <section className="text-center space-y-4">
           <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
