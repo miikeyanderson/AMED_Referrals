@@ -33,6 +33,11 @@ const getBreadcrumbItems = (path: string, role: string) => {
       label: role.charAt(0).toUpperCase() + role.slice(1),
       href: `/dashboard/${role}`,
     });
+  } else if (parts[0] === 'tips-to-get-started') {
+    items.push({
+      label: 'Tips',
+      href: '/tips-to-get-started',
+    });
   }
 
   if (parts.length > 2) {

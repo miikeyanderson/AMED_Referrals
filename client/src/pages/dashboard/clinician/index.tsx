@@ -153,7 +153,7 @@ export default function ClinicianDashboard() {
           size="default"
           variant="secondary" 
           className="mt-4 font-medium w-48"
-          onClick={() => setLocation('/tips-to-get-started')}
+          onClick={() => navigate('/tips-to-get-started')}
         >
           Tips to Get Started
         </Button>
