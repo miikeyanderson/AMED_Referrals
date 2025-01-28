@@ -14,7 +14,7 @@ import { Loader2 } from "lucide-react";
 import { ThemeProvider } from "@/components/themes/theme-provider";
 import { ThemeToggle } from "@/components/themes/theme-toggle";
 import { TooltipProvider } from "@/components/ui/tooltip"; // Added import
-import Docs from "./pages/docs"; // Added import
+import TipsToGetStarted from "./pages/tips-to-get-started"; // Added import
 
 
 function ProtectedRoute({ 
@@ -91,7 +91,7 @@ function Router() {
       } />
 
       <Route path="/auth" component={AuthPage} />
-      <Route path="/docs" component={Docs} /> {/* Added docs route */}
+      <Route path="/tips-to-get-started" component={TipsToGetStarted} /> {/* Added docs route */}
       <Route component={NotFound} />
     </Switch>
   );
