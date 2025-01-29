@@ -1,0 +1,158 @@
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Heart } from "lucide-react"
+
+export function JobDetail() {
+  return (
+    <div className="h-full bg-white p-6 [&_::-webkit-scrollbar]:w-2 [&_::-webkit-scrollbar-thumb]:rounded-full [&_::-webkit-scrollbar-thumb]:bg-gray-200 [&_::-webkit-scrollbar-track]:bg-gray-100">
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <div className="text-2xl font-bold">$3,640/wk</div>
+          <h1 className="mt-1 text-xl">Registered Nurse - Oncology</h1>
+        </div>
+        <div className="flex gap-2">
+          <Button className="bg-[#FF4405] hover:bg-[#FF4405]/90">Apply Now</Button>
+          <Button variant="outline" className="gap-2">
+            <Heart className="h-4 w-4" />
+            Favorite
+          </Button>
+        </div>
+      </div>
+
+      <Tabs defaultValue="details">
+        <TabsList className="w-full justify-start gap-4 border-b bg-transparent p-0">
+          <TabsTrigger
+            value="details"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FF4405]"
+          >
+            Details
+          </TabsTrigger>
+          <TabsTrigger
+            value="facility"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FF4405]"
+          >
+            Facility
+          </TabsTrigger>
+          <TabsTrigger
+            value="paycheck"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FF4405]"
+          >
+            Your paycheck
+          </TabsTrigger>
+          <TabsTrigger
+            value="getting"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FF4405]"
+          >
+            Getting the job
+          </TabsTrigger>
+          <TabsTrigger
+            value="why"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FF4405]"
+          >
+            Why Nomad?
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="details" className="mt-6 rounded-lg border bg-white p-6 shadow-sm">
+          <div className="h-[600px] overflow-y-auto pr-2">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">18 minutes ago</div>
+              <div className="rounded-full bg-purple-100 px-3 py-1 text-xs text-purple-700">1st to Apply</div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-3 gap-6">
+              <div>
+                <div className="text-sm text-gray-600">Shift/Type</div>
+                <div className="mt-1">Days, 5x8</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600">Start date</div>
+                <div className="mt-1">March 3, 2025</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600">Duration</div>
+                <div className="mt-1">13 Weeks</div>
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-medium">Register to see facility details</h2>
+                <div className="rounded-full bg-[#E6F3FF] px-3 py-1 text-xs">59 Nomads Worked At This Facility</div>
+              </div>
+
+              <div className="mt-4">
+                <div className="text-sm text-gray-600">Facility name</div>
+                <div className="mt-1 h-4 w-32 animate-pulse rounded bg-gray-200"></div>
+              </div>
+
+              <div className="mt-4">
+                <div className="text-sm text-gray-600">Location</div>
+                <div className="mt-1">Rochester, NY</div>
+              </div>
+
+              <div className="mt-4">
+                <div className="text-sm text-gray-600">Health system</div>
+                <div className="mt-1 h-4 w-32 animate-pulse rounded bg-gray-200"></div>
+              </div>
+            </div>
+
+            {/* Added more job details */}
+            <div className="mt-8">
+              <h2 className="text-lg font-medium">Job Requirements</h2>
+              <ul className="mt-4 space-y-3 text-sm text-gray-600">
+                <li>• Valid RN license in New York State</li>
+                <li>• 2+ years of Oncology experience required</li>
+                <li>• BLS (Basic Life Support) certification</li>
+                <li>• OCN (Oncology Certified Nurse) preferred</li>
+                <li>• Experience with chemotherapy administration</li>
+                <li>• Strong communication and interpersonal skills</li>
+              </ul>
+            </div>
+
+            <div className="mt-8">
+              <h2 className="text-lg font-medium">Job Description</h2>
+              <div className="mt-4 space-y-4 text-sm text-gray-600">
+                <p>
+                  Join our dedicated team of oncology nurses providing compassionate care to cancer patients. In this
+                  role, you'll be responsible for:
+                </p>
+                <ul className="space-y-2 pl-5">
+                  <li>• Administering chemotherapy and other cancer treatments</li>
+                  <li>• Monitoring patient vital signs and managing side effects</li>
+                  <li>• Educating patients and families about treatment plans</li>
+                  <li>• Collaborating with the interdisciplinary care team</li>
+                  <li>• Maintaining accurate medical records</li>
+                  <li>• Participating in patient care planning meetings</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <h2 className="text-lg font-medium">Unit Details</h2>
+              <div className="mt-4 space-y-3 text-sm text-gray-600">
+                <p>• 24-bed oncology unit</p>
+                <p>• 4:1 patient ratio on days</p>
+                <p>• Epic EMR system</p>
+                <p>• Supportive team environment</p>
+                <p>• Comprehensive orientation program</p>
+              </div>
+            </div>
+
+            <div className="mt-8 mb-6">
+              <h2 className="text-lg font-medium">Benefits</h2>
+              <div className="mt-4 space-y-3 text-sm text-gray-600">
+                <p>• Competitive weekly pay</p>
+                <p>• Medical, dental, and vision insurance</p>
+                <p>• 401(k) retirement plan</p>
+                <p>• Housing and meal allowances</p>
+                <p>• Travel reimbursement</p>
+                <p>• 24/7 clinical support</p>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
+
