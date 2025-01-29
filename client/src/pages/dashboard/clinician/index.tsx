@@ -166,7 +166,7 @@ export default function ClinicianDashboard() {
           <Button 
             size="default"
             variant="default"
-            className="font-medium w-48"
+            className="font-medium w-full sm:w-48"
             onClick={() => setLocation('/dashboard/clinician/refer')}
           >
             Make A Referral
@@ -174,7 +174,7 @@ export default function ClinicianDashboard() {
           <Button 
             size="default"
             variant="secondary" 
-            className="font-medium w-48"
+            className="font-medium w-full sm:w-48"
             onClick={() => setLocation('/tips-to-get-started')}
           >
             Tips to Get Started
